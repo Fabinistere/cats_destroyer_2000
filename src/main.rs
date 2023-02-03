@@ -1,7 +1,13 @@
 use bevy::{prelude::*, render::camera::ScalingMode};
 use constants::{CLEAR, RESOLUTION, TILE_SIZE};
+use debug::DebugPlugin;
+use npc::NPCPlugin;
+use spritesheet::CatSpritePlugin;
 
 pub mod constants;
+mod debug;
+pub mod npc;
+pub mod spritesheet;
 
 fn main() {
     let height = 720.0;
@@ -24,6 +30,9 @@ fn main() {
                 .set(ImagePlugin::default_nearest()),
         )
         // .add_plugin(TweeningPlugin)
+        .add_plugin(NPCPlugin)
+        .add_plugin(CatSpritePlugin)
+        .add_plugin(DebugPlugin)
         .add_startup_system(spawn_camera);
 
     app.run();
