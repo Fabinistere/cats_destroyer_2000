@@ -3,8 +3,9 @@ use crate::{
         npc::{movement::BLUE_CAT_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
+    mind_control::MindControled,
     movement::{CharacterHitbox, MovementBundle, Speed},
-    spritesheet::{AnimationTimer, CatSheet, AnimState},
+    spritesheet::{AnimState, AnimationTimer, CatSheet},
 };
 use bevy::prelude::*;
 use bevy_inspector_egui::Inspectable;
@@ -17,27 +18,17 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(spawn_player)
             .add_system(player_movement.label("movement"))
-            .add_system(camera_follow.after("movement"));
+            .add_system(player_idle.after("movement"))
+            ;
     }
 }
 
 #[derive(Component, Inspectable)]
 pub struct Player;
 
-fn camera_follow(
-    player_query: Query<&Transform, With<Player>>,
-    mut camera_query: Query<&mut Transform, (Without<Player>, With<Camera>)>,
-) {
-    let player_transform = player_query.single();
-    let mut camera_transform = camera_query.single_mut();
-
-    camera_transform.translation.x = player_transform.translation.x;
-    camera_transform.translation.y = player_transform.translation.y;
-}
-
 fn player_movement(
     keyboard_input: Res<Input<KeyCode>>,
-    mut player_query: Query<(&Speed, &mut Velocity), With<Player>>,
+    mut player_query: Query<(&Speed, &mut Velocity), (With<Player>, With<MindControled>)>,
 ) {
     if let Ok((speed, mut rb_vel)) = player_query.get_single_mut() {
         let up = keyboard_input.pressed(KeyCode::Z);
@@ -61,6 +52,16 @@ fn player_movement(
     }
 }
 
+/// # Note
+///
+/// Player's velocity = 0 if not self MindControled to avoid being lauched
+fn player_idle(mut player_query: Query<&mut Velocity, (With<Player>, Without<MindControled>)>) {
+    if let Ok(mut rb_vel) = player_query.get_single_mut() {
+        rb_vel.linvel.x = 0.;
+        rb_vel.linvel.y = 0.;
+    }
+}
+
 fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
     // Blue Cat
     commands
@@ -81,9 +82,13 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
             },
             Name::new("Player: Blue Cat"),
             Player,
+            MindControled,
             // -- Animation --
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-            AnimState { initial: BLUE_CAT_STARTING_ANIM, current: BLUE_CAT_STARTING_ANIM },
+            AnimState {
+                initial: BLUE_CAT_STARTING_ANIM,
+                current: BLUE_CAT_STARTING_ANIM,
+            },
             // -- Hitbox --
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,

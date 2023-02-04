@@ -9,7 +9,7 @@ use crate::{
     },
     movement::{CharacterHitbox, MovementBundle, Speed},
     npc::movement::{npc_walk, NewDirectionEvent},
-    spritesheet::{AnimationTimer, CatSheet, AnimState},
+    spritesheet::{AnimState, AnimationTimer, CatSheet},
 };
 
 use self::movement::{give_new_direction_event, WalkBehavior};
@@ -57,7 +57,10 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
             NPC,
             // -- Animation --
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-            AnimState { initial: BLACK_CAT_STARTING_ANIM, current: BLACK_CAT_STARTING_ANIM },
+            AnimState {
+                initial: BLACK_CAT_STARTING_ANIM,
+                current: BLACK_CAT_STARTING_ANIM,
+            },
             // -- Hitbox --
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,

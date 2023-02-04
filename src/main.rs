@@ -3,12 +3,14 @@ use bevy_rapier2d::prelude::*;
 
 use constants::{CLEAR, RESOLUTION, TILE_SIZE};
 use debug::DebugPlugin;
+use mind_control::MindControlPlugin;
 use npc::NPCPlugin;
 use player::PlayerPlugin;
 use spritesheet::CatSpritePlugin;
 
 pub mod constants;
 mod debug;
+pub mod mind_control;
 pub mod movement;
 pub mod npc;
 pub mod player;
@@ -50,6 +52,7 @@ fn main() {
         .add_plugin(NPCPlugin)
         .add_plugin(CatSpritePlugin)
         .add_plugin(PlayerPlugin)
+        .add_plugin(MindControlPlugin)
         .add_plugin(DebugPlugin)
         .add_startup_system(spawn_camera);
 

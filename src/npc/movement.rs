@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{movement::Speed, npc::NPC};
+use crate::{mind_control::MindControled, movement::Speed, npc::NPC};
 
 #[derive(Component)]
 pub struct WalkBehavior {
@@ -19,7 +19,6 @@ pub struct NewDirectionEvent(pub Entity);
 /// TODO: feature - Without MindControled
 pub fn npc_walk(
     // mut commands: Commands,
-
     mut npc_query: Query<
         (
             Entity,
@@ -29,10 +28,10 @@ pub fn npc_walk(
             &WalkBehavior,
             &Name,
         ),
-        With<NPC>,
+        (With<NPC>, Without<MindControled>),
     >,
 
-    mut new_drection_event: EventWriter<NewDirectionEvent>,
+    mut new_direction_event: EventWriter<NewDirectionEvent>,
 ) {
     for (npc, npc_transform, speed, mut rb_vel, walk_behavior, _npc_name) in npc_query.iter_mut() {
         let direction: Vec3 = walk_behavior.destination;
@@ -40,15 +39,18 @@ pub fn npc_walk(
         let close_range_width = npc_transform.scale.x * 10.;
         let close_range_height = npc_transform.scale.y * 10.;
 
+        // The npc reached destination
         if direction.x - close_range_width < npc_transform.translation.x
             && direction.x + close_range_width > npc_transform.translation.x
             && direction.y - close_range_height < npc_transform.translation.y
             && direction.y + close_range_height > npc_transform.translation.y
         {
             // info!("{} reached destination", npc_name);
-            new_drection_event.send(NewDirectionEvent(npc));
+            new_direction_event.send(NewDirectionEvent(npc));
             // commands.entity(npc).insert(Clicked);
-        } else {
+        }
+        // The npc has to walk
+        else {
             let up = direction.y > npc_transform.translation.y;
             let down = direction.y < npc_transform.translation.y;
             let left = direction.x < npc_transform.translation.x;
@@ -66,6 +68,8 @@ pub fn npc_walk(
                 vel_x *= (std::f32::consts::PI / 4.0).cos();
                 vel_y *= (std::f32::consts::PI / 4.0).cos();
             }
+
+            // TODO: gamefeel - make sure that the npc stop skape when approximate his position
 
             rb_vel.linvel.x = vel_x;
             rb_vel.linvel.y = vel_y;
@@ -85,7 +89,7 @@ pub fn give_new_direction_event(
                 // simple turn back: up and down
                 walk_behavior.destination = Vec3::new(
                     npc_transform.translation.x,
-                    - walk_behavior.destination.y,
+                    -walk_behavior.destination.y,
                     0.,
                 )
             }
