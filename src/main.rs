@@ -14,6 +14,7 @@ pub mod npc;
 pub mod player;
 pub mod spritesheet;
 
+#[rustfmt::skip]
 fn main() {
     let height = 720.0;
 

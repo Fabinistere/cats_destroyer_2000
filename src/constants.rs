@@ -12,23 +12,25 @@ pub const TILE_SIZE: f32 = 1.;
 pub mod character {
 
     use super::TILE_SIZE;
-    
+
     pub const CHAR_SCALE: f32 = 1. * TILE_SIZE;
 
     pub const CHAR_HITBOX_HEIGHT: f32 = 1.5 * CHAR_SCALE;
     pub const CHAR_HITBOX_WIDTH: f32 = 5. * CHAR_SCALE;
     pub const CHAR_HITBOX_Y_OFFSET: f32 = -4. * CHAR_SCALE;
-    pub const CHAR_HITBOX_Z_OFFSET: f32 = 0.5 * CHAR_SCALE;
+    pub const CHAR_HITBOX_Z_OFFSET: f32 = 0. * CHAR_SCALE;
 
     pub mod npc {
 
         pub const NPC_SCALE: f32 = super::CHAR_SCALE;
 
         pub const BLUE_CAT_STARTING_ANIM: usize = 0;
+        pub const BLACK_CAT_STARTING_ANIM: usize = 2;
 
         pub mod movement {
 
             pub const BLUE_CAT_POSITION: (f32, f32, f32) = (0., 0., 0.);
+            pub const BLACK_CAT_POSITION: (f32, f32, f32) = (0., 20., 0.);
         }
     }
 }

@@ -4,8 +4,7 @@ use crate::{
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     movement::{CharacterHitbox, MovementBundle, Speed},
-    npc::AnimationTimer,
-    spritesheet::CatSheet,
+    spritesheet::{AnimationTimer, CatSheet, AnimState},
 };
 use bevy::prelude::*;
 use bevy_inspector_egui::Inspectable;
@@ -13,16 +12,17 @@ use bevy_rapier2d::prelude::*;
 
 pub struct PlayerPlugin;
 
-#[derive(Component, Inspectable)]
-pub struct Player;
-
 impl Plugin for PlayerPlugin {
+    #[rustfmt::skip]
     fn build(&self, app: &mut App) {
         app.add_startup_system(spawn_player)
             .add_system(player_movement.label("movement"))
             .add_system(camera_follow.after("movement"));
     }
 }
+
+#[derive(Component, Inspectable)]
+pub struct Player;
 
 fn camera_follow(
     player_query: Query<&Transform, With<Player>>,
@@ -79,6 +79,12 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
                 },
                 ..default()
             },
+            Name::new("Player: Blue Cat"),
+            Player,
+            // -- Animation --
+            AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+            AnimState { initial: BLUE_CAT_STARTING_ANIM, current: BLUE_CAT_STARTING_ANIM },
+            // -- Hitbox --
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,
             MovementBundle {
@@ -88,10 +94,6 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
                     angvel: 0.0,
                 },
             },
-            Name::new("Player: Blue Cat"),
-            Player,
-            // -- Animation --
-            AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
         ))
         .with_children(|parent| {
             parent.spawn((
