@@ -20,7 +20,7 @@ impl Plugin for NPCPlugin {
 pub struct NPC;
 
 #[derive(Component, Deref, DerefMut)]
-struct AnimationTimer(Timer);
+pub struct AnimationTimer(pub Timer);
 
 fn animate_sprite(
     time: Res<Time>,
