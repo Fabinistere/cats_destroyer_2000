@@ -15,6 +15,11 @@ pub mod character {
     
     pub const CHAR_SCALE: f32 = 1. * TILE_SIZE;
 
+    pub const CHAR_HITBOX_HEIGHT: f32 = 1.5 * CHAR_SCALE;
+    pub const CHAR_HITBOX_WIDTH: f32 = 5. * CHAR_SCALE;
+    pub const CHAR_HITBOX_Y_OFFSET: f32 = -4. * CHAR_SCALE;
+    pub const CHAR_HITBOX_Z_OFFSET: f32 = 0.5 * CHAR_SCALE;
+
     pub mod npc {
 
         pub const NPC_SCALE: f32 = super::CHAR_SCALE;
