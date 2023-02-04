@@ -85,11 +85,10 @@ pub fn give_new_direction_event(
                 // simple turn back: up and down
                 walk_behavior.destination = Vec3::new(
                     npc_transform.translation.x,
-                    -walk_behavior.destination.y,
+                    - walk_behavior.destination.y,
                     0.,
                 )
             }
         }
-        // WalkBehavior{ destination: Vec3::new(BLACK_CAT_POSITION.0, BLACK_CAT_POSITION.1 - 50., 0.) }
     }
 }
