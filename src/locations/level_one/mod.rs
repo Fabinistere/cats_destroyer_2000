@@ -112,6 +112,30 @@ fn setup_level_one(
                 Transform::from_xyz(-8.5, -36., 0.),
                 Name::new("Entry Top Right Hitbox"),
             ));
+            // --- Corridor ---
+            parent.spawn((
+                Collider::cuboid(1.5, 44.5),
+                Transform::from_xyz(12.5, 10., 0.),
+                Name::new("Corridor Left Hitbox"),
+            ));
+            parent.spawn((
+                Collider::cuboid(1.5, 16.5),
+                Transform::from_xyz(-2.5, -18., 0.),
+                Name::new("Corridor Right Bottom Hitbox"),
+            ));
+            parent.spawn((
+                Collider::cuboid(1.5, 20.5),
+                Transform::from_xyz(-2.5, 34., 0.),
+                Name::new("Corridor Right Top Hitbox"),
+            ));
+            // --- Elevator ---
+            // Which is the two Exit and Front Door
+            parent.spawn((
+                Collider::cuboid(6., 1.5),
+                Transform::from_xyz(5., 53., 0.),
+                Name::new("Elevator Top Hitbox"),
+            ));
+            // --- Broom Closet ---
         });
 
     // -- Doors --
