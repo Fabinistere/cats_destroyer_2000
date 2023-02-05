@@ -28,7 +28,7 @@ fn main() {
     app
         .insert_resource(ClearColor(CLEAR))
         .insert_resource(Msaa { samples: 1 })
-        // hitbox
+        // v-- Hitbox --v
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,
             ..default()
