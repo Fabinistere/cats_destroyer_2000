@@ -1,6 +1,13 @@
 use bevy::{prelude::*, winit::WinitSettings};
 
-use crate::{constants::ui::tablet::*, locations::level_one::doors::{Door, OpenDoorEvent}};
+use crate::{
+    constants::ui::tablet::*, 
+    locations::level_one::doors::{Door, OpenDoorEvent},
+    tablet::{
+        run_if_tablet_is_free,
+        run_if_tablet_is_mind_ctrl,
+    }
+};
 
 pub struct HackPlugin;
 
@@ -12,7 +19,16 @@ impl Plugin for HackPlugin {
             .insert_resource(WinitSettings::game())
             
             .add_startup_system(setup_tablet_button)
-            .add_system(button_system)
+            .add_system_set(
+                SystemSet::new()
+                    .with_run_criteria(run_if_tablet_is_free)
+                    .with_system(button_system)
+            )
+            .add_system_set(
+                SystemSet::new()
+                    .with_run_criteria(run_if_tablet_is_mind_ctrl)
+                    .with_system(place_holder_while_in_mind_control)
+            )
             ;
     }
 }
@@ -26,7 +42,7 @@ pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer
         .spawn((
             ButtonBundle {
                 style: Style {
-                    size: Size::new(Val::Px(150.0), Val::Px(65.0)),
+                    size: Size::new(Val::Px(180.0), Val::Px(65.0)),
                     // center button
                     margin: UiRect::all(Val::Auto),
                     // horizontally center child text
@@ -43,8 +59,8 @@ pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer
                 background_color: NORMAL_BUTTON.into(),
                 ..default()
             },
-            Name::new("Open Alt Door"),
-            // EndOfTurnButton,
+            Name::new("Hack Button"),
+            // HackButton
         ))
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
@@ -100,6 +116,31 @@ fn button_system(
             Interaction::None => {
                 text.sections[0].value = String::from("HACK");
                 *color = NORMAL_BUTTON.into();
+            }
+        }
+    }
+}
+
+pub fn place_holder_while_in_mind_control(
+    mut interaction_query: Query<
+        (&Interaction, &mut BackgroundColor, &Children),
+        (Changed<Interaction>, With<Button>),
+    >,
+    mut text_query: Query<&mut Text>,
+) {
+    for (interaction, mut color, children) in &mut interaction_query {
+        let mut text = text_query.get_mut(children[0]).unwrap();
+        match *interaction {
+            Interaction::Clicked => {
+                // *color = PRESSED_BUTTON.into();
+            }
+            Interaction::Hovered => {
+                *color = HOVERED_INACTIVE_BUTTON.into();
+                text.sections[0].value = String::from("In MindCtrl");
+            }
+            Interaction::None => {
+                *color = INACTIVE_BUTTON.into();
+                text.sections[0].value = String::from("In MindCtrl");
             }
         }
     }

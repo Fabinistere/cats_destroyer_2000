@@ -1,24 +1,25 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use bevy::{prelude::*, render::camera::ScalingMode};
 use bevy_rapier2d::prelude::*;
 
 use constants::{CLEAR, RESOLUTION, TILE_SIZE};
 use debug::DebugPlugin;
-use hack::HackPlugin;
 use locations::LocationsPlugin;
-use mind_control::MindControlPlugin;
 use npc::NPCPlugin;
 use player::PlayerPlugin;
 use spritesheet::CatSpritePlugin;
+use tablet::hack::HackPlugin;
+use tablet::mind_control::MindControlPlugin;
 
 pub mod constants;
 mod debug;
-mod hack;
 pub mod locations;
-mod mind_control;
 mod movement;
 mod npc;
 mod player;
 mod spritesheet;
+pub mod tablet;
 
 #[rustfmt::skip]
 fn main() {

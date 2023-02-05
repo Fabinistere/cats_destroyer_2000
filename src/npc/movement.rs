@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{mind_control::MindControled, movement::Speed, npc::NPC};
+use crate::{movement::Speed, npc::NPC, tablet::mind_control::MindControled};
 
 #[derive(Component)]
 pub struct WalkBehavior {

@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use crate::{mind_control::movement::mind_control_movement, npc::NPC, player::Player};
+use crate::{npc::NPC, player::Player, tablet::mind_control::movement::mind_control_movement};
 
 mod movement;
 

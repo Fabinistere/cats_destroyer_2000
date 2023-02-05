@@ -3,11 +3,11 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     constants::locations::{level_one::*, FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE},
-    hack::Hackable,
     locations::{
         level_one::doors::{animate_door, open_door_event, Door, ExitDoor, OpenDoorEvent},
         Location,
     },
+    tablet::hack::Hackable,
 };
 
 pub mod doors;
