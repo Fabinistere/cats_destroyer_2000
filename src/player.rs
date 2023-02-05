@@ -3,9 +3,9 @@ use crate::{
         npc::{movement::BLUE_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
-    mind_control::MindControled,
     movement::{CharacterHitbox, MovementBundle, Speed},
     spritesheet::{AnimState, AnimationTimer, CatSheet},
+    tablet::mind_control::MindControled,
 };
 use bevy::prelude::*;
 use bevy_inspector_egui::Inspectable;

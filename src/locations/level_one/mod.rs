@@ -3,18 +3,22 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     constants::locations::{level_one::*, FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE},
-    locations::{level_one::doors::animate_doors, Location},
-    spritesheet::AnimationTimer,
+    locations::{
+        level_one::doors::{animate_door, open_door_event, Door, ExitDoor, OpenDoorEvent},
+        Location,
+    },
+    tablet::hack::Hackable,
 };
 
-mod doors;
+pub mod doors;
 
 pub struct LevelOnePlugin;
 
 impl Plugin for LevelOnePlugin {
     #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app.add_state(PlayerLocation::LevelOne)
+        app .add_state(PlayerLocation::LevelOne)
+            .add_event::<OpenDoorEvent>()
             .add_system_set(
                 SystemSet::on_enter(Location::LevelOne)
                     .with_system(setup_level_one)
@@ -22,7 +26,8 @@ impl Plugin for LevelOnePlugin {
             .add_system_set(
                 SystemSet::new()
                     .with_run_criteria(run_if_in_level_one)
-                    .with_system(animate_doors)
+                    .with_system(animate_door)
+                    .with_system(open_door_event)
             )
             ;
     }
@@ -47,6 +52,8 @@ fn setup_level_one(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
+    // -- Map --
+
     let walls = asset_server.load("textures/level_one/lab_wall.png");
     let floor = asset_server.load("textures/level_one/lab_floor.png");
 
@@ -96,8 +103,10 @@ fn setup_level_one(
             },
             ..default()
         },
-        Name::new("IN_DOOR"),
-        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        Name::new("Front Door"),
+        Door {
+            current_state: doors::DoorState::Closed,
+        },
     ));
 
     // XXX: double load on the same sprite_sheet
@@ -118,8 +127,11 @@ fn setup_level_one(
             },
             ..default()
         },
-        Name::new("OUT_DOOR"),
-        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        Name::new("Exit Door"),
+        ExitDoor,
+        Door {
+            current_state: doors::DoorState::Closed,
+        },
     ));
 
     let vertical_door = asset_server.load("textures/level_one/vertical_door_anim.png");
@@ -138,7 +150,10 @@ fn setup_level_one(
             },
             ..default()
         },
-        Name::new("ALT_DOOR"),
-        AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
+        Name::new("Closet Door"),
+        Door {
+            current_state: doors::DoorState::Closed,
+        },
+        Hackable,
     ));
 }
