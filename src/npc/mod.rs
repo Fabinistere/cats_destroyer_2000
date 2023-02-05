@@ -53,7 +53,7 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                 },
                 ..default()
             },
-            Name::new("Blue Cat"),
+            Name::new("Black Cat"),
             NPC,
             // -- Animation --
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),

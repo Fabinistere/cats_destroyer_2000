@@ -71,19 +71,48 @@ fn setup_level_one(
         Name::new("floor"),
     ));
 
-    commands.spawn((
-        SpriteBundle {
-            texture: walls.clone(),
-            transform: Transform {
-                translation: LEVEL_POSITION.into(),
-                scale: LEVEL_SCALE.into(),
-                ..default()
+    commands
+        .spawn((
+            SpriteBundle {
+                texture: walls.clone(),
+                transform: Transform {
+                    translation: LEVEL_POSITION.into(),
+                    scale: LEVEL_SCALE.into(),
+                    ..default()
+                },
+                ..SpriteBundle::default()
             },
-            ..SpriteBundle::default()
-        },
-        RigidBody::Fixed,
-        Name::new("walls"),
-    ));
+            RigidBody::Fixed,
+            Name::new("walls"),
+        ))
+        .with_children(|parent| {
+            // Collider draw by hand...
+            parent.spawn((
+                Collider::cuboid(21., 1.5),
+                Transform::from_xyz(5., -57., 0.),
+                Name::new("Entry Lower Hitbox"),
+            ));
+            parent.spawn((
+                Collider::cuboid(1.5, 12.),
+                Transform::from_xyz(24.5, -46.5, 0.),
+                Name::new("Entry Left Hitbox"),
+            ));
+            parent.spawn((
+                Collider::cuboid(1.5, 12.),
+                Transform::from_xyz(-14.5, -46.5, 0.),
+                Name::new("Entry Right Hitbox"),
+            ));
+            parent.spawn((
+                Collider::cuboid(7.5, 1.5),
+                Transform::from_xyz(18.5, -36., 0.),
+                Name::new("Entry Top Left Hitbox"),
+            ));
+            parent.spawn((
+                Collider::cuboid(7.5, 1.5),
+                Transform::from_xyz(-8.5, -36., 0.),
+                Name::new("Entry Top Right Hitbox"),
+            ));
+        });
 
     // -- Doors --
 

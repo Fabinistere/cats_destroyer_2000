@@ -31,7 +31,7 @@ pub mod character {
         pub mod movement {
             use crate::constants::character::CHAR_Z;
 
-            pub const BLUE_CAT_STARTING_POSITION: (f32, f32, f32) = (5., 0., CHAR_Z);
+            pub const BLUE_CAT_STARTING_POSITION: (f32, f32, f32) = (5., -48., CHAR_Z);
             pub const BLACK_CAT_STARTING_POSITION: (f32, f32, f32) = (5., 20., CHAR_Z);
         }
     }
