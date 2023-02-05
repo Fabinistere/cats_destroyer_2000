@@ -1,6 +1,6 @@
 use crate::{
     constants::character::{
-        npc::{movement::BLUE_CAT_POSITION, *},
+        npc::{movement::BLUE_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     mind_control::MindControled,
@@ -74,7 +74,7 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
                 },
                 texture_atlas: cats.0.clone(),
                 transform: Transform {
-                    translation: Vec3::from(BLUE_CAT_POSITION),
+                    translation: Vec3::from(BLUE_CAT_STARTING_POSITION),
                     scale: Vec3::splat(NPC_SCALE),
                     ..default()
                 },

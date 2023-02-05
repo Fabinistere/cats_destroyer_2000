@@ -4,7 +4,7 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     constants::character::{
-        npc::{movement::BLACK_CAT_POSITION, *},
+        npc::{movement::BLACK_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     movement::{CharacterHitbox, MovementBundle, Speed},
@@ -47,7 +47,7 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                 },
                 texture_atlas: cats.0.clone(),
                 transform: Transform {
-                    translation: Vec3::from(BLACK_CAT_POSITION),
+                    translation: Vec3::from(BLACK_CAT_STARTING_POSITION),
                     scale: Vec3::splat(NPC_SCALE),
                     ..default()
                 },
@@ -73,7 +73,11 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                 },
             },
             WalkBehavior {
-                destination: Vec3::new(BLACK_CAT_POSITION.0, BLACK_CAT_POSITION.1 - 50., 0.),
+                destination: Vec3::new(
+                    BLACK_CAT_STARTING_POSITION.0,
+                    BLACK_CAT_STARTING_POSITION.1 - 50.,
+                    0.,
+                ),
             },
         ))
         .with_children(|parent| {
