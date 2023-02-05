@@ -9,7 +9,7 @@ pub struct WalkBehavior {
 }
 
 /// DOC
-pub struct FreezeEvent;
+// pub struct FreezeEvent;
 
 /// DOC
 pub struct NewDirectionEvent(pub Entity);

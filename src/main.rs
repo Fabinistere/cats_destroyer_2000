@@ -3,6 +3,7 @@ use bevy_rapier2d::prelude::*;
 
 use constants::{CLEAR, RESOLUTION, TILE_SIZE};
 use debug::DebugPlugin;
+use hack::HackPlugin;
 use locations::LocationsPlugin;
 use mind_control::MindControlPlugin;
 use npc::NPCPlugin;
@@ -11,12 +12,13 @@ use spritesheet::CatSpritePlugin;
 
 pub mod constants;
 mod debug;
-mod locations;
-pub mod mind_control;
-pub mod movement;
-pub mod npc;
-pub mod player;
-pub mod spritesheet;
+mod hack;
+pub mod locations;
+mod mind_control;
+mod movement;
+mod npc;
+mod player;
+mod spritesheet;
 
 #[rustfmt::skip]
 fn main() {
@@ -51,12 +53,13 @@ fn main() {
         })
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
         // .add_plugin(TweeningPlugin)
-        .add_plugin(NPCPlugin)
-        .add_plugin(CatSpritePlugin)
-        .add_plugin(PlayerPlugin)
-        .add_plugin(MindControlPlugin)
         .add_plugin(DebugPlugin)
+        .add_plugin(CatSpritePlugin)
+        .add_plugin(HackPlugin)
         .add_plugin(LocationsPlugin)
+        .add_plugin(MindControlPlugin)
+        .add_plugin(NPCPlugin)
+        .add_plugin(PlayerPlugin)
         .add_startup_system(spawn_camera);
 
     app.run();

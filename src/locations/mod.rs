@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-mod level_one;
+pub mod level_one;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum Location {
