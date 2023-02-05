@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::{npc::NPC, player::Player};
+
 pub struct CatSpritePlugin;
 
 #[derive(Clone, Resource)]
@@ -21,18 +23,21 @@ pub struct AnimationTimer(pub Timer);
 #[derive(Component)]
 pub struct AnimState {
     pub initial: usize,
-    pub current: usize
+    pub current: usize,
 }
 
 pub fn animate_sprite(
     time: Res<Time>,
     _texture_atlases: Res<Assets<TextureAtlas>>,
-    mut query: Query<(
-        &mut AnimationTimer,
-        &mut AnimState,
-        &mut TextureAtlasSprite,
-        &Handle<TextureAtlas>,
-    )>,
+    mut query: Query<
+        (
+            &mut AnimationTimer,
+            &mut AnimState,
+            &mut TextureAtlasSprite,
+            &Handle<TextureAtlas>,
+        ),
+        Or<(With<Player>, With<NPC>)>,
+    >,
 ) {
     for (mut timer, mut state, mut sprite, _texture_atlas_handle) in &mut query {
         timer.tick(time.delta());
