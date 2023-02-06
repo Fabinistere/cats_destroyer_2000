@@ -23,7 +23,7 @@ pub mod tablet;
 
 #[rustfmt::skip]
 fn main() {
-    let height = 720.0;
+    let height = 720.;
 
     let mut app = App::new();
     app
@@ -52,7 +52,7 @@ fn main() {
             mode: DebugRenderMode::all(),
             ..default()
         })
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.))
         // .add_plugin(TweeningPlugin)
         .add_plugin(DebugPlugin)
         .add_plugin(CatSpritePlugin)

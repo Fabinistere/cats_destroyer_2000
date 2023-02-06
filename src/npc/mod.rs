@@ -69,7 +69,7 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                 speed: Speed::default(),
                 velocity: Velocity {
                     linvel: Vect::ZERO,
-                    angvel: 0.0,
+                    angvel: 0.,
                 },
             },
             WalkBehavior {
@@ -83,7 +83,7 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
         .with_children(|parent| {
             parent.spawn((
                 Collider::cuboid(CHAR_HITBOX_WIDTH, CHAR_HITBOX_HEIGHT),
-                Transform::from_xyz(CHAR_HITBOX_Z_OFFSET, CHAR_HITBOX_Y_OFFSET, 0.0),
+                Transform::from_xyz(CHAR_HITBOX_Z_OFFSET, CHAR_HITBOX_Y_OFFSET, 0.),
                 CharacterHitbox,
             ));
         });

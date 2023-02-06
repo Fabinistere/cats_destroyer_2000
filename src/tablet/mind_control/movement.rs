@@ -21,8 +21,8 @@ pub fn mind_control_movement(
         let mut vel_y = y_axis as f32 * **speed;
 
         if x_axis != 0 && y_axis != 0 {
-            vel_x *= (std::f32::consts::PI / 4.0).cos();
-            vel_y *= (std::f32::consts::PI / 4.0).cos();
+            vel_x *= (std::f32::consts::PI / 4.).cos();
+            vel_y *= (std::f32::consts::PI / 4.).cos();
         }
 
         rb_vel.linvel.x = vel_x;
