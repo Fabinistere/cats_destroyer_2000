@@ -136,6 +136,22 @@ fn setup_level_one(
                 Name::new("Elevator Top Hitbox"),
             ));
             // --- Broom Closet ---
+            parent.spawn((
+                Collider::cuboid(1.5, 7.5),
+                Transform::from_xyz(-29.5, 6., 0.),
+                Name::new("Closet Left Hitbox"),
+                // VisibilityBundle::default(),
+            ));
+            parent.spawn((
+                Collider::cuboid(12., 1.5),
+                Transform::from_xyz(-16., 15., 0.),
+                Name::new("Closet Top Hitbox"),
+            ));
+            parent.spawn((
+                Collider::cuboid(12., 1.5),
+                Transform::from_xyz(-16., -3., 0.),
+                Name::new("Closet Bottom Hitbox"),
+            ));
         });
 
     // -- Doors --
@@ -146,21 +162,30 @@ fn setup_level_one(
 
     let horizontal_door_atlas_handle = texture_atlases.add(horizontal_door_atlas);
 
-    commands.spawn((
-        SpriteSheetBundle {
-            texture_atlas: horizontal_door_atlas_handle,
-            transform: Transform {
-                translation: IN_DOOR_POSITION.into(),
-                scale: LEVEL_SCALE.into(),
+    commands
+        .spawn((
+            SpriteSheetBundle {
+                texture_atlas: horizontal_door_atlas_handle,
+                transform: Transform {
+                    translation: IN_DOOR_POSITION.into(),
+                    scale: LEVEL_SCALE.into(),
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        },
-        Name::new("Front Door"),
-        Door {
-            current_state: doors::DoorState::Closed,
-        },
-    ));
+            Name::new("Front Door"),
+            Door {
+                current_state: doors::DoorState::Closed,
+            },
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Collider::cuboid(6., 1.5),
+                Transform::from_xyz(5., -36., 0.),
+                Name::new("Front Door Hitbox"),
+                // VisibilityBundle::default(),
+            ));
+        });
 
     // XXX: double load on the same sprite_sheet
 
@@ -170,22 +195,31 @@ fn setup_level_one(
 
     let out_horizontal_door_atlas_handle = texture_atlases.add(out_horizontal_door_atlas);
 
-    commands.spawn((
-        SpriteSheetBundle {
-            texture_atlas: out_horizontal_door_atlas_handle,
-            transform: Transform {
-                translation: OUT_DOOR_POSITION.into(),
-                scale: LEVEL_SCALE.into(),
+    commands
+        .spawn((
+            SpriteSheetBundle {
+                texture_atlas: out_horizontal_door_atlas_handle,
+                transform: Transform {
+                    translation: OUT_DOOR_POSITION.into(),
+                    scale: LEVEL_SCALE.into(),
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        },
-        Name::new("Exit Door"),
-        ExitDoor,
-        Door {
-            current_state: doors::DoorState::Closed,
-        },
-    ));
+            Name::new("Exit Door"),
+            ExitDoor,
+            Door {
+                current_state: doors::DoorState::Closed,
+            },
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Collider::cuboid(6., 1.5),
+                Transform::from_xyz(5., 36., 0.),
+                Name::new("Exit Door Hitbox"),
+                // VisibilityBundle::default(),
+            ));
+        });
 
     let vertical_door = asset_server.load("textures/level_one/vertical_door_anim.png");
     let vertical_door_atlas =
@@ -193,20 +227,29 @@ fn setup_level_one(
 
     let vertical_door_atlas_handle = texture_atlases.add(vertical_door_atlas);
 
-    commands.spawn((
-        SpriteSheetBundle {
-            texture_atlas: vertical_door_atlas_handle,
-            transform: Transform {
-                translation: ALT_DOOR_POSITION.into(),
-                scale: LEVEL_SCALE.into(),
+    commands
+        .spawn((
+            SpriteSheetBundle {
+                texture_atlas: vertical_door_atlas_handle,
+                transform: Transform {
+                    translation: ALT_DOOR_POSITION.into(),
+                    scale: LEVEL_SCALE.into(),
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        },
-        Name::new("Closet Door"),
-        Door {
-            current_state: doors::DoorState::Closed,
-        },
-        Hackable,
-    ));
+            Name::new("Closet Door"),
+            Door {
+                current_state: doors::DoorState::Closed,
+            },
+            Hackable,
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Collider::cuboid(1.5, 7.5),
+                Transform::from_xyz(-2.5, 6., 0.),
+                Name::new("Side Door Hitbox"),
+                // VisibilityBundle::default(),
+            ));
+        });
 }
