@@ -5,6 +5,7 @@ use crate::{
     constants::locations::{level_one::*, FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE},
     locations::{
         level_one::doors::{animate_door, open_door_event, Door, ExitDoor, OpenDoorEvent},
+        sensors::ElevatorSensor,
         Location,
     },
     tablet::hack::Hackable,
@@ -17,8 +18,7 @@ pub struct LevelOnePlugin;
 impl Plugin for LevelOnePlugin {
     #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app .add_state(PlayerLocation::LevelOne)
-            .add_event::<OpenDoorEvent>()
+        app .add_event::<OpenDoorEvent>()
             .add_system_set(
                 SystemSet::on_enter(Location::LevelOne)
                     .with_system(setup_level_one)
@@ -31,12 +31,6 @@ impl Plugin for LevelOnePlugin {
             )
             ;
     }
-}
-
-// States
-#[derive(Clone, Eq, PartialEq, Debug, Hash)]
-pub enum PlayerLocation {
-    LevelOne,
 }
 
 fn run_if_in_level_one(location: Res<State<Location>>) -> ShouldRun {
@@ -140,7 +134,6 @@ fn setup_level_one(
                 Collider::cuboid(1.5, 7.5),
                 Transform::from_xyz(-29.5, 6., 0.),
                 Name::new("Closet Left Hitbox"),
-                // VisibilityBundle::default(),
             ));
             parent.spawn((
                 Collider::cuboid(12., 1.5),
@@ -218,6 +211,15 @@ fn setup_level_one(
                 Transform::from_xyz(5., 36., 0.),
                 Name::new("Exit Door Hitbox"),
                 // VisibilityBundle::default(),
+            ));
+            // --- Win Sensor ---
+            parent.spawn((
+                Collider::segment(Vect::new(9., 48.5), Vect::new(1., 40.5)),
+                Transform::default(),
+                ActiveEvents::COLLISION_EVENTS,
+                Sensor,
+                ElevatorSensor,
+                Name::new("Elevator Sensor"),
             ));
         });
 

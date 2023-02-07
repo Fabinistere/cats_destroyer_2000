@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::Sensor;
 
 use crate::spritesheet::AnimationTimer;
 
@@ -60,9 +61,10 @@ pub fn animate_door(
         &mut AnimationTimer,
         &mut TextureAtlasSprite,
         &Handle<TextureAtlas>,
+        &Children,
     )>,
 ) {
-    for (door_id, mut door, mut timer, mut sprite, texture_atlas_handle) in &mut query {
+    for (door_id, mut door, mut timer, mut sprite, texture_atlas_handle, children) in &mut query {
         timer.tick(time.delta());
         if timer.just_finished() {
             let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
@@ -70,10 +72,17 @@ pub fn animate_door(
                 door.current_state = DoorState::Opening;
 
                 let new_index = (sprite.index + 1) % texture_atlas.textures.len();
+                // if last frame
                 if new_index == 0 {
                     door.current_state = DoorState::Open;
                     // stop the animation
                     commands.entity(door_id).remove::<AnimationTimer>();
+
+                    // We assume that a door has only hitbox as a child
+                    // Or: Create and verify the DoorHitbox Component
+                    for child in children.iter() {
+                        commands.entity(*child).insert(Sensor);
+                    }
                 } else {
                     sprite.index = new_index;
                 }
@@ -83,10 +92,15 @@ pub fn animate_door(
                 door.current_state = DoorState::Closing;
 
                 sprite.index = (sprite.index - 1) % texture_atlas.textures.len();
+                // if first frame
                 if sprite.index == 0 {
                     door.current_state = DoorState::Closed;
                     // stop the animation
                     commands.entity(door_id).remove::<AnimationTimer>();
+
+                    for child in children.iter() {
+                        commands.entity(*child).remove::<Sensor>();
+                    }
                 }
             }
         }

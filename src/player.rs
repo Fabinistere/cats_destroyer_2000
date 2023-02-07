@@ -26,6 +26,9 @@ impl Plugin for PlayerPlugin {
 #[derive(Component, Inspectable)]
 pub struct Player;
 
+#[derive(Component)]
+pub struct PlayerHitbox;
+
 fn player_movement(
     keyboard_input: Res<Input<KeyCode>>,
     mut player_query: Query<(&Speed, &mut Velocity), (With<Player>, With<MindControled>)>,
@@ -105,6 +108,7 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
                 Collider::cuboid(CHAR_HITBOX_WIDTH, CHAR_HITBOX_HEIGHT),
                 Transform::from_xyz(CHAR_HITBOX_Z_OFFSET, CHAR_HITBOX_Y_OFFSET, 0.),
                 CharacterHitbox,
+                PlayerHitbox,
             ));
         });
 }
