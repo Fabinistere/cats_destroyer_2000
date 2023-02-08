@@ -14,6 +14,22 @@ pub struct WalkBehavior {
 /// DOC
 pub struct NewDirectionEvent(pub Entity);
 
+/// Is it a good habit to seperate
+/// - Dazed
+/// - DazeTimer
+/// ?
+#[derive(Component)]
+pub struct Dazed {
+    /// should be a non-repeating timer
+    pub timer: Timer,
+}
+
+// #[derive(Component)]
+// pub struct DazeTimer {
+//     /// should be a non-repeating timer
+//     pub timer: Timer,
+// }
+
 /// # Note
 ///
 /// TODO: feature - Without MindControled
@@ -28,7 +44,7 @@ pub fn npc_walk(
             &WalkBehavior,
             &Name,
         ),
-        (With<NPC>, Without<MindControled>),
+        (With<NPC>, Without<MindControled>, Without<Dazed>),
     >,
 
     mut new_direction_event: EventWriter<NewDirectionEvent>,
@@ -93,6 +109,26 @@ pub fn give_new_direction_event(
                     0.,
                 )
             }
+        }
+    }
+}
+
+/// Decrement the daze Timer
+pub fn daze_wait(
+    mut commands: Commands,
+
+    time: Res<Time>,
+    mut npc_query: Query<(Entity, &mut Dazed, &mut Velocity, &Name), With<NPC>>,
+) {
+    for (npc, mut daze_timer, mut _rb_vel, name) in npc_query.iter_mut() {
+        daze_timer.timer.tick(time.delta());
+
+        // not required to control velocity because it is managed elsewhere
+
+        if daze_timer.timer.finished() {
+            info!("{:?}, {} can now aggro", npc, name);
+
+            commands.entity(npc).remove::<Dazed>();
         }
     }
 }

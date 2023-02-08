@@ -8,13 +8,18 @@ use crate::{
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     movement::{CharacterHitbox, MovementBundle, Speed},
-    npc::movement::{npc_walk, NewDirectionEvent},
+    npc::movement::{daze_wait, npc_walk, NewDirectionEvent},
     spritesheet::{AnimState, AnimationTimer, CatSheet},
 };
 
-use self::movement::{give_new_direction_event, WalkBehavior};
+use self::{
+    movement::{give_new_direction_event, WalkBehavior},
+    style::dazed_effect,
+};
 
+mod aggression;
 pub mod movement;
+mod style;
 
 #[derive(Default)]
 pub struct NPCPlugin;
@@ -25,7 +30,12 @@ impl Plugin for NPCPlugin {
         app
             .add_event::<NewDirectionEvent>()
             .add_startup_system(spawn_characters)
+            // TODO: ? - move them into different plugin ?
+            // -- Movement --
             .add_system(npc_walk)
+            .add_system(daze_wait)
+            // -- Style --
+            .add_system(dazed_effect)
             // event handler
             .add_system(give_new_direction_event)
             ;

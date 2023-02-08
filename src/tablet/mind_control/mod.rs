@@ -1,8 +1,15 @@
 //! All the stuffs that depend directly on the mechanics of mind control.
 
+use std::time::Duration;
+
 use bevy::prelude::*;
 
-use crate::{npc::NPC, player::Player, tablet::mind_control::movement::mind_control_movement};
+use crate::{
+    constants::character::npc::movement::DAZE_TIMER,
+    npc::{movement::Dazed, NPC},
+    player::Player,
+    tablet::mind_control::movement::mind_control_movement,
+};
 
 mod movement;
 
@@ -49,7 +56,7 @@ pub fn mind_control_button(
 ) {
     if keyboard_input.pressed(KeyCode::M) {
         for npc in npc_query.iter() {
-            commands.entity(npc).insert(MindControled);
+            commands.entity(npc).insert(MindControled).remove::<Dazed>();
             break;
         }
         let player = player_query.single();
@@ -63,13 +70,18 @@ fn exit_mind_control(
     keyboard_input: Res<Input<KeyCode>>,
 
     player_query: Query<Entity, With<Player>>,
-    npc_query: Query<Entity, With<NPC>>,
+    npc_query: Query<Entity, (With<NPC>, With<MindControled>)>,
 ) {
     if keyboard_input.pressed(KeyCode::Escape) {
         for npc in npc_query.iter() {
-            commands.entity(npc).remove::<MindControled>();
-            // break;
+            commands
+                .entity(npc)
+                .insert(Dazed {
+                    timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Once),
+                })
+                .remove::<MindControled>();
         }
+
         let player = player_query.single();
         commands.entity(player).insert(MindControled);
     }
