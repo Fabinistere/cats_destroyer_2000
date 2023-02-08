@@ -1,10 +1,20 @@
 use bevy::prelude::*;
 
+use self::sensors::{elevator_events, win_trigger, WinTriggerEvent};
+
 pub mod level_one;
+pub mod sensors;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum Location {
     LevelOne,
+}
+
+// States
+#[derive(Clone, Eq, PartialEq, Debug, Hash)]
+pub enum PlayerLocation {
+    LevelOne,
+    LevelTwo,
 }
 
 pub struct LocationsPlugin;
@@ -12,7 +22,12 @@ pub struct LocationsPlugin;
 impl Plugin for LocationsPlugin {
     #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app .add_plugin(level_one::LevelOnePlugin)
-            .add_state(Location::LevelOne);
+        app .add_event::<WinTriggerEvent>()
+            .add_plugin(level_one::LevelOnePlugin)
+            .add_state(Location::LevelOne)
+            .add_state(PlayerLocation::LevelOne)
+            .add_system(elevator_events)
+            .add_system(win_trigger)
+            ;
     }
 }

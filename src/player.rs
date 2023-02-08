@@ -26,6 +26,9 @@ impl Plugin for PlayerPlugin {
 #[derive(Component, Inspectable)]
 pub struct Player;
 
+#[derive(Component)]
+pub struct PlayerHitbox;
+
 fn player_movement(
     keyboard_input: Res<Input<KeyCode>>,
     mut player_query: Query<(&Speed, &mut Velocity), (With<Player>, With<MindControled>)>,
@@ -43,8 +46,8 @@ fn player_movement(
         let mut vel_y = y_axis as f32 * **speed;
 
         if x_axis != 0 && y_axis != 0 {
-            vel_x *= (std::f32::consts::PI / 4.0).cos();
-            vel_y *= (std::f32::consts::PI / 4.0).cos();
+            vel_x *= (std::f32::consts::PI / 4.).cos();
+            vel_y *= (std::f32::consts::PI / 4.).cos();
         }
 
         rb_vel.linvel.x = vel_x;
@@ -96,15 +99,16 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
                 speed: Speed::default(),
                 velocity: Velocity {
                     linvel: Vect::ZERO,
-                    angvel: 0.0,
+                    angvel: 0.,
                 },
             },
         ))
         .with_children(|parent| {
             parent.spawn((
                 Collider::cuboid(CHAR_HITBOX_WIDTH, CHAR_HITBOX_HEIGHT),
-                Transform::from_xyz(CHAR_HITBOX_Z_OFFSET, CHAR_HITBOX_Y_OFFSET, 0.0),
+                Transform::from_xyz(CHAR_HITBOX_Z_OFFSET, CHAR_HITBOX_Y_OFFSET, 0.),
                 CharacterHitbox,
+                PlayerHitbox,
             ));
         });
 }
