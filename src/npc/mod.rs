@@ -4,12 +4,12 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     constants::character::{
-        npc::{movement::BLACK_CAT_POSITION, *},
+        npc::{movement::BLACK_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     movement::{CharacterHitbox, MovementBundle, Speed},
     npc::movement::{npc_walk, NewDirectionEvent},
-    spritesheet::{AnimationTimer, CatSheet, AnimState},
+    spritesheet::{AnimState, AnimationTimer, CatSheet},
 };
 
 use self::movement::{give_new_direction_event, WalkBehavior};
@@ -47,17 +47,20 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                 },
                 texture_atlas: cats.0.clone(),
                 transform: Transform {
-                    translation: Vec3::from(BLACK_CAT_POSITION),
+                    translation: Vec3::from(BLACK_CAT_STARTING_POSITION),
                     scale: Vec3::splat(NPC_SCALE),
                     ..default()
                 },
                 ..default()
             },
-            Name::new("Blue Cat"),
+            Name::new("Black Cat"),
             NPC,
             // -- Animation --
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-            AnimState { initial: BLACK_CAT_STARTING_ANIM, current: BLACK_CAT_STARTING_ANIM },
+            AnimState {
+                initial: BLACK_CAT_STARTING_ANIM,
+                current: BLACK_CAT_STARTING_ANIM,
+            },
             // -- Hitbox --
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,
@@ -66,17 +69,21 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                 speed: Speed::default(),
                 velocity: Velocity {
                     linvel: Vect::ZERO,
-                    angvel: 0.0,
+                    angvel: 0.,
                 },
             },
             WalkBehavior {
-                destination: Vec3::new(BLACK_CAT_POSITION.0, BLACK_CAT_POSITION.1 - 50., 0.),
+                destination: Vec3::new(
+                    BLACK_CAT_STARTING_POSITION.0,
+                    BLACK_CAT_STARTING_POSITION.1 - 50.,
+                    0.,
+                ),
             },
         ))
         .with_children(|parent| {
             parent.spawn((
                 Collider::cuboid(CHAR_HITBOX_WIDTH, CHAR_HITBOX_HEIGHT),
-                Transform::from_xyz(CHAR_HITBOX_Z_OFFSET, CHAR_HITBOX_Y_OFFSET, 0.0),
+                Transform::from_xyz(CHAR_HITBOX_Z_OFFSET, CHAR_HITBOX_Y_OFFSET, 0.),
                 CharacterHitbox,
             ));
         });

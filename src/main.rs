@@ -1,28 +1,35 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use bevy::{prelude::*, render::camera::ScalingMode};
 use bevy_rapier2d::prelude::*;
 
 use constants::{CLEAR, RESOLUTION, TILE_SIZE};
 use debug::DebugPlugin;
+use locations::LocationsPlugin;
 use npc::NPCPlugin;
 use player::PlayerPlugin;
 use spritesheet::CatSpritePlugin;
+use tablet::hack::HackPlugin;
+use tablet::mind_control::MindControlPlugin;
 
 pub mod constants;
 mod debug;
-pub mod movement;
-pub mod npc;
-pub mod player;
-pub mod spritesheet;
+pub mod locations;
+mod movement;
+mod npc;
+mod player;
+mod spritesheet;
+pub mod tablet;
 
 #[rustfmt::skip]
 fn main() {
-    let height = 720.0;
+    let height = 720.;
 
     let mut app = App::new();
     app
         .insert_resource(ClearColor(CLEAR))
         .insert_resource(Msaa { samples: 1 })
-        // hitbox
+        // v-- Hitbox --v
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,
             ..default()
@@ -45,12 +52,15 @@ fn main() {
             mode: DebugRenderMode::all(),
             ..default()
         })
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.))
         // .add_plugin(TweeningPlugin)
-        .add_plugin(NPCPlugin)
-        .add_plugin(CatSpritePlugin)
-        .add_plugin(PlayerPlugin)
         .add_plugin(DebugPlugin)
+        .add_plugin(CatSpritePlugin)
+        .add_plugin(HackPlugin)
+        .add_plugin(LocationsPlugin)
+        .add_plugin(MindControlPlugin)
+        .add_plugin(NPCPlugin)
+        .add_plugin(PlayerPlugin)
         .add_startup_system(spawn_camera);
 
     app.run();
