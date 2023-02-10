@@ -15,26 +15,14 @@ use super::NPC;
 
 // :0
 
-/// Happens when:
-///   - ??? (npc::movement::pursue)
-///     - target is not found/exist
-///     - target is reach
-/// Read in ??? (npc::aggression::remove_pursuit_urge)
-pub struct StopChaseEvent {
-    pub npc_entity: Entity,
-}
-
-/// Happens when:
-///   - ??? (npc::aggression::remove_pursuit_urge)
-///     - restablish -*dominance*- the detection behavior
-///       over the pursuit beh
-/// Read in
-///   - ??? (npc::aggression::add_detection_aura)
-///     - creates THE DetectionSensor in the entity
-///     IDEA: We could just add ActiveEvent
-pub struct DetectionModeEvent {
-    pub entity: Entity,
-}
+// Happens when:
+//   - ??? (npc::movement::pursue)
+//     - target is not found/exist
+//     - target is reach
+// Read in ??? (npc::aggression::remove_pursuit_urge)
+// pub struct StopChaseEvent {
+//     pub npc_entity: Entity,
+// }
 
 /// Happens when:
 ///   - npc::aggression::player_detection
