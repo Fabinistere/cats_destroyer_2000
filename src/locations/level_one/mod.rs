@@ -1,4 +1,5 @@
 use bevy::{ecs::schedule::ShouldRun, prelude::*};
+use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
@@ -11,6 +12,7 @@ use crate::{
     tablet::hack::Hackable,
 };
 
+use super::sensors::LocationSensor;
 pub mod doors;
 
 pub struct LevelOnePlugin;
@@ -32,6 +34,16 @@ impl Plugin for LevelOnePlugin {
             ;
     }
 }
+
+#[derive(Clone, Eq, PartialEq, Debug, Hash, Copy, Inspectable)]
+pub enum LevelOneLocation {
+    SpawnRoom,
+    Corridor,
+    Elevator,
+}
+
+#[derive(Component, Inspectable)]
+pub struct CharacterLocation(pub LevelOneLocation);
 
 fn run_if_in_level_one(location: Res<State<Location>>) -> ShouldRun {
     if location.current() == &Location::LevelOne {
@@ -178,6 +190,28 @@ fn setup_level_one(
                 Name::new("Front Door Hitbox"),
                 // VisibilityBundle::default(),
             ));
+            // --- Corridor Sensor ---
+            parent.spawn((
+                Collider::cuboid(6., 3.),
+                Transform::from_xyz(5., -31.5, 0.),
+                ActiveEvents::COLLISION_EVENTS,
+                Sensor,
+                LocationSensor {
+                    location: LevelOneLocation::Corridor,
+                },
+                Name::new("Corridor Sensor From Spawn"),
+            ));
+            // --- SpawnRoom Sensor ---
+            parent.spawn((
+                Collider::cuboid(6., 3.),
+                Transform::from_xyz(5., -40.5, 0.),
+                ActiveEvents::COLLISION_EVENTS,
+                Sensor,
+                LocationSensor {
+                    location: LevelOneLocation::SpawnRoom,
+                },
+                Name::new("SpawnRoom Sensor"),
+            ));
         });
 
     // XXX: double load on the same sprite_sheet
@@ -220,6 +254,17 @@ fn setup_level_one(
                 Sensor,
                 ElevatorSensor,
                 Name::new("Elevator Sensor"),
+            ));
+            // --- Corridor Sensor ---
+            parent.spawn((
+                Collider::cuboid(6., 3.),
+                Transform::from_xyz(5., 31.5, 0.),
+                ActiveEvents::COLLISION_EVENTS,
+                Sensor,
+                LocationSensor {
+                    location: LevelOneLocation::Corridor,
+                },
+                Name::new("Corridor Sensor From Exit"),
             ));
         });
 

@@ -3,6 +3,7 @@ use crate::{
         npc::{movement::BLUE_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
+    locations::level_one::{CharacterLocation, LevelOneLocation},
     movement::{CharacterHitbox, MovementBundle, Speed},
     spritesheet::{AnimState, AnimationTimer, CatSheet},
     tablet::mind_control::MindControled,
@@ -102,6 +103,7 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
                     angvel: 0.,
                 },
             },
+            CharacterLocation(LevelOneLocation::SpawnRoom),
         ))
         .with_children(|parent| {
             parent.spawn((
