@@ -8,7 +8,10 @@ use crate::{
     constants::character::npc::movement::DAZE_TIMER,
     npc::{movement::Dazed, NPC},
     player::Player,
-    tablet::mind_control::movement::mind_control_movement,
+    tablet::{
+        mind_control::movement::mind_control_movement, run_if_tablet_is_free,
+        run_if_tablet_is_mind_ctrl,
+    },
 };
 
 mod movement;
@@ -19,10 +22,20 @@ impl Plugin for MindControlPlugin {
     #[rustfmt::skip]
     fn build(&self, app: &mut App) {
         app
-            .add_system(mind_control_button.label("enter_mind_control"))
-            .add_system(exit_mind_control.label("exit_mind_control").after("enter_mind_control"))
-            .add_system(mind_control_movement.label("movement"))
+            .add_system_set(
+                SystemSet::new()
+                .with_run_criteria(run_if_tablet_is_free)
+                .with_system(mind_control_button.label("enter_mind_control"))
+            )
+            .add_system_set(
+                SystemSet::new()
+                .with_run_criteria(run_if_tablet_is_mind_ctrl)
+                .with_system(exit_mind_control.label("exit_mind_control").after("enter_mind_control"))
+            )
+            .add_system(mind_control_movement.label("movement").after("enter_mind_control"))
             .add_system(camera_follow.after("movement"))
+            .add_system(daze_post_mind_control.after("exit_mind_control"))
+            .add_system(daze_cure_by_mind_control.before("exit_mind_control").after("enter_mind_control"))
             ;
     }
 }
@@ -56,7 +69,7 @@ pub fn mind_control_button(
 ) {
     if keyboard_input.pressed(KeyCode::M) {
         for npc in npc_query.iter() {
-            commands.entity(npc).insert(MindControled).remove::<Dazed>();
+            commands.entity(npc).insert(MindControled); // .remove::<Dazed>()
             break;
         }
         let player = player_query.single();
@@ -70,19 +83,62 @@ fn exit_mind_control(
     keyboard_input: Res<Input<KeyCode>>,
 
     player_query: Query<Entity, With<Player>>,
-    npc_query: Query<Entity, (With<NPC>, With<MindControled>)>,
+    npc_query: Query<(Entity, &Name), (With<NPC>, With<MindControled>)>,
 ) {
     if keyboard_input.pressed(KeyCode::Escape) {
-        for npc in npc_query.iter() {
-            commands
-                .entity(npc)
-                .insert(Dazed {
-                    timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Once),
-                })
-                .remove::<MindControled>();
+        // could be a single for now
+        for (npc, name) in npc_query.iter() {
+            info!("DEBUG: {}: mind controled exited", name);
+            commands.entity(npc).remove::<MindControled>();
+            commands.entity(npc).insert(Dazed {
+                timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Once),
+            });
         }
 
         let player = player_query.single();
         commands.entity(player).insert(MindControled);
+        // XXX: can accumulate
+        commands.entity(player).insert(Dazed {
+            timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Repeating),
+        });
+    }
+}
+
+/// BUG: ? - Never Detect the removal
+fn daze_post_mind_control(
+    mut commands: Commands,
+    mind_controled_removals: RemovedComponents<MindControled>,
+
+    player_query: Query<Entity, With<Player>>,
+) {
+    for entity in mind_controled_removals.iter() {
+        info!("DEBUG: mind controled removed detected");
+        match player_query.get(entity) {
+            // This is prbly a npc
+            Err(_) => {
+                commands.entity(entity).insert(Dazed {
+                    timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Once),
+                });
+            }
+            Ok(_) => {
+                // Will never be decreased (no system for it)
+                // Only removed by adding MindControled back to the player
+                // So the content of the timer is useless
+                commands.entity(entity).insert(Dazed {
+                    timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Repeating),
+                });
+            }
+        }
+    }
+}
+
+fn daze_cure_by_mind_control(
+    mut commands: Commands,
+
+    mind_controled_query: Query<(Entity, &Name), Added<MindControled>>,
+) {
+    for (entity, name) in mind_controled_query.iter() {
+        info!("DEBUG: {}: dazed removed", name);
+        commands.entity(entity).remove::<Dazed>();
     }
 }
