@@ -7,14 +7,24 @@ use crate::{
         npc::{movement::BLACK_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
+    locations::level_one::{CharacterLocation, LevelOneLocation},
     movement::{CharacterHitbox, MovementBundle, Speed},
-    npc::movement::{npc_walk, NewDirectionEvent},
+    npc::{
+        aggression::{add_pursuit_urge, player_detection, DetectionSensor, EngagePursuitEvent},
+        movement::{
+            daze_wait, give_new_direction_event, npc_chase, npc_walk, npc_walk_to, reset_aggro,
+            NewDirectionEvent, ResetAggroEvent, WalkBehavior,
+        },
+        style::dazed_effect,
+    },
     spritesheet::{AnimState, AnimationTimer, CatSheet},
 };
 
-use self::movement::{give_new_direction_event, WalkBehavior};
+use self::movement::Target;
 
+mod aggression;
 pub mod movement;
+mod style;
 
 #[derive(Default)]
 pub struct NPCPlugin;
@@ -24,10 +34,21 @@ impl Plugin for NPCPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<NewDirectionEvent>()
+            .add_event::<EngagePursuitEvent>()
+            .add_event::<ResetAggroEvent>()
             .add_startup_system(spawn_characters)
+            // -- Movement --
+            .add_system(npc_walk_to)
             .add_system(npc_walk)
-            // event handler
+            .add_system(npc_chase)
+            .add_system(reset_aggro)
+            .add_system(daze_wait)
             .add_system(give_new_direction_event)
+            // -- Aggression --
+            .add_system(player_detection)
+            .add_system(add_pursuit_urge)
+            // -- Style --
+            .add_system(dazed_effect)
             ;
     }
 }
@@ -36,6 +57,22 @@ impl Plugin for NPCPlugin {
 pub struct NPC;
 
 fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
+    // initial target
+    let way_point = commands
+        .spawn((
+            SpatialBundle {
+                transform: Transform::from_translation(Vec3::new(
+                    BLACK_CAT_STARTING_POSITION.0,
+                    BLACK_CAT_STARTING_POSITION.1 - 50.,
+                    0.,
+                )),
+                visibility: Visibility { is_visible: false },
+                ..Default::default()
+            },
+            Name::new(format!("WayPoint for Black Cat")),
+        ))
+        .id();
+
     // Black Cat
     commands
         .spawn((
@@ -72,19 +109,22 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                     angvel: 0.,
                 },
             },
-            WalkBehavior {
-                destination: Vec3::new(
-                    BLACK_CAT_STARTING_POSITION.0,
-                    BLACK_CAT_STARTING_POSITION.1 - 50.,
-                    0.,
-                ),
-            },
+            WalkBehavior,
+            Target(Some(way_point)),
+            CharacterLocation(LevelOneLocation::Corridor),
         ))
         .with_children(|parent| {
             parent.spawn((
                 Collider::cuboid(CHAR_HITBOX_WIDTH, CHAR_HITBOX_HEIGHT),
                 Transform::from_xyz(CHAR_HITBOX_Z_OFFSET, CHAR_HITBOX_Y_OFFSET, 0.),
                 CharacterHitbox,
+            ));
+            parent.spawn((
+                Collider::ball(40.),
+                ActiveEvents::COLLISION_EVENTS,
+                Sensor,
+                DetectionSensor,
+                Name::new("Detection Range"),
             ));
         });
 }

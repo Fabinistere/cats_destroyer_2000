@@ -12,6 +12,7 @@ use spritesheet::CatSpritePlugin;
 use tablet::hack::HackPlugin;
 use tablet::mind_control::MindControlPlugin;
 
+pub mod collisions;
 pub mod constants;
 mod debug;
 pub mod locations;
