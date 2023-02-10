@@ -258,7 +258,7 @@ fn setup_level_one(
             // --- Corridor Sensor ---
             parent.spawn((
                 Collider::cuboid(6., 3.),
-                Transform::from_xyz(5., 32.5, 0.),
+                Transform::from_xyz(5., 31.5, 0.),
                 ActiveEvents::COLLISION_EVENTS,
                 Sensor,
                 LocationSensor {
