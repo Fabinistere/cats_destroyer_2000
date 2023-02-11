@@ -1,12 +1,13 @@
 use crate::{
+    characters::movement::{CharacterHitbox, MovementBundle, Speed},
     constants::character::{
         npc::{movement::BLUE_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     locations::level_one::{CharacterLocation, LevelOneLocation},
-    movement::{CharacterHitbox, MovementBundle, Speed},
     spritesheet::{AnimState, AnimationTimer, CatSheet},
     tablet::mind_control::MindControled,
+    AppState,
 };
 use bevy::prelude::*;
 use bevy_inspector_egui::Inspectable;
@@ -17,7 +18,7 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_player)
+        app .add_startup_system(spawn_player)
             .add_system(player_movement.label("movement"))
             .add_system(player_idle.after("movement"))
             ;
@@ -68,7 +69,6 @@ fn player_idle(mut player_query: Query<&mut Velocity, (With<Player>, Without<Min
 
 fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
     // Blue Cat
-    commands
         .spawn((
             SpriteSheetBundle {
                 sprite: TextureAtlasSprite {
@@ -112,5 +112,4 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
                 CharacterHitbox,
                 PlayerHitbox,
             ));
-        });
 }

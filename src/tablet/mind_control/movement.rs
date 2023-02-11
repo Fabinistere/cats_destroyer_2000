@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{movement::Speed, tablet::mind_control::MindControled};
+use crate::{characters::movement::Speed, tablet::mind_control::MindControled};
 
 /// The player input will act on the current MindControled entity
 pub fn mind_control_movement(

@@ -3,20 +3,21 @@ use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
+    characters::movement::{CharacterHitbox, MovementBundle, Speed},
+    characters::npcs::{
+        aggression::{
+            add_pursuit_urge, player_detection, reset_aggro, DetectionSensor, EngagePursuitEvent,
+        },
+        movement::{
+            daze_wait, give_new_direction_event, npc_chase, npc_walk, npc_walk_to,
+            NewDirectionEvent, ResetAggroEvent, WalkBehavior,
+        },
+    },
     constants::character::{
         npc::{movement::BLACK_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     locations::level_one::{CharacterLocation, LevelOneLocation},
-    movement::{CharacterHitbox, MovementBundle, Speed},
-    npc::{
-        aggression::{add_pursuit_urge, player_detection, DetectionSensor, EngagePursuitEvent},
-        movement::{
-            daze_wait, give_new_direction_event, npc_chase, npc_walk, npc_walk_to, reset_aggro,
-            NewDirectionEvent, ResetAggroEvent, WalkBehavior,
-        },
-        style::dazed_effect,
-    },
     spritesheet::{AnimState, AnimationTimer, CatSheet},
 };
 
@@ -24,12 +25,11 @@ use self::movement::Target;
 
 mod aggression;
 pub mod movement;
-mod style;
 
 #[derive(Default)]
-pub struct NPCPlugin;
+pub struct NPCsPlugin;
 
-impl Plugin for NPCPlugin {
+impl Plugin for NPCsPlugin {
     #[rustfmt::skip]
     fn build(&self, app: &mut App) {
         app
@@ -47,8 +47,6 @@ impl Plugin for NPCPlugin {
             // -- Aggression --
             .add_system(player_detection)
             .add_system(add_pursuit_urge)
-            // -- Style --
-            .add_system(dazed_effect)
             ;
     }
 }

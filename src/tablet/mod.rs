@@ -1,7 +1,7 @@
 use bevy::{ecs::schedule::ShouldRun, prelude::*};
 
 use crate::{
-    player::Player,
+    characters::player::Player,
     tablet::{
         hack::HackPlugin,
         mind_control::{MindControlPlugin, MindControled},

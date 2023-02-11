@@ -3,22 +3,19 @@
 use bevy::{prelude::*, render::camera::ScalingMode};
 use bevy_rapier2d::prelude::*;
 
+use characters::CharactersPlugin;
 use constants::{CLEAR, RESOLUTION, TILE_SIZE};
 use debug::DebugPlugin;
 use locations::LocationsPlugin;
-use npc::NPCPlugin;
-use player::PlayerPlugin;
 use spritesheet::CatSpritePlugin;
 use tablet::hack::HackPlugin;
 use tablet::mind_control::MindControlPlugin;
 
+pub mod characters;
 pub mod collisions;
 pub mod constants;
 mod debug;
 pub mod locations;
-mod movement;
-mod npc;
-mod player;
 mod spritesheet;
 pub mod tablet;
 
@@ -35,6 +32,7 @@ fn main() {
             gravity: Vec2::ZERO,
             ..default()
         })
+
         .add_plugins(
             DefaultPlugins
                 .set(WindowPlugin {
@@ -60,6 +58,7 @@ fn main() {
         .add_plugin(HackPlugin)
         .add_plugin(LocationsPlugin)
         .add_plugin(MindControlPlugin)
+        .add_plugin(CharactersPlugin)
         .add_plugin(NPCPlugin)
         .add_plugin(PlayerPlugin)
         .add_startup_system(spawn_camera);

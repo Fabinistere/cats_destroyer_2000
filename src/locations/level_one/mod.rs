@@ -1,4 +1,4 @@
-use bevy::{ecs::schedule::ShouldRun, prelude::*};
+use bevy::prelude::*;
 use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 
@@ -28,6 +28,10 @@ impl Plugin for LevelOnePlugin {
     #[rustfmt::skip]
     fn build(&self, app: &mut App) {
         app .add_event::<OpenDoorEvent>()
+            // .add_event::<ResetLevelOneEvent>()
+            // .add_event::<EnterLevelOneEvent>()
+            // .add_system(reset_level_one)
+            // .add_system(enter_level_one)
             .add_system_set(
                 SystemSet::on_enter(Location::LevelOne)
                     .with_system(setup_level_one)
@@ -57,13 +61,42 @@ pub enum LevelOneLocation {
 #[derive(Component, Inspectable)]
 pub struct CharacterLocation(pub LevelOneLocation);
 
-fn run_if_in_level_one(location: Res<State<Location>>) -> ShouldRun {
-    if location.current() == &Location::LevelOne {
-        ShouldRun::Yes
-    } else {
-        ShouldRun::No
-    }
-}
+// /// DOC
+// pub struct ResetLevelOneEvent;
+
+// /// DOC
+// pub struct EnterLevelOneEvent;
+
+// fn reset_level_one(
+//     mut reset_level_event: EventReader<ResetLevelOneEvent>,
+//     mut location: ResMut<State<Location>>,
+//     mut enter_level_one_event: EventWriter<EnterLevelOneEvent>,
+// ) {
+//     for _ in reset_level_event.iter() {
+//         if location.current() == &Location::LevelOne {
+//             location.set(Location::Void).unwrap();
+//             enter_level_one_event.send(EnterLevelOneEvent);
+//         }
+//     }
+// }
+
+// fn enter_level_one(
+//     mut enter_level_event: EventReader<EnterLevelOneEvent>,
+//     mut location: ResMut<State<Location>>,
+// ) {
+//     for _ in enter_level_event.iter() {
+//         if location.current() != &Location::LevelOne {
+//             location.set(Location::LevelOne).unwrap();
+//         }
+//     }
+// }
+
+// /// XXX: the filter on Name OUCH
+// fn despawn_level_one(mut commands: Commands, query: Query<Entity, With<Name>>) {
+//     for entity in query.iter() {
+//         commands.entity(entity).despawn_recursive();
+//     }
+// }
 
 fn setup_level_one(
     mut commands: Commands,
