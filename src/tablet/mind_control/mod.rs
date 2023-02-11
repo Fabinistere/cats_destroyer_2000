@@ -5,8 +5,8 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
-    constants::character::npc::movement::DAZE_TIMER,
-    npc::{movement::Dazed, NPC},
+    constants::character::effects::DAZE_TIMER,
+    npc::{movement::Dazed, style::DazeAnimation, NPC},
     player::Player,
     tablet::{
         mind_control::movement::mind_control_movement, run_if_tablet_is_free,
@@ -71,16 +71,13 @@ pub fn mind_control_button(
     npc_query: Query<Entity, With<NPC>>,
 ) {
     if keyboard_input.pressed(KeyCode::M) {
+        info!("DEBUG: mind controled entered");
         for npc in npc_query.iter() {
             commands.entity(npc).insert(MindControled); // .remove::<Dazed>()
             break;
         }
         let player = player_query.single();
         commands.entity(player).remove::<MindControled>();
-        // XXX: can accumulate
-        commands.entity(player).insert(Dazed {
-            timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Repeating),
-        });
     }
 }
 
@@ -97,9 +94,6 @@ fn exit_mind_control(
         for (npc, name) in npc_query.iter() {
             info!("DEBUG: {}: mind controled exited", name);
             commands.entity(npc).remove::<MindControled>();
-            commands.entity(npc).insert(Dazed {
-                timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Once),
-            });
         }
 
         let player = player_query.single();
@@ -138,10 +132,21 @@ fn daze_post_mind_control(
 fn daze_cure_by_mind_control(
     mut commands: Commands,
 
-    mind_controled_query: Query<(Entity, &Name), Added<MindControled>>,
+    mind_controled_query: Query<(Entity, &Name, &Children), Added<MindControled>>,
+    daze_effect_query: Query<Entity, With<DazeAnimation>>,
 ) {
-    for (entity, name) in mind_controled_query.iter() {
+    for (entity, name, children) in mind_controled_query.iter() {
         info!("DEBUG: {}: dazed removed", name);
         commands.entity(entity).remove::<Dazed>();
+        for child in children {
+            match daze_effect_query.get(*child) {
+                Err(_) => continue,
+                Ok(daze_effect) => {
+                    // Only works for player
+                    // XXX: don't remove the link to their parent
+                    commands.entity(daze_effect).despawn();
+                }
+            }
+        }
     }
 }

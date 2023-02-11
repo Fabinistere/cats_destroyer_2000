@@ -10,12 +10,14 @@ use crate::{
     locations::level_one::{CharacterLocation, LevelOneLocation},
     movement::{CharacterHitbox, MovementBundle, Speed},
     npc::{
-        aggression::{add_pursuit_urge, player_detection, DetectionSensor, EngagePursuitEvent},
+        aggression::{
+            add_pursuit_urge, player_detection, reset_aggro, DetectionSensor, EngagePursuitEvent,
+        },
         movement::{
-            daze_wait, give_new_direction_event, npc_chase, npc_walk, npc_walk_to, reset_aggro,
+            daze_wait, give_new_direction_event, npc_chase, npc_walk, npc_walk_to,
             NewDirectionEvent, ResetAggroEvent, WalkBehavior,
         },
-        style::dazed_effect,
+        style::{add_dazed_effect, animate_dazed_effect},
     },
     spritesheet::{AnimState, AnimationTimer, CatSheet},
 };
@@ -24,7 +26,7 @@ use self::movement::Target;
 
 mod aggression;
 pub mod movement;
-mod style;
+pub mod style;
 
 #[derive(Default)]
 pub struct NPCPlugin;
@@ -48,7 +50,8 @@ impl Plugin for NPCPlugin {
             .add_system(player_detection)
             .add_system(add_pursuit_urge)
             // -- Style --
-            .add_system(dazed_effect)
+            .add_system(add_dazed_effect)
+            .add_system(animate_dazed_effect)
             ;
     }
 }
