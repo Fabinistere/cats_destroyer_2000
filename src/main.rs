@@ -59,8 +59,6 @@ fn main() {
         .add_plugin(LocationsPlugin)
         .add_plugin(MindControlPlugin)
         .add_plugin(CharactersPlugin)
-        .add_plugin(NPCPlugin)
-        .add_plugin(PlayerPlugin)
         .add_startup_system(spawn_camera);
 
     app.run();
