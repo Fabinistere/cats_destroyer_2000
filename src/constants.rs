@@ -41,7 +41,7 @@ pub mod character {
 
 pub mod locations {
 
-    pub const LEVEL_Z: f32 = 2.;
+    pub const LEVEL_Z: f32 = 3.;
     pub const LEVEL_POSITION: (f32, f32, f32) = (0., 0., LEVEL_Z);
     pub const LEVEL_SCALE: (f32, f32, f32) = (-1., 1., 1.);
 
@@ -54,6 +54,10 @@ pub mod locations {
         pub const IN_DOOR_POSITION: (f32, f32, f32) = (5., -36., LEVEL_Z);
         pub const ALT_DOOR_POSITION: (f32, f32, f32) = (-2.5, 6., LEVEL_Z);
         pub const OUT_DOOR_POSITION: (f32, f32, f32) = (5., 36., LEVEL_Z);
+
+        pub const BUTTON_POSITION: (f32, f32, f32) = (-24., 6., LEVEL_Z - 1.);
+        pub const BUTTON_HITBOX_X_OFFSET: (f32, f32, f32) = (3., 0., 0.);
+        pub const BUTTON_SENSOR_POSITION: (f32, f32, f32) = (-25.5, 6., LEVEL_Z);
     }
 }
 

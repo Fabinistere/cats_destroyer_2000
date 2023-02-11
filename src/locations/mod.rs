@@ -1,17 +1,20 @@
 use bevy::prelude::*;
 
-use self::sensors::{elevator_events, location_events, win_trigger, WinTriggerEvent};
+use self::sensors::{button_event, location_event, win_event, win_trigger, WinTriggerEvent};
 
 pub mod level_one;
 pub mod sensors;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum Location {
-    /// Start cinematic
-    LevelZero,
+    /// The transition universe
+    /// Used when reset a Level
+    Void,
+    // Start cinematic
+    // LevelZero,
     LevelOne,
-    /// Exit cinematic
-    Level1000,
+    // Exit cinematic
+    // Level1000,
 }
 
 // States
@@ -30,9 +33,10 @@ impl Plugin for LocationsPlugin {
             .add_plugin(level_one::LevelOnePlugin)
             .add_state(Location::LevelOne)
             .add_state(PlayerLocation::LevelOne)
-            .add_system(elevator_events)
-            .add_system(location_events)
+            .add_system(win_event)
             .add_system(win_trigger)
+            .add_system(location_event)
+            .add_system(button_event)
             ;
     }
 }
