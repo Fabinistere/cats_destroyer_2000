@@ -3,61 +3,85 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     locations::{
-        level_one::{CharacterLocation, LevelOneLocation},
+        level_one::{
+            button::ButtonSensor,
+            doors::{Door, OpenDoorEvent},
+            CharacterLocation, LevelOneLocation,
+        },
         PlayerLocation,
     },
     movement::CharacterHitbox,
     npc::NPC,
     player::{Player, PlayerHitbox},
+    tablet::hack::Hackable,
 };
 
-pub struct WinTriggerEvent;
+/// Happens when
+///   -
+/// Read in
+///   -
+/// DOC
+pub struct WinTriggerEvent {
+    /// The Entity which triggered the WinEvent
+    pub entity: Entity,
+}
 
 #[derive(Component)]
-pub struct ElevatorSensor;
+pub struct WinSensor;
 
 #[derive(Component)]
 pub struct LocationSensor {
     pub location: LevelOneLocation,
 }
-pub fn elevator_events(
+
+/// Enter the elevator to trigger the win
+pub fn win_event(
     mut collision_events: EventReader<CollisionEvent>,
 
-    elevator_sensor_query: Query<Entity, With<ElevatorSensor>>,
-    player_hitbox_query: Query<Entity, With<PlayerHitbox>>,
+    win_sensor_query: Query<Entity, With<WinSensor>>,
+    character_hitbox_query: Query<(Entity, &Parent), With<CharacterHitbox>>,
 
     mut win_trigger_event: EventWriter<WinTriggerEvent>,
 ) {
     for collision_event in collision_events.iter() {
         match collision_event {
             CollisionEvent::Started(e1, e2, _) => {
-                let elevator_sensor = elevator_sensor_query.single();
-                let player_hitbox = player_hitbox_query.single();
-
-                if (*e1 == elevator_sensor && *e2 == player_hitbox)
-                    || (*e1 == player_hitbox && *e2 == elevator_sensor)
-                {
-                    win_trigger_event.send(WinTriggerEvent);
+                let win_sensor = win_sensor_query.single();
+                if *e1 == win_sensor || *e2 == win_sensor {
+                    // if this is a NPC AltWin with a the npc leaving the building happy
+                    // and the character still in.
+                    match (
+                        character_hitbox_query.get(*e1),
+                        character_hitbox_query.get(*e2),
+                    ) {
+                        (Err(_), Ok((_, character))) | (Ok((_, character)), Err(_)) => {
+                            win_trigger_event.send(WinTriggerEvent {
+                                entity: **character,
+                            });
+                        }
+                        _ => continue, // warn!("Neither {:?} or {:?} is a CharacterHitbox", *e1, *e2),
+                    }
                 }
             }
-            CollisionEvent::Stopped(_e1, _e2, _) => {
-                // let elevator_sensor = elevator_sensor_query.single();
-
-                // if *e1 == elevator_sensor || *e2 == elevator_sensor {
-                //     win_trigger_event.send(WinTriggerEvent);
-                // }
-            }
+            _ => continue,
         }
     }
 }
 
 pub fn win_trigger(
-    // player_query: Query<&Transform, With<Player>>,
-    mut player_location: ResMut<State<PlayerLocation>>,
     mut win_trigger_event: EventReader<WinTriggerEvent>,
+
+    character_query: Query<&Name, Or<(With<Player>, With<NPC>)>>,
+    mut player_location: ResMut<State<PlayerLocation>>,
 ) {
-    for _event in win_trigger_event.iter() {
-        println!("BIEN JOUE !");
+    for event in win_trigger_event.iter() {
+        match character_query.get(event.entity) {
+            Err(e) => warn!("The Winner is neither a NPC or a Player... {:?}", e),
+            Ok(name) => {
+                let congrats = format!("BIEN JOUE {}!", name);
+                println!("{}", congrats);
+            }
+        }
         // TODO: 'increment" the level
         if *player_location.current() == PlayerLocation::LevelOne {
             player_location.set(PlayerLocation::LevelTwo).unwrap();
@@ -66,7 +90,7 @@ pub fn win_trigger(
 }
 
 /// Manage where characters are
-pub fn location_events(
+pub fn location_event(
     mut collision_events: EventReader<CollisionEvent>,
 
     location_sensor_query: Query<(Entity, &LocationSensor)>,
@@ -110,6 +134,39 @@ pub fn location_events(
                         }
                     }
                     _ => continue,
+                }
+            }
+            _ => continue,
+        }
+    }
+}
+
+/// Enter the button to trigger the win
+pub fn button_event(
+    mut collision_events: EventReader<CollisionEvent>,
+
+    button_sensor_query: Query<Entity, With<ButtonSensor>>,
+    npc_hitbox_query: Query<Entity, (With<CharacterHitbox>, Without<PlayerHitbox>)>,
+
+    secured_door_query: Query<Entity, (With<Door>, Without<Hackable>)>,
+    mut open_door_event: EventWriter<OpenDoorEvent>,
+) {
+    for collision_event in collision_events.iter() {
+        match collision_event {
+            CollisionEvent::Started(e1, e2, _) => {
+                let button_sensor = button_sensor_query.single();
+                // for the LevelOne: could be a single
+                for npc_hitbox in npc_hitbox_query.iter() {
+                    if (*e1 == button_sensor && *e2 == npc_hitbox)
+                        || (*e1 == npc_hitbox && *e2 == button_sensor)
+                    {
+                        for door in secured_door_query.iter() {
+                            open_door_event.send(OpenDoorEvent(door));
+                        }
+
+                        // The npc hitbox has been found
+                        break;
+                    }
                 }
             }
             _ => continue,
