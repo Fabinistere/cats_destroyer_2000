@@ -12,7 +12,7 @@ use crate::{
     },
     movement::CharacterHitbox,
     npc::NPC,
-    player::{Player, PlayerHitbox},
+    player::Player,
     tablet::hack::Hackable,
 };
 
@@ -146,7 +146,8 @@ pub fn button_event(
     mut collision_events: EventReader<CollisionEvent>,
 
     button_sensor_query: Query<Entity, With<ButtonSensor>>,
-    npc_hitbox_query: Query<Entity, (With<CharacterHitbox>, Without<PlayerHitbox>)>,
+    // can be a npc or player
+    character_hitbox_query: Query<Entity, With<CharacterHitbox>>,
 
     secured_door_query: Query<Entity, (With<Door>, Without<Hackable>)>,
     mut open_door_event: EventWriter<OpenDoorEvent>,
@@ -156,15 +157,15 @@ pub fn button_event(
             CollisionEvent::Started(e1, e2, _) => {
                 let button_sensor = button_sensor_query.single();
                 // for the LevelOne: could be a single
-                for npc_hitbox in npc_hitbox_query.iter() {
-                    if (*e1 == button_sensor && *e2 == npc_hitbox)
-                        || (*e1 == npc_hitbox && *e2 == button_sensor)
+                for character_hitbox in character_hitbox_query.iter() {
+                    if (*e1 == button_sensor && *e2 == character_hitbox)
+                        || (*e1 == character_hitbox && *e2 == button_sensor)
                     {
                         for door in secured_door_query.iter() {
                             open_door_event.send(OpenDoorEvent(door));
                         }
 
-                        // The npc hitbox has been found
+                        // The character hitbox has been found
                         break;
                     }
                 }
