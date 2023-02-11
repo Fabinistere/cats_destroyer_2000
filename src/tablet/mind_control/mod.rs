@@ -34,7 +34,10 @@ impl Plugin for MindControlPlugin {
             )
             .add_system(mind_control_movement.label("movement").after("enter_mind_control"))
             .add_system(camera_follow.after("movement"))
-            .add_system(daze_post_mind_control.after("exit_mind_control"))
+            .add_system_to_stage(
+                CoreStage::PostUpdate,
+                daze_post_mind_control//.after("exit_mind_control")
+            )
             .add_system(daze_cure_by_mind_control.before("exit_mind_control").after("enter_mind_control"))
             ;
     }
@@ -74,6 +77,10 @@ pub fn mind_control_button(
         }
         let player = player_query.single();
         commands.entity(player).remove::<MindControled>();
+        // XXX: can accumulate
+        commands.entity(player).insert(Dazed {
+            timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Repeating),
+        });
     }
 }
 
@@ -97,10 +104,6 @@ fn exit_mind_control(
 
         let player = player_query.single();
         commands.entity(player).insert(MindControled);
-        // XXX: can accumulate
-        commands.entity(player).insert(Dazed {
-            timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Repeating),
-        });
     }
 }
 

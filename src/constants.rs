@@ -33,8 +33,7 @@ pub mod character {
 
             pub const BLUE_CAT_STARTING_POSITION: (f32, f32, f32) = (5., -48., CHAR_Z);
             pub const BLACK_CAT_STARTING_POSITION: (f32, f32, f32) = (5., 20., CHAR_Z);
-
-            pub const DAZE_TIMER: u64 = 5;
+            pub const DAZE_TIMER: u64 = 2;
         }
     }
 }
