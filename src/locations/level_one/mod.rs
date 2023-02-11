@@ -6,13 +6,20 @@ use crate::{
     constants::locations::{level_one::*, FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE},
     locations::{
         level_one::doors::{animate_door, open_door_event, Door, ExitDoor, OpenDoorEvent},
-        sensors::ElevatorSensor,
+        sensors::WinSensor,
         Location,
     },
     tablet::hack::Hackable,
 };
 
+use self::{
+    button::{set_up_button, ButtonSensor},
+    doors::DoorHitbox,
+};
+
 use super::sensors::LocationSensor;
+
+pub mod button;
 pub mod doors;
 
 pub struct LevelOnePlugin;
@@ -24,13 +31,18 @@ impl Plugin for LevelOnePlugin {
             .add_system_set(
                 SystemSet::on_enter(Location::LevelOne)
                     .with_system(setup_level_one)
+                    .with_system(set_up_button)
             )
             .add_system_set(
-                SystemSet::new()
-                    .with_run_criteria(run_if_in_level_one)
+                SystemSet::on_update(Location::LevelOne)
+                    // .with_run_criteria(run_if_in_level_one)
                     .with_system(animate_door)
                     .with_system(open_door_event)
             )
+            // .add_system_set(
+            //     SystemSet::on_exit(Location::LevelOne)
+            //         .with_system(despawn_level_one)
+            // )
             ;
     }
 }
@@ -157,6 +169,16 @@ fn setup_level_one(
                 Transform::from_xyz(-16., -3., 0.),
                 Name::new("Closet Bottom Hitbox"),
             ));
+            // --- Closet Button Sensor ---
+            parent.spawn((
+                Collider::cuboid(2.5, 3.5),
+                Transform::from_translation(BUTTON_SENSOR_POSITION.into()),
+                ActiveEvents::COLLISION_EVENTS,
+                Sensor,
+                ButtonSensor,
+                // DOC: Better Naming
+                Name::new("OneWay Button Sensor"),
+            ));
         });
 
     // -- Doors --
@@ -187,8 +209,8 @@ fn setup_level_one(
             parent.spawn((
                 Collider::cuboid(6., 1.5),
                 Transform::from_xyz(5., -36., 0.),
+                DoorHitbox,
                 Name::new("Front Door Hitbox"),
-                // VisibilityBundle::default(),
             ));
             // --- Corridor Sensor ---
             parent.spawn((
@@ -243,8 +265,8 @@ fn setup_level_one(
             parent.spawn((
                 Collider::cuboid(6., 1.5),
                 Transform::from_xyz(5., 36., 0.),
+                DoorHitbox,
                 Name::new("Exit Door Hitbox"),
-                // VisibilityBundle::default(),
             ));
             // --- Win Sensor ---
             parent.spawn((
@@ -252,7 +274,7 @@ fn setup_level_one(
                 Transform::default(),
                 ActiveEvents::COLLISION_EVENTS,
                 Sensor,
-                ElevatorSensor,
+                WinSensor,
                 Name::new("Elevator Sensor"),
             ));
             // --- Corridor Sensor ---
@@ -295,8 +317,8 @@ fn setup_level_one(
             parent.spawn((
                 Collider::cuboid(1.5, 7.5),
                 Transform::from_xyz(-2.5, 6., 0.),
+                DoorHitbox,
                 Name::new("Side Door Hitbox"),
-                // VisibilityBundle::default(),
             ));
         });
 }
