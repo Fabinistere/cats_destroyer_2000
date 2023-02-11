@@ -5,15 +5,15 @@
 use bevy::prelude::*;
 
 use crate::{
+    characters::movement::Dazed,
     constants::character::effects::{DAZE_STARTING_ANIM, DAZE_Y_OFFSET},
     spritesheet::{AnimationTimer, DazeSheet},
 };
 
-use super::movement::Dazed;
-
 #[derive(Component)]
 pub struct DazeAnimation;
 
+/// Polish - floating Stars above their head
 pub fn add_dazed_effect(
     mut commands: Commands,
     dazed_character_query: Query<Entity, Added<Dazed>>,

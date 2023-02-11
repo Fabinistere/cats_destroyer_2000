@@ -5,9 +5,9 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
+    characters::movement::Dazed,
+    characters::{effects::style::DazeAnimation, npcs::NPC, player::Player},
     constants::character::effects::DAZE_TIMER,
-    npc::{movement::Dazed, style::DazeAnimation, NPC},
-    player::Player,
     tablet::{
         mind_control::movement::mind_control_movement, run_if_tablet_is_free,
         run_if_tablet_is_mind_ctrl,
@@ -71,7 +71,6 @@ pub fn mind_control_button(
     npc_query: Query<Entity, With<NPC>>,
 ) {
     if keyboard_input.pressed(KeyCode::M) {
-        info!("DEBUG: mind controled entered");
         for npc in npc_query.iter() {
             commands.entity(npc).insert(MindControled); // .remove::<Dazed>()
             break;
@@ -91,8 +90,7 @@ fn exit_mind_control(
 ) {
     if keyboard_input.pressed(KeyCode::Escape) {
         // could be a single for now
-        for (npc, name) in npc_query.iter() {
-            info!("DEBUG: {}: mind controled exited", name);
+        for (npc, _name) in npc_query.iter() {
             commands.entity(npc).remove::<MindControled>();
         }
 
@@ -101,7 +99,6 @@ fn exit_mind_control(
     }
 }
 
-/// BUG: ? - Never Detect the removal
 fn daze_post_mind_control(
     mut commands: Commands,
     mind_controled_removals: RemovedComponents<MindControled>,
@@ -109,7 +106,6 @@ fn daze_post_mind_control(
     player_query: Query<Entity, With<Player>>,
 ) {
     for entity in mind_controled_removals.iter() {
-        info!("DEBUG: mind controled removed detected");
         match player_query.get(entity) {
             // This is prbly a npc
             Err(_) => {
@@ -135,8 +131,7 @@ fn daze_cure_by_mind_control(
     mind_controled_query: Query<(Entity, &Name, &Children), Added<MindControled>>,
     daze_effect_query: Query<Entity, With<DazeAnimation>>,
 ) {
-    for (entity, name, children) in mind_controled_query.iter() {
-        info!("DEBUG: {}: dazed removed", name);
+    for (entity, _name, children) in mind_controled_query.iter() {
         commands.entity(entity).remove::<Dazed>();
         for child in children {
             match daze_effect_query.get(*child) {

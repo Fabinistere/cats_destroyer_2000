@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{npc::NPC, player::Player};
+use crate::characters::{npcs::NPC, player::Player};
 
 pub struct CatSpritePlugin;
 

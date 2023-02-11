@@ -2,8 +2,10 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    constants::character::npc::movement::BLACK_CAT_STARTING_POSITION, movement::Speed, npc::NPC,
-    player::Player, tablet::mind_control::MindControled,
+    characters::movement::{Dazed, Speed},
+    characters::{npcs::NPC, player::Player},
+    constants::character::npc::movement::BLACK_CAT_STARTING_POSITION,
+    tablet::mind_control::MindControled,
 };
 
 #[derive(Component)]
@@ -30,22 +32,6 @@ pub struct NewDirectionEvent(pub Entity);
 pub struct ResetAggroEvent {
     pub npc: Entity,
 }
-
-/// Is it a good habit to seperate
-/// - Dazed
-/// - DazeTimer
-/// ?
-#[derive(Component)]
-pub struct Dazed {
-    /// should be a non-repeating timer
-    pub timer: Timer,
-}
-
-// #[derive(Component)]
-// pub struct DazeTimer {
-//     /// should be a non-repeating timer
-//     pub timer: Timer,
-// }
 
 #[derive(Clone, Copy, Component)]
 pub struct Target(pub Option<Entity>);

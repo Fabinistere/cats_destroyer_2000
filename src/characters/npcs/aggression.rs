@@ -4,10 +4,12 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
+    characters::{
+        npcs::movement::{ChaseBehavior, Target, WalkBehavior},
+        player::{Player, PlayerHitbox},
+    },
     collisions::CollisionEventExt,
     locations::level_one::CharacterLocation,
-    npc::movement::{ChaseBehavior, Target, WalkBehavior},
-    player::{Player, PlayerHitbox},
     tablet::mind_control::MindControled,
 };
 
