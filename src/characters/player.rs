@@ -7,7 +7,6 @@ use crate::{
     locations::level_one::{CharacterLocation, LevelOneLocation},
     spritesheet::{AnimState, AnimationTimer, CatSheet},
     tablet::mind_control::MindControled,
-    AppState,
 };
 use bevy::prelude::*;
 use bevy_inspector_egui::Inspectable;
@@ -69,6 +68,7 @@ fn player_idle(mut player_query: Query<&mut Velocity, (With<Player>, Without<Min
 
 fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
     // Blue Cat
+    commands
         .spawn((
             SpriteSheetBundle {
                 sprite: TextureAtlasSprite {
@@ -112,4 +112,5 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
                 CharacterHitbox,
                 PlayerHitbox,
             ));
+        });
 }
