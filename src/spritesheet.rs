@@ -74,7 +74,7 @@ fn load_character_spritesheet(
 
     let dazed_image = assets.load("textures/character/dazed.png");
     let dazed_atlas =
-        TextureAtlas::from_grid(dazed_image, Vec2::from((35., 25.)), 1, 12, None, None);
+        TextureAtlas::from_grid(dazed_image, Vec2::from((35., 25.)), 12, 1, None, None);
 
     let dazed_atlas_handle = texture_atlases.add(dazed_atlas);
 
