@@ -41,6 +41,7 @@ fn main() {
                         height,
                         title: "CatBeDoingTheLaundry".to_string(),
                         resizable: false,
+                        fit_canvas_to_parent: true,
                         ..default()
                     },
                     ..default()
