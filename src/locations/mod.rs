@@ -7,9 +7,9 @@ pub mod sensors;
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum Location {
-    /// The transition universe
-    /// Used when reset a Level
-    Void,
+    // /// The transition universe
+    // /// Used when reset a Level
+    // Void,
     // Start cinematic
     // LevelZero,
     LevelOne,
