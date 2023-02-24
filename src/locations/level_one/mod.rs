@@ -221,11 +221,12 @@ fn setup_level_one(
         TextureAtlas::from_grid(horizontal_door, Vec2::new(12., 3.), 1, 7, None, None);
 
     let horizontal_door_atlas_handle = texture_atlases.add(horizontal_door_atlas);
-
+    let horizontal_door_texture_atlas_sprite = TextureAtlasSprite::new(0);
     commands
         .spawn((
             SpriteSheetBundle {
-                texture_atlas: horizontal_door_atlas_handle,
+                texture_atlas: horizontal_door_atlas_handle.clone(),
+                sprite: horizontal_door_texture_atlas_sprite.clone(),
                 transform: Transform {
                     translation: IN_DOOR_POSITION.into(),
                     scale: LEVEL_SCALE.into(),
@@ -269,18 +270,11 @@ fn setup_level_one(
             ));
         });
 
-    // XXX: double load on the same sprite_sheet
-
-    let out_horizontal_door = asset_server.load("textures/level_one/horizontal_door_anim.png");
-    let out_horizontal_door_atlas =
-        TextureAtlas::from_grid(out_horizontal_door, Vec2::new(12., 3.), 1, 7, None, None);
-
-    let out_horizontal_door_atlas_handle = texture_atlases.add(out_horizontal_door_atlas);
-
     commands
         .spawn((
             SpriteSheetBundle {
-                texture_atlas: out_horizontal_door_atlas_handle,
+                texture_atlas: horizontal_door_atlas_handle.clone(),
+                sprite: horizontal_door_texture_atlas_sprite.clone(),
                 transform: Transform {
                     translation: OUT_DOOR_POSITION.into(),
                     scale: LEVEL_SCALE.into(),
