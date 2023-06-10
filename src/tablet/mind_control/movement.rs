@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{movement::Speed, tablet::mind_control::MindControled};
+use crate::{characters::movement::Speed, tablet::mind_control::MindControled};
 
 /// The player input will act on the current MindControled entity
 pub fn mind_control_movement(
@@ -9,10 +9,14 @@ pub fn mind_control_movement(
     mut mind_controled_query: Query<(&Speed, &mut Velocity), With<MindControled>>,
 ) {
     if let Ok((speed, mut rb_vel)) = mind_controled_query.get_single_mut() {
-        let up = keyboard_input.pressed(KeyCode::Z);
-        let down = keyboard_input.pressed(KeyCode::S);
-        let left = keyboard_input.pressed(KeyCode::Q);
-        let right = keyboard_input.pressed(KeyCode::D);
+        let up = keyboard_input.pressed(KeyCode::Z)
+            || keyboard_input.pressed(KeyCode::Up)
+            || keyboard_input.pressed(KeyCode::W);
+        let down = keyboard_input.pressed(KeyCode::S) || keyboard_input.pressed(KeyCode::Down);
+        let left = keyboard_input.pressed(KeyCode::Q)
+            || keyboard_input.pressed(KeyCode::Left)
+            || keyboard_input.pressed(KeyCode::A);
+        let right = keyboard_input.pressed(KeyCode::D) || keyboard_input.pressed(KeyCode::Right);
 
         let x_axis = -(right as i8) + left as i8;
         let y_axis = -(down as i8) + up as i8;

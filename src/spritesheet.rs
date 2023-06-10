@@ -1,11 +1,8 @@
 use bevy::prelude::*;
 
-use crate::{npc::NPC, player::Player};
+use crate::characters::{npcs::NPC, player::Player};
 
 pub struct CatSpritePlugin;
-
-#[derive(Clone, Resource)]
-pub struct CatSheet(pub Handle<TextureAtlas>);
 
 impl Plugin for CatSpritePlugin {
     #[rustfmt::skip]
@@ -16,6 +13,13 @@ impl Plugin for CatSpritePlugin {
             ;
     }
 }
+
+#[derive(Clone, Resource)]
+pub struct CatSheet(pub Handle<TextureAtlas>);
+
+/// DOC: Rename it to EffectSheet
+#[derive(Clone, Resource)]
+pub struct DazeSheet(pub Handle<TextureAtlas>);
 
 #[derive(Component, Deref, DerefMut)]
 pub struct AnimationTimer(pub Timer);
@@ -67,4 +71,12 @@ fn load_character_spritesheet(
     let atlas_handle = texture_atlases.add(atlas);
 
     commands.insert_resource(CatSheet(atlas_handle));
+
+    let dazed_image = assets.load("textures/character/dazed.png");
+    let dazed_atlas =
+        TextureAtlas::from_grid(dazed_image, Vec2::from((35., 25.)), 12, 1, None, None);
+
+    let dazed_atlas_handle = texture_atlases.add(dazed_atlas);
+
+    commands.insert_resource(DazeSheet(dazed_atlas_handle));
 }

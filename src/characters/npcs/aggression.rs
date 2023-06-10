@@ -4,14 +4,19 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
+    characters::{
+        npcs::movement::{ChaseBehavior, Target, WalkBehavior},
+        player::{Player, PlayerHitbox},
+    },
     collisions::CollisionEventExt,
     locations::level_one::CharacterLocation,
-    npc::movement::{ChaseBehavior, Target, WalkBehavior},
-    player::{Player, PlayerHitbox},
     tablet::mind_control::MindControled,
 };
 
-use super::NPC;
+use super::{
+    movement::{NewDirectionEvent, ResetAggroEvent},
+    NPC,
+};
 
 // :0
 
@@ -123,5 +128,23 @@ pub fn add_pursuit_urge(
                 target.0 = Some(ev.target_entity);
             }
         }
+    }
+}
+
+/// The npc returns to walk peacefully
+///
+/// - Remove ChaseBehavior
+/// - Insert WalkBehavior
+/// - Ask for a new destination
+pub fn reset_aggro(
+    mut commands: Commands,
+    mut reset_aggro_event: EventReader<ResetAggroEvent>,
+
+    mut new_direction_event: EventWriter<NewDirectionEvent>,
+) {
+    for ev in reset_aggro_event.iter() {
+        commands.entity(ev.npc).remove::<ChaseBehavior>();
+        commands.entity(ev.npc).insert(WalkBehavior);
+        new_direction_event.send(NewDirectionEvent(ev.npc));
     }
 }

@@ -2,8 +2,8 @@ use bevy::prelude::*;
 use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
 
 use crate::{
+    characters::npcs::NPC,
     locations::level_one::{CharacterLocation, LevelOneLocation},
-    npc::NPC,
 };
 
 pub struct DebugPlugin;

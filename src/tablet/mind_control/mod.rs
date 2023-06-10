@@ -5,9 +5,9 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
-    constants::character::npc::movement::DAZE_TIMER,
-    npc::{movement::Dazed, NPC},
-    player::Player,
+    characters::movement::Dazed,
+    characters::{effects::style::DazeAnimation, npcs::NPC, player::Player},
+    constants::character::effects::DAZE_TIMER,
     tablet::{
         mind_control::movement::mind_control_movement, run_if_tablet_is_free,
         run_if_tablet_is_mind_ctrl,
@@ -34,7 +34,10 @@ impl Plugin for MindControlPlugin {
             )
             .add_system(mind_control_movement.label("movement").after("enter_mind_control"))
             .add_system(camera_follow.after("movement"))
-            .add_system(daze_post_mind_control.after("exit_mind_control"))
+            .add_system_to_stage(
+                CoreStage::PostUpdate,
+                daze_post_mind_control//.after("exit_mind_control")
+            )
             .add_system(daze_cure_by_mind_control.before("exit_mind_control").after("enter_mind_control"))
             ;
     }
@@ -87,24 +90,15 @@ fn exit_mind_control(
 ) {
     if keyboard_input.pressed(KeyCode::Escape) {
         // could be a single for now
-        for (npc, name) in npc_query.iter() {
-            info!("DEBUG: {}: mind controled exited", name);
+        for (npc, _name) in npc_query.iter() {
             commands.entity(npc).remove::<MindControled>();
-            commands.entity(npc).insert(Dazed {
-                timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Once),
-            });
         }
 
         let player = player_query.single();
         commands.entity(player).insert(MindControled);
-        // XXX: can accumulate
-        commands.entity(player).insert(Dazed {
-            timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Repeating),
-        });
     }
 }
 
-/// BUG: ? - Never Detect the removal
 fn daze_post_mind_control(
     mut commands: Commands,
     mind_controled_removals: RemovedComponents<MindControled>,
@@ -112,7 +106,6 @@ fn daze_post_mind_control(
     player_query: Query<Entity, With<Player>>,
 ) {
     for entity in mind_controled_removals.iter() {
-        info!("DEBUG: mind controled removed detected");
         match player_query.get(entity) {
             // This is prbly a npc
             Err(_) => {
@@ -135,10 +128,20 @@ fn daze_post_mind_control(
 fn daze_cure_by_mind_control(
     mut commands: Commands,
 
-    mind_controled_query: Query<(Entity, &Name), Added<MindControled>>,
+    mind_controled_query: Query<(Entity, &Name, &Children), Added<MindControled>>,
+    daze_effect_query: Query<Entity, With<DazeAnimation>>,
 ) {
-    for (entity, name) in mind_controled_query.iter() {
-        info!("DEBUG: {}: dazed removed", name);
+    for (entity, _name, children) in mind_controled_query.iter() {
         commands.entity(entity).remove::<Dazed>();
+        for child in children {
+            match daze_effect_query.get(*child) {
+                Err(_) => continue,
+                Ok(daze_effect) => {
+                    // Only works for player
+                    // XXX: don't remove the link to their parent
+                    commands.entity(daze_effect).despawn();
+                }
+            }
+        }
     }
 }

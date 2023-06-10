@@ -1,10 +1,10 @@
 use crate::{
+    characters::movement::{CharacterHitbox, MovementBundle, Speed},
     constants::character::{
         npc::{movement::BLUE_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     locations::level_one::{CharacterLocation, LevelOneLocation},
-    movement::{CharacterHitbox, MovementBundle, Speed},
     spritesheet::{AnimState, AnimationTimer, CatSheet},
     tablet::mind_control::MindControled,
 };
@@ -17,9 +17,8 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_player)
-            .add_system(player_movement.label("movement"))
-            .add_system(player_idle.after("movement"))
+        app .add_startup_system(spawn_player)
+            .add_system(player_idle)
             ;
     }
 }
@@ -29,32 +28,6 @@ pub struct Player;
 
 #[derive(Component)]
 pub struct PlayerHitbox;
-
-fn player_movement(
-    keyboard_input: Res<Input<KeyCode>>,
-    mut player_query: Query<(&Speed, &mut Velocity), (With<Player>, With<MindControled>)>,
-) {
-    if let Ok((speed, mut rb_vel)) = player_query.get_single_mut() {
-        let up = keyboard_input.pressed(KeyCode::Z);
-        let down = keyboard_input.pressed(KeyCode::S);
-        let left = keyboard_input.pressed(KeyCode::Q);
-        let right = keyboard_input.pressed(KeyCode::D);
-
-        let x_axis = -(right as i8) + left as i8;
-        let y_axis = -(down as i8) + up as i8;
-
-        let mut vel_x = x_axis as f32 * **speed;
-        let mut vel_y = y_axis as f32 * **speed;
-
-        if x_axis != 0 && y_axis != 0 {
-            vel_x *= (std::f32::consts::PI / 4.).cos();
-            vel_y *= (std::f32::consts::PI / 4.).cos();
-        }
-
-        rb_vel.linvel.x = vel_x;
-        rb_vel.linvel.y = vel_y;
-    }
-}
 
 /// # Note
 ///

@@ -2,8 +2,10 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    constants::character::npc::movement::BLACK_CAT_STARTING_POSITION, movement::Speed, npc::NPC,
-    player::Player, tablet::mind_control::MindControled,
+    characters::movement::{Dazed, Speed},
+    characters::{npcs::NPC, player::Player},
+    constants::character::npc::movement::BLACK_CAT_STARTING_POSITION,
+    tablet::mind_control::MindControled,
 };
 
 #[derive(Component)]
@@ -28,24 +30,8 @@ pub struct NewDirectionEvent(pub Entity);
 ///     Insert WalkBehavior
 ///     Ask for a new destination
 pub struct ResetAggroEvent {
-    npc: Entity,
+    pub npc: Entity,
 }
-
-/// Is it a good habit to seperate
-/// - Dazed
-/// - DazeTimer
-/// ?
-#[derive(Component)]
-pub struct Dazed {
-    /// should be a non-repeating timer
-    pub timer: Timer,
-}
-
-// #[derive(Component)]
-// pub struct DazeTimer {
-//     /// should be a non-repeating timer
-//     pub timer: Timer,
-// }
 
 #[derive(Clone, Copy, Component)]
 pub struct Target(pub Option<Entity>);
@@ -117,6 +103,7 @@ pub fn npc_chase(
     player_query: Query<(Entity, &Transform, &Name), With<Player>>,
 
     mut reset_aggro_event: EventWriter<ResetAggroEvent>,
+    // mut reset_level_event: EventWriter<ResetLevelOneEvent>,
 ) {
     for (npc, npc_transform, target, npc_name) in npc_query.iter_mut() {
         match player_query.get(target.0.unwrap()) {
@@ -130,6 +117,10 @@ pub fn npc_chase(
                 let close_range_width = npc_transform.scale.x * 10.;
                 let close_range_height = npc_transform.scale.y * 10.;
 
+                // TODO: feature - Cancel aggro when no longer in the same area
+                // and insert Dazed ------^^^^^
+                // TODO: feature ? - Confine NPC within certain area
+
                 // The npc reached destination
                 if direction.x - close_range_width < npc_transform.translation.x
                     && direction.x + close_range_width > npc_transform.translation.x
@@ -137,8 +128,9 @@ pub fn npc_chase(
                     && direction.y + close_range_height > npc_transform.translation.y
                 {
                     info!("{}: Back to Horny Jail by {}", player_name, npc_name);
-                    // TODO: BAKC TO THE START with event
                     reset_aggro_event.send(ResetAggroEvent { npc });
+                    // TODO: BAKC TO THE START with event
+                    // reset_level_event.send(ResetLevelOneEvent);
                 } else {
                     // The npc has to walk
                     // Managed by npc::movement::npc_walk_to
@@ -193,31 +185,13 @@ pub fn npc_walk_to(
     }
 }
 
-/// The npc returns to walk peacefully
-///
-/// - Remove ChaseBehavior
-/// - Insert WalkBehavior
-/// - Ask for a new destination
-pub fn reset_aggro(
-    mut commands: Commands,
-    mut reset_aggro_event: EventReader<ResetAggroEvent>,
-
-    mut new_direction_event: EventWriter<NewDirectionEvent>,
-) {
-    for ev in reset_aggro_event.iter() {
-        commands.entity(ev.npc).remove::<ChaseBehavior>();
-        commands.entity(ev.npc).insert(WalkBehavior);
-        new_direction_event.send(NewDirectionEvent(ev.npc));
-    }
-}
-
 /// Event Handler of NewDirectionEvent
 pub fn give_new_direction_event(
     mut commands: Commands,
     mut new_direction_event: EventReader<NewDirectionEvent>,
 
     mut npc_query: Query<(Entity, &Transform, &mut Target, &Name), (With<NPC>, With<WalkBehavior>)>,
-    // REFACTOR: FOR NOW target can't be NPC
+    // REFACTOR: FOR NOW target can't be NPC - conflictual queries
     mut target_query: Query<(Entity, &mut Transform), (Without<Player>, Without<NPC>)>,
 ) {
     for event in new_direction_event.iter() {

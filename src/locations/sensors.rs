@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
+    characters::movement::CharacterHitbox,
+    characters::{npcs::NPC, player::Player},
     locations::{
         level_one::{
             button::ButtonSensor,
@@ -10,9 +12,6 @@ use crate::{
         },
         PlayerLocation,
     },
-    movement::CharacterHitbox,
-    npc::NPC,
-    player::Player,
     tablet::hack::Hackable,
 };
 
