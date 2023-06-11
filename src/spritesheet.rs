@@ -49,11 +49,11 @@ pub fn animate_sprite(
             // let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
             // disco cats:
             // sprite.index = (sprite.index + 1) % texture_atlas.textures.len();
-            if state.current == state.initial {
-                sprite.index = sprite.index + 1;
+            sprite.index = if state.current == state.initial {
+                sprite.index + 1
             } else {
-                sprite.index = sprite.index - 1;
-            }
+                sprite.index - 1
+            };
             state.current = sprite.index;
         }
     }

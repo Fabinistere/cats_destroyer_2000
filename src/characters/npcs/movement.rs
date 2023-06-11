@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    characters::movement::{Dazed, Speed},
+    characters::{effects::style::DazeAnimation, movement::{Dazed, Speed}},
     characters::{npcs::NPC, player::Player},
     constants::character::npc::movement::BLACK_CAT_STARTING_POSITION,
     tablet::mind_control::MindControled,
@@ -239,9 +239,10 @@ pub fn daze_wait(
     mut commands: Commands,
 
     time: Res<Time>,
-    mut npc_query: Query<(Entity, &mut Dazed, &mut Velocity, &Name), (With<NPC>, Without<Player>)>,
+    mut npc_query: Query<(Entity, &mut Dazed, &mut Velocity, &Children, &Name), (With<NPC>, Without<Player>)>,
+    daze_effect_query: Query<Entity, With<DazeAnimation>>,
 ) {
-    for (npc, mut daze_timer, mut _rb_vel, name) in npc_query.iter_mut() {
+    for (npc, mut daze_timer, mut _rb_vel, children, name) in npc_query.iter_mut() {
         daze_timer.timer.tick(time.delta());
 
         // not required to control velocity because it is managed elsewhere
@@ -249,7 +250,16 @@ pub fn daze_wait(
         if daze_timer.timer.finished() {
             info!("{:?}, {} can now aggro", npc, name);
 
+            // REFACTOR: Abstract Daze Cure by event (also in daze_cure_by_mind_control())
             commands.entity(npc).remove::<Dazed>();
+            for child in children {
+                match daze_effect_query.get(*child) {
+                    Err(_) => continue,
+                    Ok(daze_effect) => {
+                        commands.entity(daze_effect).despawn();
+                    }
+                }
+            }
         }
     }
 }

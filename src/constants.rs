@@ -9,6 +9,8 @@ pub const RESOLUTION: f32 = 16. / 9.;
 
 pub const TILE_SIZE: f32 = 1.;
 
+pub const FRAME_TIME: f32 = 0.1;
+
 pub mod character {
 
     use super::TILE_SIZE;
@@ -49,21 +51,27 @@ pub mod locations {
     pub const LEVEL_Z: f32 = 3.;
     pub const LEVEL_POSITION: (f32, f32, f32) = (0., 0., LEVEL_Z);
     pub const LEVEL_SCALE: (f32, f32, f32) = (-1., 1., 1.);
-
+    
     pub const FLOOR_Z: f32 = 1.;
     pub const FLOOR_POSITION: (f32, f32, f32) = (0., 0., FLOOR_Z);
-
+    
     pub mod level_one {
         use super::LEVEL_Z;
-
+        
         pub const IN_DOOR_POSITION: (f32, f32, f32) = (5., -36., LEVEL_Z);
         pub const ALT_DOOR_POSITION: (f32, f32, f32) = (-2.5, 6., LEVEL_Z);
         pub const OUT_DOOR_POSITION: (f32, f32, f32) = (5., 36., LEVEL_Z);
-
+        
         pub const BUTTON_POSITION: (f32, f32, f32) = (-24., 6., LEVEL_Z - 1.);
         pub const BUTTON_HITBOX_X_OFFSET: (f32, f32, f32) = (3., 0., 0.);
         pub const BUTTON_SENSOR_POSITION: (f32, f32, f32) = (-25.5, 6., LEVEL_Z);
     }
+}
+
+pub mod cinematics {
+    pub const CLOUDS_LIMIT: f32 = -333.;
+    pub const CLOUDS_RESET: f32 = 334.;
+    pub const SECOND_CLOUDS_INIT: f32 = 1001.;
 }
 
 pub mod ui {
