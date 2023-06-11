@@ -15,7 +15,7 @@ or in the correct release note (if from other version):
 
 ## Rules
 
-***But du jeu*** : Arriver à s’enfuir du Labo
+***But du jeu**- : Arriver à s’enfuir du Labo
 
 ### Binding
 
@@ -23,6 +23,15 @@ or in the correct release note (if from other version):
 - `ESC` to return to the player body
 - `Left Click` on the button *Hack* to hack doors
 - `Z Q S D` or `W A S D` or `Up Left Down Right` to move
+
+### Future... (lmao)
+
+- [ ] TODO: LevelScene, CinematicScene
+  - [ ] TODO: MustHave - Reset the scene when touched (by an enemy)
+- [ ] TODO: Background + MovingBubbles
+- [x] Final Cinematic
+  - [x] Animations
+  - [x] Black Cat, EasterEgg
 
 ### Level Design
 

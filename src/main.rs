@@ -4,7 +4,7 @@ use bevy::{prelude::*, render::camera::ScalingMode};
 use bevy_rapier2d::prelude::*;
 
 use characters::CharactersPlugin;
-use constants::{CLEAR, RESOLUTION, TILE_SIZE};
+use constants::{RESOLUTION, TILE_SIZE};
 use debug::DebugPlugin;
 use locations::LocationsPlugin;
 use spritesheet::CatSpritePlugin;
@@ -21,11 +21,12 @@ pub mod tablet;
 
 #[rustfmt::skip]
 fn main() {
-    let height = 720.;
+    let height = 1080.;
 
     let mut app = App::new();
     app
-        .insert_resource(ClearColor(CLEAR))
+        // Color::TEAL / AZURE
+        .insert_resource(ClearColor(Color::TEAL))
         .insert_resource(Msaa { samples: 1 })
         // v-- Hitbox --v
         .insert_resource(RapierConfiguration {
@@ -40,7 +41,7 @@ fn main() {
                         width: height * RESOLUTION,
                         height,
                         title: "CatBeDoingTheLaundry".to_string(),
-                        resizable: false,
+                        resizable: true,
                         fit_canvas_to_parent: true,
                         ..default()
                     },
@@ -74,6 +75,7 @@ fn spawn_camera(mut commands: Commands) {
     camera.projection.left = 50. * TILE_SIZE * RESOLUTION;
     camera.projection.right = -50. * TILE_SIZE * RESOLUTION;
 
+    // vv-- Flip the left and right --vv
     camera.projection.scaling_mode = ScalingMode::None;
 
     commands.spawn(camera);

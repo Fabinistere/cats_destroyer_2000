@@ -8,6 +8,7 @@ use crate::{
     characters::movement::Dazed,
     characters::{effects::style::DazeAnimation, npcs::NPC, player::Player},
     constants::character::effects::DAZE_TIMER,
+    locations::Location,
     tablet::{
         mind_control::movement::mind_control_movement, run_if_tablet_is_free,
         run_if_tablet_is_mind_ctrl,
@@ -33,7 +34,10 @@ impl Plugin for MindControlPlugin {
                 .with_system(exit_mind_control.label("exit_mind_control").after("enter_mind_control"))
             )
             .add_system(mind_control_movement.label("movement").after("enter_mind_control"))
-            .add_system(camera_follow.after("movement"))
+            .add_system_set(
+                SystemSet::on_update(Location::Level1000)
+                .with_system(camera_follow.after("movement"))
+            )
             .add_system_to_stage(
                 CoreStage::PostUpdate,
                 daze_post_mind_control//.after("exit_mind_control")
@@ -137,7 +141,6 @@ fn daze_cure_by_mind_control(
             match daze_effect_query.get(*child) {
                 Err(_) => continue,
                 Ok(daze_effect) => {
-                    // Only works for player
                     // XXX: don't remove the link to their parent
                     commands.entity(daze_effect).despawn();
                 }

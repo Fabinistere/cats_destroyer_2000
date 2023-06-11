@@ -12,7 +12,7 @@ use crate::constants::locations::{
 /// Link Doors and Button:
 /// Button { pub linked_doors: Vec<Entity> }
 #[derive(Component)]
-pub struct Button;
+pub struct PushButton;
 
 #[derive(Component)]
 pub struct ButtonSensor;
@@ -48,7 +48,7 @@ pub fn set_up_button(
                 ..default()
             },
             Name::new("OneWay Button"),
-            Button,
+            PushButton,
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,
         ))
