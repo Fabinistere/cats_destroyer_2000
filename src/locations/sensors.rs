@@ -10,7 +10,7 @@ use crate::{
             doors::{Door, OpenDoorEvent},
             CharacterLocation, LevelOneLocation,
         },
-        PlayerLocation,
+        Location,
     },
     tablet::hack::Hackable,
 };
@@ -34,13 +34,13 @@ pub struct LocationSensor {
 }
 
 /// Enter the elevator to trigger the win
-pub fn win_event(
+pub fn win_trigger(
     mut collision_events: EventReader<CollisionEvent>,
 
     win_sensor_query: Query<Entity, With<WinSensor>>,
     character_hitbox_query: Query<(Entity, &Parent), With<CharacterHitbox>>,
 
-    mut win_trigger_event: EventWriter<WinTriggerEvent>,
+    mut win_event: EventWriter<WinTriggerEvent>,
 ) {
     for collision_event in collision_events.iter() {
         match collision_event {
@@ -54,7 +54,7 @@ pub fn win_event(
                         character_hitbox_query.get(*e2),
                     ) {
                         (Err(_), Ok((_, character))) | (Ok((_, character)), Err(_)) => {
-                            win_trigger_event.send(WinTriggerEvent {
+                            win_event.send(WinTriggerEvent {
                                 entity: **character,
                             });
                         }
@@ -67,13 +67,13 @@ pub fn win_event(
     }
 }
 
-pub fn win_trigger(
-    mut win_trigger_event: EventReader<WinTriggerEvent>,
+pub fn win_event(
+    mut win_event: EventReader<WinTriggerEvent>,
 
     character_query: Query<&Name, Or<(With<Player>, With<NPC>)>>,
-    mut player_location: ResMut<State<PlayerLocation>>,
+    mut location: ResMut<State<Location>>,
 ) {
-    for event in win_trigger_event.iter() {
+    for event in win_event.iter() {
         match character_query.get(event.entity) {
             Err(e) => warn!("The Winner is neither a NPC or a Player... {:?}", e),
             Ok(name) => {
@@ -81,9 +81,10 @@ pub fn win_trigger(
                 println!("{}", congrats);
             }
         }
-        // TODO: 'increment" the level
-        if *player_location.current() == PlayerLocation::LevelOne {
-            player_location.set(PlayerLocation::LevelTwo).unwrap();
+        // TODO: "increment" the level
+        if *location.current() == Location::Level1000 {
+            println!("In LevelOne");
+            location.set(Location::OutDoor).unwrap();
         }
     }
 }
@@ -140,7 +141,7 @@ pub fn location_event(
     }
 }
 
-/// Enter the button to trigger the win
+/// Enter the button to trigger the windoor opening
 pub fn button_event(
     mut collision_events: EventReader<CollisionEvent>,
 
