@@ -64,7 +64,7 @@ pub enum LevelOneLocation {
     Elevator,
 }
 
-#[derive(Component, Inspectable)]
+#[derive(Component, Inspectable, PartialEq, Eq)]
 pub struct CharacterLocation(pub LevelOneLocation);
 
 // /// DOC

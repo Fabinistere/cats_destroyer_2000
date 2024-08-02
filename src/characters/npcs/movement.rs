@@ -2,9 +2,14 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    characters::{effects::style::DazeAnimation, movement::{Dazed, Speed}},
-    characters::{npcs::NPC, player::Player},
+    characters::{
+        effects::style::DazeAnimation,
+        movement::{Dazed, Speed},
+        npcs::NPC,
+        player::Player,
+    },
     constants::character::npc::movement::BLACK_CAT_STARTING_POSITION,
+    locations::level_one::CharacterLocation,
     tablet::mind_control::MindControled,
 };
 
@@ -24,27 +29,19 @@ pub struct NewDirectionEvent(pub Entity);
 ///   - npc::movement::npc_chase
 ///     - target in ChaseBehavior is not a player
 ///     - target is reached
+///
 /// Read in
 ///   - npc::movement::reset_aggro
 ///     - Remove ChaseBehavior
-///     Insert WalkBehavior
-///     Ask for a new destination
+///       Insert WalkBehavior
+///       Ask for a new destination
 pub struct ResetAggroEvent {
     pub npc: Entity,
 }
 
-#[derive(Clone, Copy, Component)]
+#[derive(Component, Clone, Copy, Default)]
 pub struct Target(pub Option<Entity>);
 
-impl Default for Target {
-    fn default() -> Self {
-        Target { 0: None }
-    }
-}
-
-/// # Note
-///
-/// TODO: feature - Without MindControled
 pub fn npc_walk(
     // mut commands: Commands,
     mut npc_query: Query<
@@ -87,12 +84,9 @@ pub fn npc_walk(
     }
 }
 
-/// # Note
-///
-/// TODO: feature - Without MindControled
 pub fn npc_chase(
     mut npc_query: Query<
-        (Entity, &Transform, &Target, &Name),
+        (Entity, &Transform, &Target, &Name, &CharacterLocation),
         (
             With<NPC>,
             With<ChaseBehavior>,
@@ -100,26 +94,22 @@ pub fn npc_chase(
             Without<Dazed>,
         ),
     >,
-    player_query: Query<(Entity, &Transform, &Name), With<Player>>,
+    player_query: Query<(Entity, &Transform, &Name, &CharacterLocation), With<Player>>,
 
     mut reset_aggro_event: EventWriter<ResetAggroEvent>,
     // mut reset_level_event: EventWriter<ResetLevelOneEvent>,
 ) {
-    for (npc, npc_transform, target, npc_name) in npc_query.iter_mut() {
+    for (npc, npc_transform, target, npc_name, npc_location) in npc_query.iter_mut() {
         match player_query.get(target.0.unwrap()) {
             Err(e) => {
                 warn!("target is not a player: {:?}", e);
                 reset_aggro_event.send(ResetAggroEvent { npc });
             }
-            Ok((_player, player_transform, player_name)) => {
+            Ok((_player, player_transform, player_name, player_location)) => {
                 let direction = player_transform.translation;
 
                 let close_range_width = npc_transform.scale.x * 10.;
                 let close_range_height = npc_transform.scale.y * 10.;
-
-                // TODO: feature - Cancel aggro when no longer in the same area
-                // and insert Dazed ------^^^^^
-                // TODO: feature ? - Confine NPC within certain area
 
                 // The npc reached destination
                 if direction.x - close_range_width < npc_transform.translation.x
@@ -129,8 +119,16 @@ pub fn npc_chase(
                 {
                     info!("{}: Back to Horny Jail by {}", player_name, npc_name);
                     reset_aggro_event.send(ResetAggroEvent { npc });
-                    // TODO: BAKC TO THE START with event
+
+                    // TODO: feature - Cinematic flash: bandeau with the two characters
+                    // TODO: feature - Reload Scene
+
+                    // TODO: BACK TO THE START with event
                     // reset_level_event.send(ResetLevelOneEvent);
+                } else if npc_location != player_location {
+                    // TODO: feature - Cancel aggro when no longer in the same area and insert Dazed
+                    // info!("{}: Unreachable target - chaser: {}", player_name, npc_name);
+                    reset_aggro_event.send(ResetAggroEvent { npc });
                 } else {
                     // The npc has to walk
                     // Managed by npc::movement::npc_walk_to
@@ -239,7 +237,10 @@ pub fn daze_wait(
     mut commands: Commands,
 
     time: Res<Time>,
-    mut npc_query: Query<(Entity, &mut Dazed, &mut Velocity, &Children, &Name), (With<NPC>, Without<Player>)>,
+    mut npc_query: Query<
+        (Entity, &mut Dazed, &mut Velocity, &Children, &Name),
+        (With<NPC>, Without<Player>),
+    >,
     daze_effect_query: Query<Entity, With<DazeAnimation>>,
 ) {
     for (npc, mut daze_timer, mut _rb_vel, children, name) in npc_query.iter_mut() {

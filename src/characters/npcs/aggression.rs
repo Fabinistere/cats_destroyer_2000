@@ -32,7 +32,8 @@ use super::{
 /// Happens when:
 ///   - npc::aggression::player_detection
 ///     - An npc detected a enemy
-///     in the same Area
+///       in the same Area
+///
 /// Read in
 ///   - npc::aggression::add_pursuit_urge
 ///     - remove DetectionBehavior from the entity
@@ -89,7 +90,7 @@ pub fn player_detection(
                     match character_query.get_many([**detection_sensor.1, **player_hitbox.1]) {
                         Err(e) => warn!("{:?}", e),
                         Ok([(npc, npc_location), (player, player_location)]) => {
-                            if npc_location.0 == player_location.0 {
+                            if npc_location == player_location {
                                 // [detection_sensor, player_hitbox].1 returns the Parent Entity
                                 // Only Bad Cats have a DetectionSensor
                                 // Only the Player have a PlayerHitbox
