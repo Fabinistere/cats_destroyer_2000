@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -8,7 +10,7 @@ use crate::{
         npcs::NPC,
         player::Player,
     },
-    constants::character::npc::movement::BLACK_CAT_STARTING_POSITION,
+    constants::character::{effects::DAZE_TIMER, npc::movement::BLACK_CAT_STARTING_POSITION},
     locations::level_one::CharacterLocation,
     tablet::mind_control::MindControled,
 };
@@ -85,6 +87,7 @@ pub fn npc_walk(
 }
 
 pub fn npc_chase(
+    mut commands: Commands,
     mut npc_query: Query<
         (Entity, &Transform, &Target, &Name, &CharacterLocation),
         (
@@ -120,15 +123,17 @@ pub fn npc_chase(
                     info!("{}: Back to Horny Jail by {}", player_name, npc_name);
                     reset_aggro_event.send(ResetAggroEvent { npc });
 
-                    // TODO: feature - Cinematic flash: bandeau with the two characters
+                    // TODO: feature - Cinematic flash: bandeau with the two characters + animation falling bars, lock up
                     // TODO: feature - Reload Scene
 
                     // TODO: BACK TO THE START with event
                     // reset_level_event.send(ResetLevelOneEvent);
                 } else if npc_location != player_location {
-                    // TODO: feature - Cancel aggro when no longer in the same area and insert Dazed
                     // info!("{}: Unreachable target - chaser: {}", player_name, npc_name);
                     reset_aggro_event.send(ResetAggroEvent { npc });
+                    commands.entity(npc).insert(Dazed {
+                        timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Once),
+                    });
                 } else {
                     // The npc has to walk
                     // Managed by npc::movement::npc_walk_to
