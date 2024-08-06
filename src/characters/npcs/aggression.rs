@@ -39,6 +39,7 @@ use super::{
 ///     - remove DetectionBehavior from the entity
 ///     - insert PursuitBehavior into the entity
 ///     - insert the Target into the entity
+#[derive(Event)]
 pub struct EngagePursuitEvent {
     npc_entity: Entity,
     target_entity: Entity,
@@ -143,9 +144,9 @@ pub fn reset_aggro(
 
     mut new_direction_event: EventWriter<NewDirectionEvent>,
 ) {
-    for ev in reset_aggro_event.iter() {
-        commands.entity(ev.npc).remove::<ChaseBehavior>();
-        commands.entity(ev.npc).insert(WalkBehavior);
-        new_direction_event.send(NewDirectionEvent(ev.npc));
+    for ResetAggroEvent { npc } in reset_aggro_event.iter() {
+        commands.entity(*npc).remove::<ChaseBehavior>();
+        commands.entity(*npc).insert(WalkBehavior);
+        new_direction_event.send(NewDirectionEvent(*npc));
     }
 }

@@ -19,7 +19,8 @@ use crate::{
 ///   -
 /// Read in
 ///   -
-/// DOC
+/// DOC: describe WinTriggerEvent
+#[derive(Event)]
 pub struct WinTriggerEvent {
     /// The Entity which triggered the WinEvent
     pub entity: Entity,
@@ -71,7 +72,8 @@ pub fn win_event(
     mut win_event: EventReader<WinTriggerEvent>,
 
     character_query: Query<&Name, Or<(With<Player>, With<NPC>)>>,
-    mut location: ResMut<State<Location>>,
+    current_location: Res<State<Location>>,
+    mut next_location: ResMut<NextState<Location>>,
 ) {
     for event in win_event.iter() {
         match character_query.get(event.entity) {
@@ -81,10 +83,9 @@ pub fn win_event(
                 println!("{}", congrats);
             }
         }
-        // TODO: "increment" the level
-        if *location.current() == Location::Level1000 {
+        if current_location.get() == &Location::Level1000 {
             println!("In LevelOne");
-            location.set(Location::OutDoor).unwrap();
+            next_location.set(Location::OutDoor);
         }
     }
 }

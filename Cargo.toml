@@ -1,6 +1,6 @@
 [package]
 name = "cats_destroyer_2000"
-version = "0.1.0"
+version = "0.3.0"
 authors = ["Olf EPAIN aka Wabtey <wabtey@disroot.org>", "???"]
 edition = "2021"
 
@@ -8,10 +8,9 @@ edition = "2021"
 
 [dependencies]
 
-bevy = { version = "0.9", features = ["dynamic"] }
-bevy-inspector-egui = "0.15"
-# bevy_tweening = "0.6"
-bevy_rapier2d = { version = "0.19", features = ["simd-stable", "debug-render"] }
+bevy = "0.11"
+bevy-inspector-egui = "0.20"
+bevy_rapier2d = { version = "0.22", features = ["simd-stable", "debug-render-2d"] }
 
 image = "0.23"
 

@@ -18,7 +18,7 @@ pub fn mind_control_movement(
             || keyboard_input.pressed(KeyCode::A);
         let right = keyboard_input.pressed(KeyCode::D) || keyboard_input.pressed(KeyCode::Right);
 
-        let x_axis = -(right as i8) + left as i8;
+        let x_axis = -(left as i8) + right as i8;
         let y_axis = -(down as i8) + up as i8;
 
         let mut vel_x = x_axis as f32 * **speed;

@@ -9,10 +9,7 @@ use crate::{
     characters::{effects::style::DazeAnimation, npcs::NPC, player::Player},
     constants::character::effects::DAZE_TIMER,
     locations::Location,
-    tablet::{
-        mind_control::movement::mind_control_movement, run_if_tablet_is_free,
-        run_if_tablet_is_mind_ctrl,
-    },
+    tablet::{mind_control::movement::mind_control_movement, tablet_is_free, tablet_is_mind_ctrl},
 };
 
 mod movement;
@@ -20,31 +17,40 @@ mod movement;
 pub struct MindControlPlugin;
 
 impl Plugin for MindControlPlugin {
-    #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app
-            .add_system_set(
-                SystemSet::new()
-                .with_run_criteria(run_if_tablet_is_free)
-                .with_system(mind_control_button.label("enter_mind_control"))
-            )
-            .add_system_set(
-                SystemSet::new()
-                .with_run_criteria(run_if_tablet_is_mind_ctrl)
-                .with_system(exit_mind_control.label("exit_mind_control").after("enter_mind_control"))
-            )
-            .add_system(mind_control_movement.label("movement").after("enter_mind_control"))
-            .add_system_set(
-                SystemSet::on_update(Location::Level1000)
-                .with_system(camera_follow.after("movement"))
-            )
-            .add_system_to_stage(
-                CoreStage::PostUpdate,
-                daze_post_mind_control//.after("exit_mind_control")
-            )
-            .add_system(daze_cure_by_mind_control.before("exit_mind_control").after("enter_mind_control"))
-            ;
+        app.add_systems(
+            Update,
+            (
+                mind_control_button
+                    .run_if(tablet_is_free)
+                    .in_set(MindControlSet::Enter),
+                exit_mind_control
+                    .run_if(tablet_is_mind_ctrl)
+                    .in_set(MindControlSet::Exit)
+                    .after(MindControlSet::Enter),
+                camera_follow
+                    .after(MindControlSet::Movement)
+                    .run_if(in_state(Location::Level1000)),
+                mind_control_movement
+                    .in_set(MindControlSet::Movement)
+                    .after(MindControlSet::Enter),
+                daze_cure_by_mind_control
+                    .before(MindControlSet::Exit)
+                    .after(MindControlSet::Enter),
+            ),
+        )
+        .add_systems(
+            PostUpdate,
+            daze_post_mind_control, //.after(MindControlSet::Exit)
+        );
     }
+}
+
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+enum MindControlSet {
+    Enter,
+    Exit,
+    Movement,
 }
 
 #[derive(Component)]
@@ -75,12 +81,11 @@ pub fn mind_control_button(
     npc_query: Query<Entity, With<NPC>>,
 ) {
     if keyboard_input.pressed(KeyCode::M) {
-        for npc in npc_query.iter() {
+        if let Some(npc) = npc_query.iter().next() {
             commands.entity(npc).insert(MindControled); // .remove::<Dazed>()
-            break;
+            let player = player_query.single();
+            commands.entity(player).remove::<MindControled>();
         }
-        let player = player_query.single();
-        commands.entity(player).remove::<MindControled>();
     }
 }
 
@@ -93,7 +98,6 @@ fn exit_mind_control(
     npc_query: Query<(Entity, &Name), (With<NPC>, With<MindControled>)>,
 ) {
     if keyboard_input.pressed(KeyCode::Escape) {
-        // could be a single for now
         for (npc, _name) in npc_query.iter() {
             commands.entity(npc).remove::<MindControled>();
         }
@@ -105,7 +109,7 @@ fn exit_mind_control(
 
 fn daze_post_mind_control(
     mut commands: Commands,
-    mind_controled_removals: RemovedComponents<MindControled>,
+    mut mind_controled_removals: RemovedComponents<MindControled>,
 
     player_query: Query<Entity, With<Player>>,
 ) {

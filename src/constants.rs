@@ -20,7 +20,7 @@ pub mod character {
 
     pub const CHAR_HITBOX_HEIGHT: f32 = 1.5 * CHAR_SCALE;
     pub const CHAR_HITBOX_WIDTH: f32 = 5. * CHAR_SCALE;
-    pub const CHAR_HITBOX_Y_OFFSET: f32 = -4. * CHAR_SCALE;
+    pub const CHAR_HITBOX_Y_OFFSET: f32 = -3.5 * CHAR_SCALE;
     pub const CHAR_HITBOX_Z_OFFSET: f32 = 0. * CHAR_SCALE;
 
     pub mod npc {
@@ -33,8 +33,8 @@ pub mod character {
         pub mod movement {
             use crate::constants::character::CHAR_Z;
 
-            pub const BLUE_CAT_STARTING_POSITION: (f32, f32, f32) = (5., -48., CHAR_Z);
-            pub const BLACK_CAT_STARTING_POSITION: (f32, f32, f32) = (5., 20., CHAR_Z);
+            pub const BLUE_CAT_STARTING_POSITION: (f32, f32, f32) = (-5., -48., CHAR_Z);
+            pub const BLACK_CAT_STARTING_POSITION: (f32, f32, f32) = (-5., 20., CHAR_Z);
         }
     }
 
@@ -50,21 +50,21 @@ pub mod locations {
 
     pub const LEVEL_Z: f32 = 3.;
     pub const LEVEL_POSITION: (f32, f32, f32) = (0., 0., LEVEL_Z);
-    pub const LEVEL_SCALE: (f32, f32, f32) = (-1., 1., 1.);
-    
+    pub const LEVEL_SCALE: (f32, f32, f32) = (1., 1., 1.);
+
     pub const FLOOR_Z: f32 = 1.;
     pub const FLOOR_POSITION: (f32, f32, f32) = (0., 0., FLOOR_Z);
-    
+
     pub mod level_one {
         use super::LEVEL_Z;
-        
-        pub const IN_DOOR_POSITION: (f32, f32, f32) = (5., -36., LEVEL_Z);
-        pub const ALT_DOOR_POSITION: (f32, f32, f32) = (-2.5, 6., LEVEL_Z);
-        pub const OUT_DOOR_POSITION: (f32, f32, f32) = (5., 36., LEVEL_Z);
-        
-        pub const BUTTON_POSITION: (f32, f32, f32) = (-24., 6., LEVEL_Z - 1.);
-        pub const BUTTON_HITBOX_X_OFFSET: (f32, f32, f32) = (3., 0., 0.);
-        pub const BUTTON_SENSOR_POSITION: (f32, f32, f32) = (-25.5, 6., LEVEL_Z);
+
+        pub const IN_DOOR_POSITION: (f32, f32, f32) = (-5., -36., LEVEL_Z);
+        pub const ALT_DOOR_POSITION: (f32, f32, f32) = (2.5, 6., LEVEL_Z);
+        pub const OUT_DOOR_POSITION: (f32, f32, f32) = (-5., 36., LEVEL_Z);
+
+        pub const BUTTON_POSITION: (f32, f32, f32) = (24., 6., LEVEL_Z - 1.);
+        pub const BUTTON_HITBOX_X_OFFSET: (f32, f32, f32) = (-3., 0., 0.);
+        pub const BUTTON_SENSOR_POSITION: (f32, f32, f32) = (25.5, 6., LEVEL_Z);
     }
 }
 

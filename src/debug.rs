@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::{RegisterInspectable, WorldInspectorPlugin};
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 use crate::{
     characters::npcs::NPC,
@@ -9,13 +9,12 @@ use crate::{
 pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
-    #[rustfmt::skip]
     fn build(&self, app: &mut App) {
         if cfg!(debug_assertions) {
-            app.add_plugin(WorldInspectorPlugin::new())
-                .register_inspectable::<NPC>()
-                .register_inspectable::<CharacterLocation>()
-                .register_inspectable::<LevelOneLocation>()
+            app.add_plugins(WorldInspectorPlugin::new())
+                .register_type::<NPC>()
+                .register_type::<CharacterLocation>()
+                .register_type::<LevelOneLocation>()
 
                 // UI
                 ;

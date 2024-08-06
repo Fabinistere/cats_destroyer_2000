@@ -5,22 +5,56 @@ use crate::characters::{npcs::NPC, player::Player};
 pub struct CatSpritePlugin;
 
 impl Plugin for CatSpritePlugin {
-    #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app
-            .add_startup_system_to_stage(StartupStage::PreStartup, load_character_spritesheet)
-            .add_system(animate_sprite)
-            ;
+        app.init_resource::<CatSheet>()
+            .init_resource::<DazeSheet>()
+            .add_systems(Update, animate_sprite);
     }
 }
 
 #[derive(Clone, Resource)]
 pub struct CatSheet(pub Handle<TextureAtlas>);
 
+impl FromWorld for CatSheet {
+    fn from_world(world: &mut World) -> Self {
+        let image = world
+            .get_resource::<AssetServer>()
+            .unwrap()
+            .load("textures/character/character_sheet_v1.png");
+        // warn!("You have to download the asset see in github releases");
+        let atlas = TextureAtlas::from_grid(image, Vec2::splat(14.), 2, 2, None, None);
+
+        let atlas_handle = world
+            .get_resource_mut::<Assets<TextureAtlas>>()
+            .unwrap()
+            .add(atlas);
+
+        CatSheet(atlas_handle)
+    }
+}
+
 /// DOC: Rename it to EffectSheet
 #[derive(Clone, Resource)]
 pub struct DazeSheet(pub Handle<TextureAtlas>);
 
+impl FromWorld for DazeSheet {
+    fn from_world(world: &mut World) -> Self {
+        let dazed_image = world
+            .get_resource::<AssetServer>()
+            .unwrap()
+            .load("textures/character/dazed.png");
+        // warn!("You have to download the asset see in github releases");
+        let dazed_atlas =
+            TextureAtlas::from_grid(dazed_image, Vec2::from((35., 25.)), 12, 1, None, None);
+
+        let dazed_atlas_handle = world
+            .get_resource_mut::<Assets<TextureAtlas>>()
+            .unwrap()
+            .add(dazed_atlas);
+
+        DazeSheet(dazed_atlas_handle)
+    }
+}
 #[derive(Component, Deref, DerefMut)]
 pub struct AnimationTimer(pub Timer);
 
@@ -57,26 +91,4 @@ pub fn animate_sprite(
             state.current = sprite.index;
         }
     }
-}
-
-fn load_character_spritesheet(
-    mut commands: Commands,
-    assets: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
-) {
-    let image = assets.load("textures/character/character_sheet_v1.png");
-    // warn!("You have to download the asset see in github releases");
-    let atlas = TextureAtlas::from_grid(image, Vec2::splat(14.), 2, 2, None, None);
-
-    let atlas_handle = texture_atlases.add(atlas);
-
-    commands.insert_resource(CatSheet(atlas_handle));
-
-    let dazed_image = assets.load("textures/character/dazed.png");
-    let dazed_atlas =
-        TextureAtlas::from_grid(dazed_image, Vec2::from((35., 25.)), 12, 1, None, None);
-
-    let dazed_atlas_handle = texture_atlases.add(dazed_atlas);
-
-    commands.insert_resource(DazeSheet(dazed_atlas_handle));
 }

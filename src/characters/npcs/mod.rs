@@ -1,17 +1,11 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
     characters::movement::{CharacterHitbox, MovementBundle, Speed},
     characters::npcs::{
-        aggression::{
-            add_pursuit_urge, player_detection, reset_aggro, DetectionSensor, EngagePursuitEvent,
-        },
-        movement::{
-            daze_wait, give_new_direction_event, npc_chase, npc_walk, npc_walk_to,
-            NewDirectionEvent, ResetAggroEvent, WalkBehavior,
-        },
+        aggression::{DetectionSensor, EngagePursuitEvent},
+        movement::{NewDirectionEvent, ResetAggroEvent, WalkBehavior},
     },
     constants::character::{
         npc::{movement::BLACK_CAT_STARTING_POSITION, *},
@@ -30,28 +24,30 @@ pub mod movement;
 pub struct NPCsPlugin;
 
 impl Plugin for NPCsPlugin {
-    #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app
-            .add_event::<NewDirectionEvent>()
+        app.add_event::<NewDirectionEvent>()
             .add_event::<EngagePursuitEvent>()
             .add_event::<ResetAggroEvent>()
-            .add_startup_system(spawn_characters)
-            // -- Movement --
-            .add_system(npc_walk_to)
-            .add_system(npc_walk)
-            .add_system(npc_chase)
-            .add_system(reset_aggro)
-            .add_system(daze_wait)
-            .add_system(give_new_direction_event)
-            // -- Aggression --
-            .add_system(player_detection)
-            .add_system(add_pursuit_urge)
-            ;
+            .add_systems(Startup, spawn_characters)
+            .add_systems(
+                Update,
+                (
+                    // -- Movement --
+                    movement::npc_walk_to,
+                    movement::npc_walk,
+                    movement::npc_chase,
+                    movement::daze_wait,
+                    movement::give_new_direction_event,
+                    // -- Aggression --
+                    aggression::player_detection,
+                    aggression::add_pursuit_urge,
+                    aggression::reset_aggro,
+                ),
+            );
     }
 }
 
-#[derive(Component, Inspectable)]
+#[derive(Component, Reflect)]
 pub struct NPC;
 
 fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
@@ -64,10 +60,10 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                     BLACK_CAT_STARTING_POSITION.1 - 50.,
                     0.,
                 )),
-                visibility: Visibility { is_visible: false },
-                ..Default::default()
+                visibility: Visibility::Hidden,
+                ..default()
             },
-            Name::new(format!("WayPoint for Black Cat")),
+            Name::new("WayPoint for Black Cat"),
         ))
         .id();
 
@@ -77,7 +73,6 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
             SpriteSheetBundle {
                 sprite: TextureAtlasSprite {
                     index: BLACK_CAT_STARTING_ANIM,
-                    flip_x: true,
                     ..default()
                 },
                 texture_atlas: cats.0.clone(),
