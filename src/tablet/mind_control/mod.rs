@@ -75,12 +75,11 @@ pub fn mind_control_button(
     npc_query: Query<Entity, With<NPC>>,
 ) {
     if keyboard_input.pressed(KeyCode::M) {
-        for npc in npc_query.iter() {
+        if let Some(npc) = npc_query.iter().next() {
             commands.entity(npc).insert(MindControled); // .remove::<Dazed>()
-            break;
+            let player = player_query.single();
+            commands.entity(player).remove::<MindControled>();
         }
-        let player = player_query.single();
-        commands.entity(player).remove::<MindControled>();
     }
 }
 
@@ -93,7 +92,6 @@ fn exit_mind_control(
     npc_query: Query<(Entity, &Name), (With<NPC>, With<MindControled>)>,
 ) {
     if keyboard_input.pressed(KeyCode::Escape) {
-        // could be a single for now
         for (npc, _name) in npc_query.iter() {
             commands.entity(npc).remove::<MindControled>();
         }

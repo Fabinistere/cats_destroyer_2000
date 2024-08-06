@@ -67,7 +67,7 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                 visibility: Visibility { is_visible: false },
                 ..Default::default()
             },
-            Name::new(format!("WayPoint for Black Cat")),
+            Name::new("WayPoint for Black Cat"),
         ))
         .id();
 
