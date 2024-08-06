@@ -1,35 +1,22 @@
 use bevy::{prelude::*, winit::WinitSettings};
 
 use crate::{
-    constants::ui::tablet::*, 
+    constants::ui::tablet::*,
     locations::level_one::doors::{Door, OpenDoorEvent},
-    tablet::{
-        run_if_tablet_is_free,
-        run_if_tablet_is_mind_ctrl,
-    }
+    tablet::{tablet_is_free, tablet_is_mind_ctrl},
 };
 
 pub struct HackPlugin;
 
 impl Plugin for HackPlugin {
-    #[rustfmt::skip]
+    // #[rustfmt::skip]
     fn build(&self, app: &mut App) {
         app
             // OPTIMIZE: Only run the app when there is user input. This will significantly reduce CPU/GPU use.
             .insert_resource(WinitSettings::game())
-            
             .add_startup_system(setup_tablet_button)
-            .add_system_set(
-                SystemSet::new()
-                    .with_run_criteria(run_if_tablet_is_free)
-                    .with_system(button_system)
-            )
-            .add_system_set(
-                SystemSet::new()
-                    .with_run_criteria(run_if_tablet_is_mind_ctrl)
-                    .with_system(place_holder_while_in_mind_control)
-            )
-            ;
+            .add_system(button_system.run_if(tablet_is_free))
+            .add_system(place_holder_while_in_mind_control.run_if(tablet_is_mind_ctrl));
     }
 }
 
@@ -80,9 +67,9 @@ pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer
 // }
 
 /// # Note
-/// 
+///
 /// Spamming should not work (cause of the timer being only 0.1s)
-/// 
+///
 /// TODO: feature - limit the access to tablet's features when using one
 /// Can't hack while MindCtrl -------------------^^^^^^^^
 /// REFACTOR: seperate color/text management from action

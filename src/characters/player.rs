@@ -9,7 +9,6 @@ use crate::{
     tablet::mind_control::MindControled,
 };
 use bevy::prelude::*;
-use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 
 pub struct PlayerPlugin;
@@ -23,7 +22,7 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-#[derive(Component, Inspectable)]
+#[derive(Component, Reflect)]
 pub struct Player;
 
 #[derive(Component)]

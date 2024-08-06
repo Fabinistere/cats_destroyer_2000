@@ -8,7 +8,7 @@ impl Plugin for CatSpritePlugin {
     #[rustfmt::skip]
     fn build(&self, app: &mut App) {
         app
-            .add_startup_system_to_stage(StartupStage::PreStartup, load_character_spritesheet)
+            .add_startup_system(load_character_spritesheet.in_base_set(StartupSet::PreStartup))
             .add_system(animate_sprite)
             ;
     }

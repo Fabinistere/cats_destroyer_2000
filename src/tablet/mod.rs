@@ -1,4 +1,4 @@
-use bevy::{ecs::schedule::ShouldRun, prelude::*};
+use bevy::prelude::*;
 
 use crate::{
     characters::player::Player,
@@ -24,20 +24,14 @@ impl Plugin for TabletPlugin {
 }
 
 /// REFACTOR: stop checking if free by the Entity Player not being MindControled ?
-fn run_if_tablet_is_free(
+fn tablet_is_free(
     player_query: Query<Entity, (With<MindControled>, With<Player>)>,
-) -> ShouldRun {
-    match player_query.get_single() {
-        Ok(_) => ShouldRun::Yes,
-        _ => ShouldRun::No,
-    }
+) -> bool {
+    player_query.get_single().is_ok()
 }
 
-fn run_if_tablet_is_mind_ctrl(
+fn tablet_is_mind_ctrl(
     player_query: Query<Entity, (With<MindControled>, With<Player>)>,
-) -> ShouldRun {
-    match player_query.get_single() {
-        Ok(_) => ShouldRun::No,
-        _ => ShouldRun::Yes,
-    }
+) -> bool {
+    player_query.get_single().is_err()
 }

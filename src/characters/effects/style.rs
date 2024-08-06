@@ -23,7 +23,7 @@ pub fn add_dazed_effect(
         // TODO: polish - floating Stars above their head
 
         // whatever the entity
-        commands.entity(entity).add_children(|parent| {
+        commands.entity(entity).with_children(|parent| {
             parent.spawn((
                 SpriteSheetBundle {
                     sprite: TextureAtlasSprite {

@@ -2,7 +2,10 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    characters::{effects::style::DazeAnimation, movement::{Dazed, Speed}},
+    characters::{
+        effects::style::DazeAnimation,
+        movement::{Dazed, Speed},
+    },
     characters::{npcs::NPC, player::Player},
     constants::character::npc::movement::BLACK_CAT_STARTING_POSITION,
     tablet::mind_control::MindControled,
@@ -212,8 +215,8 @@ pub fn give_new_direction_event(
                                         BLACK_CAT_STARTING_POSITION.1 - 50.,
                                         0.,
                                     )),
-                                    visibility: Visibility { is_visible: false },
-                                    ..Default::default()
+                                    visibility: Visibility::Hidden,
+                                    ..default()
                                 },
                                 Name::new(format!("WayPoint for {}", name)),
                             ))
@@ -239,7 +242,10 @@ pub fn daze_wait(
     mut commands: Commands,
 
     time: Res<Time>,
-    mut npc_query: Query<(Entity, &mut Dazed, &mut Velocity, &Children, &Name), (With<NPC>, Without<Player>)>,
+    mut npc_query: Query<
+        (Entity, &mut Dazed, &mut Velocity, &Children, &Name),
+        (With<NPC>, Without<Player>),
+    >,
     daze_effect_query: Query<Entity, With<DazeAnimation>>,
 ) {
     for (npc, mut daze_timer, mut _rb_vel, children, name) in npc_query.iter_mut() {

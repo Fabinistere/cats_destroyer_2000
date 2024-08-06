@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
@@ -51,7 +50,7 @@ impl Plugin for NPCsPlugin {
     }
 }
 
-#[derive(Component, Inspectable)]
+#[derive(Component, Reflect)]
 pub struct NPC;
 
 fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
@@ -64,8 +63,8 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                     BLACK_CAT_STARTING_POSITION.1 - 50.,
                     0.,
                 )),
-                visibility: Visibility { is_visible: false },
-                ..Default::default()
+                visibility: Visibility::Hidden,
+                ..default()
             },
             Name::new("WayPoint for Black Cat"),
         ))

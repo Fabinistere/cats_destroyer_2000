@@ -2,7 +2,7 @@
 #![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::pedantic)]
 // #![warn(missing_docs)]
 
-use bevy::{prelude::*, render::camera::ScalingMode};
+use bevy::{prelude::*, window::WindowResolution};
 use bevy_rapier2d::prelude::*;
 
 use characters::CharactersPlugin;
@@ -29,7 +29,7 @@ fn main() {
     app
         // Color::TEAL / AZURE
         .insert_resource(ClearColor(Color::TEAL))
-        .insert_resource(Msaa { samples: 1 })
+        .insert_resource(Msaa::Off)
         // v-- Hitbox --v
         .insert_resource(RapierConfiguration {
             gravity: Vec2::ZERO,
@@ -39,13 +39,12 @@ fn main() {
         .add_plugins(
             DefaultPlugins
                 .set(WindowPlugin {
-                    window: WindowDescriptor {
-                        width: height * RESOLUTION,
-                        height,
+                    primary_window: Some(Window {
+                        resolution: WindowResolution::new(height * RESOLUTION, height),
                         title: "CatBeDoingTheLaundry".to_string(),
                         resizable: true,
                         ..default()
-                    },
+                    }),
                     ..default()
                 })
                 .set(ImagePlugin::default_nearest()),
@@ -70,14 +69,10 @@ fn main() {
 fn spawn_camera(mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
 
-    camera.projection.top = 50. * TILE_SIZE;
-    camera.projection.bottom = -50. * TILE_SIZE;
-
-    camera.projection.left = 50. * TILE_SIZE * RESOLUTION;
-    camera.projection.right = -50. * TILE_SIZE * RESOLUTION;
+    camera.projection.scale = 0.1;
 
     // vv-- Flip the left and right --vv
-    camera.projection.scaling_mode = ScalingMode::None;
+    // camera.projection.scaling_mode = ScalingMode::None;
 
     commands.spawn(camera);
 }
