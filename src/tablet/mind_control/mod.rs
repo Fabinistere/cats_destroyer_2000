@@ -17,7 +17,6 @@ mod movement;
 pub struct MindControlPlugin;
 
 impl Plugin for MindControlPlugin {
-    // #[rustfmt::skip]
     fn build(&self, app: &mut App) {
         app.add_system(
             mind_control_button

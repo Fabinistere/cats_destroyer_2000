@@ -27,23 +27,18 @@ pub struct NewDirectionEvent(pub Entity);
 ///   - npc::movement::npc_chase
 ///     - target in ChaseBehavior is not a player
 ///     - target is reached
+///
 /// Read in
 ///   - npc::movement::reset_aggro
 ///     - Remove ChaseBehavior
-///     Insert WalkBehavior
-///     Ask for a new destination
+///       Insert WalkBehavior
+///       Ask for a new destination
 pub struct ResetAggroEvent {
     pub npc: Entity,
 }
 
-#[derive(Clone, Copy, Component)]
+#[derive(Clone, Copy, Default, Component)]
 pub struct Target(pub Option<Entity>);
-
-impl Default for Target {
-    fn default() -> Self {
-        Target { 0: None }
-    }
-}
 
 /// # Note
 ///
@@ -197,11 +192,11 @@ pub fn give_new_direction_event(
     // REFACTOR: FOR NOW target can't be NPC - conflictual queries
     mut target_query: Query<(Entity, &mut Transform), (Without<Player>, Without<NPC>)>,
 ) {
-    for event in new_direction_event.iter() {
-        match npc_query.get_mut(event.0) {
-            Err(e) => warn!("{:?}", e),
+    for NewDirectionEvent(npc) in new_direction_event.iter() {
+        match npc_query.get_mut(*npc) {
+            Err(e) => warn!("the entity {npc:?} is not a npc. {e:?}"),
             Ok((_, npc_transform, mut target, name)) => {
-                // creation of a Waypoint
+                // creation of a Waypoint if not pursing
                 match target_query.get_mut(target.0.unwrap()) {
                     Err(e) => {
                         // resetAggro ?

@@ -5,9 +5,9 @@ use bevy::prelude::*;
 
 use crate::{
     characters::npcs::NPC,
-    constants::{FRAME_TIME, locations::LEVEL_SCALE, cinematics::*},
-    tablet::mind_control::MindControled,
+    constants::{cinematics::*, locations::LEVEL_SCALE, FRAME_TIME},
     spritesheet::AnimationTimer,
+    tablet::mind_control::MindControled,
 };
 
 /* -------------------------------------------------------------------------- */
@@ -16,18 +16,13 @@ use crate::{
 
 /// Marker for the final cat sprite anim
 #[derive(Component)]
-struct FinalFormCat;
+pub struct Clouds;
 
 /// Marker for the final cat sprite anim
 #[derive(Component)]
-pub struct Clouds;
-
-#[derive(Component)]
 pub struct PlayerHusk;
 
-pub fn cinematic_camera(
-    mut camera_query: Query<&mut Transform, With<Camera>>,
-) {
+pub fn cinematic_camera(mut camera_query: Query<&mut Transform, With<Camera>>) {
     let mut camera_transform = camera_query.single_mut();
 
     camera_transform.translation.x = 0.;
@@ -94,6 +89,7 @@ pub fn spawn_cinematic_final(
         Name::new("Cinematics - Mountain Lab"),
     ));
 
+    // BUG: if an enemy manage to cross the win sensor without the mind controlled the wrong cinematic will proc
     let cat_escape_image = if blue_cat_controlled_query.is_empty() {
         info!("EasterEgg: Black Cat Escaped");
         asset_server.load("textures/cinematics/final/black-cat-sheet.png")
@@ -102,14 +98,8 @@ pub fn spawn_cinematic_final(
         asset_server.load("textures/cinematics/final/blue-cat-sheet.png")
     };
 
-    let cat_escape_atlas = TextureAtlas::from_grid(
-        cat_escape_image,
-        Vec2::from((19., 17.)),
-        14,
-        1,
-        None,
-        None,
-    );
+    let cat_escape_atlas =
+        TextureAtlas::from_grid(cat_escape_image, Vec2::from((19., 17.)), 14, 1, None, None);
     let cat_escape_atlas_handle = texture_atlases.add(cat_escape_atlas);
 
     commands.spawn((
@@ -138,20 +128,13 @@ pub fn spawn_cinematic_final(
 /// Infinitly loop the clouds
 pub fn animate_clouds(
     time: Res<Time>,
-    mut clouds_query: Query<
-        (
-            &mut AnimationTimer,
-            &mut Transform,
-        ),
-        With<Clouds>,
-    >,
+    mut clouds_query: Query<(&mut AnimationTimer, &mut Transform), With<Clouds>>,
 ) {
     for (mut timer, mut transform) in &mut clouds_query {
         timer.tick(time.delta());
 
         if timer.just_finished() {
-            transform.translation.x = 
-            if transform.translation.x == CLOUDS_LIMIT {
+            transform.translation.x = if transform.translation.x == CLOUDS_LIMIT {
                 CLOUDS_RESET
             } else {
                 // IDEA: can be smoother if - 0.1 and faster timer

@@ -14,11 +14,8 @@ use bevy_rapier2d::prelude::*;
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
-    #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app .add_startup_system(spawn_player)
-            .add_system(player_idle)
-            ;
+        app.add_startup_system(spawn_player).add_system(player_idle);
     }
 }
 

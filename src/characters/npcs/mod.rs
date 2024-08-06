@@ -4,13 +4,8 @@ use bevy_rapier2d::prelude::*;
 use crate::{
     characters::movement::{CharacterHitbox, MovementBundle, Speed},
     characters::npcs::{
-        aggression::{
-            add_pursuit_urge, player_detection, reset_aggro, DetectionSensor, EngagePursuitEvent,
-        },
-        movement::{
-            daze_wait, give_new_direction_event, npc_chase, npc_walk, npc_walk_to,
-            NewDirectionEvent, ResetAggroEvent, WalkBehavior,
-        },
+        aggression::{DetectionSensor, EngagePursuitEvent},
+        movement::{NewDirectionEvent, ResetAggroEvent, WalkBehavior},
     },
     constants::character::{
         npc::{movement::BLACK_CAT_STARTING_POSITION, *},
@@ -37,15 +32,19 @@ impl Plugin for NPCsPlugin {
             .add_event::<ResetAggroEvent>()
             .add_startup_system(spawn_characters)
             // -- Movement --
-            .add_system(npc_walk_to)
-            .add_system(npc_walk)
-            .add_system(npc_chase)
-            .add_system(reset_aggro)
-            .add_system(daze_wait)
-            .add_system(give_new_direction_event)
+            .add_systems((
+                movement::npc_walk_to,
+                movement::npc_walk,
+                movement::npc_chase,
+                movement::daze_wait,
+                movement::give_new_direction_event,
+            ))
             // -- Aggression --
-            .add_system(player_detection)
-            .add_system(add_pursuit_urge)
+            .add_systems((
+                aggression::player_detection,
+                aggression::add_pursuit_urge,
+                aggression::reset_aggro,
+            ))
             ;
     }
 }

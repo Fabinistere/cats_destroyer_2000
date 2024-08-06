@@ -7,7 +7,7 @@ use crate::{
     locations::{
         level_one::{
             button::PushButton,
-            doors::{animate_door, open_door_event, Door, ExitDoor, OpenDoorEvent},
+            doors::{Door, ExitDoor, OpenDoorEvent},
         },
         sensors::WinSensor,
         Location,
@@ -30,16 +30,14 @@ pub mod doors;
 pub struct LevelOnePlugin;
 
 impl Plugin for LevelOnePlugin {
-    // #[rustfmt::skip]
     fn build(&self, app: &mut App) {
         app.add_event::<OpenDoorEvent>()
             // .add_event::<ResetLevelOneEvent>()
             // .add_event::<EnterLevelOneEvent>()
-            // .add_system(reset_level_one)
-            // .add_system(enter_level_one)
+            // .add_systems((reset_level_one, enter_level_one))
             .add_systems((setup_level_one, set_up_button).in_schedule(OnEnter(Location::Level1000)))
             .add_systems(
-                (animate_door, open_door_event).in_set(OnUpdate(Location::Level1000)), // .run_if(in_level_one)
+                (doors::animate_door, doors::open_door_event).in_set(OnUpdate(Location::Level1000)), // .run_if(in_level_one)
             )
             .add_system(despawn_level_one.in_schedule(OnExit(Location::Level1000)));
     }
