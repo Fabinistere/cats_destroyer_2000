@@ -9,21 +9,18 @@ use crate::{
     tablet::mind_control::MindControled,
 };
 use bevy::prelude::*;
-use bevy_inspector_egui::Inspectable;
 use bevy_rapier2d::prelude::*;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
-    #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app .add_startup_system(spawn_player)
-            .add_system(player_idle)
-            ;
+        app.add_systems(Startup, spawn_player)
+            .add_systems(Update, player_idle);
     }
 }
 
-#[derive(Component, Inspectable)]
+#[derive(Component, Reflect)]
 pub struct Player;
 
 #[derive(Component)]
@@ -46,7 +43,6 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
             SpriteSheetBundle {
                 sprite: TextureAtlasSprite {
                     index: BLUE_CAT_STARTING_ANIM,
-                    flip_x: true,
                     ..default()
                 },
                 texture_atlas: cats.0.clone(),

@@ -8,21 +8,11 @@ use crate::TILE_SIZE;
 #[derive(Component)]
 pub struct CharacterHitbox;
 
-/// Is it a good habit to seperate
-/// - Dazed
-/// - DazeTimer
-/// ?
 #[derive(Component)]
 pub struct Dazed {
     /// should be a non-repeating timer
     pub timer: Timer,
 }
-
-// #[derive(Component)]
-// pub struct DazeTimer {
-//     /// should be a non-repeating timer
-//     pub timer: Timer,
-// }
 
 #[derive(Component, Deref, DerefMut)]
 pub struct Speed(pub f32);
