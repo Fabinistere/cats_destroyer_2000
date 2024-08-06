@@ -156,66 +156,66 @@ fn setup_level_one(
                     // Collider draw by hand...
                     parent.spawn((
                         Collider::cuboid(21., 1.5),
-                        Transform::from_xyz(5., -57., 0.),
+                        Transform::from_xyz(-5., -57., 0.),
                         Name::new("Entry Lower Hitbox"),
                     ));
                     parent.spawn((
                         Collider::cuboid(1.5, 12.),
-                        Transform::from_xyz(24.5, -46.5, 0.),
+                        Transform::from_xyz(-24.5, -46.5, 0.),
                         Name::new("Entry Left Hitbox"),
                     ));
                     parent.spawn((
                         Collider::cuboid(1.5, 12.),
-                        Transform::from_xyz(-14.5, -46.5, 0.),
+                        Transform::from_xyz(14.5, -46.5, 0.),
                         Name::new("Entry Right Hitbox"),
                     ));
                     parent.spawn((
                         Collider::cuboid(7.5, 1.5),
-                        Transform::from_xyz(18.5, -36., 0.),
+                        Transform::from_xyz(-18.5, -36., 0.),
                         Name::new("Entry Top Left Hitbox"),
                     ));
                     parent.spawn((
                         Collider::cuboid(7.5, 1.5),
-                        Transform::from_xyz(-8.5, -36., 0.),
+                        Transform::from_xyz(8.5, -36., 0.),
                         Name::new("Entry Top Right Hitbox"),
                     ));
                     // --- Corridor ---
                     parent.spawn((
                         Collider::cuboid(1.5, 44.5),
-                        Transform::from_xyz(12.5, 10., 0.),
+                        Transform::from_xyz(-12.5, 10., 0.),
                         Name::new("Corridor Left Hitbox"),
                     ));
                     parent.spawn((
                         Collider::cuboid(1.5, 16.5),
-                        Transform::from_xyz(-2.5, -18., 0.),
+                        Transform::from_xyz(2.5, -18., 0.),
                         Name::new("Corridor Right Bottom Hitbox"),
                     ));
                     parent.spawn((
                         Collider::cuboid(1.5, 20.5),
-                        Transform::from_xyz(-2.5, 34., 0.),
+                        Transform::from_xyz(2.5, 34., 0.),
                         Name::new("Corridor Right Top Hitbox"),
                     ));
                     // --- Elevator ---
                     // Which is the two Exit and Front Door
                     parent.spawn((
                         Collider::cuboid(6., 1.5),
-                        Transform::from_xyz(5., 53., 0.),
+                        Transform::from_xyz(-5., 53., 0.),
                         Name::new("Elevator Top Hitbox"),
                     ));
                     // --- Broom Closet ---
                     parent.spawn((
                         Collider::cuboid(1.5, 7.5),
-                        Transform::from_xyz(-29.5, 6., 0.),
+                        Transform::from_xyz(29.5, 6., 0.),
                         Name::new("Closet Left Hitbox"),
                     ));
                     parent.spawn((
                         Collider::cuboid(12., 1.5),
-                        Transform::from_xyz(-16., 15., 0.),
+                        Transform::from_xyz(16., 15., 0.),
                         Name::new("Closet Top Hitbox"),
                     ));
                     parent.spawn((
                         Collider::cuboid(12., 1.5),
-                        Transform::from_xyz(-16., -3., 0.),
+                        Transform::from_xyz(16., -3., 0.),
                         Name::new("Closet Bottom Hitbox"),
                     ));
                     // --- Closet Button Sensor ---
@@ -251,6 +251,7 @@ fn setup_level_one(
                         ..default()
                     },
                     Name::new("Front Door"),
+                    RigidBody::Fixed,
                     Door {
                         current_state: doors::DoorState::Closed,
                     },
@@ -258,14 +259,14 @@ fn setup_level_one(
                 .with_children(|parent| {
                     parent.spawn((
                         Collider::cuboid(6., 1.5),
-                        Transform::default(), // from_xyz(5., -36., 0.),
+                        Transform::default(), // from_xyz(-5., -36., 0.),
                         DoorHitbox,
                         Name::new("Front Door Hitbox"),
                     ));
                     // --- Corridor Sensor ---
                     parent.spawn((
                         Collider::cuboid(6., 3.),
-                        Transform::from_xyz(0., -4.5, 0.),
+                        Transform::from_xyz(0., 4.5, 0.),
                         ActiveEvents::COLLISION_EVENTS,
                         Sensor,
                         LocationSensor {
@@ -276,7 +277,7 @@ fn setup_level_one(
                     // --- SpawnRoom Sensor ---
                     parent.spawn((
                         Collider::cuboid(6., 3.),
-                        Transform::from_xyz(0., 4.5, 0.),
+                        Transform::from_xyz(0., -4.5, 0.),
                         ActiveEvents::COLLISION_EVENTS,
                         Sensor,
                         LocationSensor {
@@ -299,6 +300,7 @@ fn setup_level_one(
                         ..default()
                     },
                     Name::new("Exit Door"),
+                    RigidBody::Fixed,
                     ExitDoor,
                     Door {
                         current_state: doors::DoorState::Closed,
@@ -307,7 +309,7 @@ fn setup_level_one(
                 .with_children(|parent| {
                     parent.spawn((
                         Collider::cuboid(6., 1.5),
-                        Transform::default(), // from_xyz(5., 36., 0.),
+                        Transform::default(), // from_xyz(-5., 36., 0.),
                         DoorHitbox,
                         Name::new("Exit Door Hitbox"),
                     ));
@@ -323,7 +325,7 @@ fn setup_level_one(
                     // --- Corridor Sensor ---
                     parent.spawn((
                         Collider::cuboid(6., 3.),
-                        Transform::from_xyz(0., 4.5, 0.),
+                        Transform::from_xyz(0., -4.5, 0.),
                         ActiveEvents::COLLISION_EVENTS,
                         Sensor,
                         LocationSensor {
@@ -351,6 +353,7 @@ fn setup_level_one(
                         ..default()
                     },
                     Name::new("Closet Door"),
+                    RigidBody::Fixed,
                     Door {
                         current_state: doors::DoorState::Closed,
                     },
@@ -359,7 +362,7 @@ fn setup_level_one(
                 .with_children(|parent| {
                     parent.spawn((
                         Collider::cuboid(1.5, 7.5),
-                        Transform::default(), // from_xyz(-2.5, 6., 0.),
+                        Transform::default(), // from_xyz(2.5, 6., 0.),
                         DoorHitbox,
                         Name::new("Side Door Hitbox"),
                     ));

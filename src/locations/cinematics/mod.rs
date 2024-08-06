@@ -33,7 +33,8 @@ pub fn cinematic_camera(
     camera_transform.translation.x = 0.;
     camera_transform.translation.y = 3.;
 
-    camera_transform.scale = Vec3::new(1.4, 1.4, 1.)
+    camera_transform.scale = Vec3::new(1.3, 1.3, 1.3)
+    // TODO: adpat the camera to be centered on the endcinematic
 }
 
 pub fn spawn_cinematic_final(
@@ -115,7 +116,7 @@ pub fn spawn_cinematic_final(
         SpriteSheetBundle {
             texture_atlas: cat_escape_atlas_handle.clone(),
             transform: Transform {
-                translation: Vec3::from((12., -12., 9.)),
+                translation: Vec3::from((-12., -12., 9.)),
                 scale: Vec3::from(LEVEL_SCALE),
                 ..default()
             },
@@ -131,7 +132,6 @@ pub fn spawn_cinematic_final(
 }
 
 // TODO: spawn a Quit button after x seconds
-// TODO: adpat the camera to be centered on the endcinematic
 
 // LEVEL_SCALE
 

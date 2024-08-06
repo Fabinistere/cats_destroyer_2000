@@ -71,8 +71,5 @@ fn spawn_camera(mut commands: Commands) {
 
     camera.projection.scale = 0.1;
 
-    // vv-- Flip the left and right --vv
-    // camera.projection.scaling_mode = ScalingMode::None;
-
     commands.spawn(camera);
 }

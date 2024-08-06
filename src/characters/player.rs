@@ -45,7 +45,6 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
             SpriteSheetBundle {
                 sprite: TextureAtlasSprite {
                     index: BLUE_CAT_STARTING_ANIM,
-                    flip_x: true,
                     ..default()
                 },
                 texture_atlas: cats.0.clone(),
