@@ -24,7 +24,8 @@ pub enum DoorState {
 #[derive(Component)]
 pub struct ExitDoor;
 
-/// DOC
+/// DOC: describe OpenDoorEvent
+#[derive(Event)]
 pub struct OpenDoorEvent(pub Entity);
 
 /// Open the end of the level

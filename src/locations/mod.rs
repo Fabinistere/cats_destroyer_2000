@@ -30,16 +30,23 @@ impl Plugin for LocationsPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<WinTriggerEvent>()
             .add_state::<Location>()
-            .add_plugin(level_one::LevelOnePlugin)
-            .add_systems((
-                sensors::win_trigger,
-                sensors::win_event,
-                sensors::location_event,
-                sensors::button_event,
-            ))
+            .add_plugins(level_one::LevelOnePlugin)
             .add_systems(
-                (spawn_cinematic_final, cinematic_camera).in_schedule(OnEnter(Location::OutDoor)),
+                Update,
+                (
+                    sensors::win_trigger,
+                    sensors::win_event,
+                    sensors::location_event,
+                    sensors::button_event,
+                ),
             )
-            .add_systems((animate_clouds, animate_free_cat).in_set(OnUpdate(Location::OutDoor)));
+            .add_systems(
+                OnEnter(Location::OutDoor),
+                (spawn_cinematic_final, cinematic_camera),
+            )
+            .add_systems(
+                Update,
+                (animate_clouds, animate_free_cat).run_if(in_state(Location::OutDoor)),
+            );
     }
 }

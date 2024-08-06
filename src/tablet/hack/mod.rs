@@ -14,9 +14,14 @@ impl Plugin for HackPlugin {
         app
             // OPTIMIZE: Only run the app when there is user input. This will significantly reduce CPU/GPU use.
             .insert_resource(WinitSettings::game())
-            .add_startup_system(setup_tablet_button)
-            .add_system(button_system.run_if(tablet_is_free))
-            .add_system(place_holder_while_in_mind_control.run_if(tablet_is_mind_ctrl));
+            .add_systems(Startup, setup_tablet_button)
+            .add_systems(
+                Update,
+                (
+                    button_system.run_if(tablet_is_free),
+                    place_holder_while_in_mind_control.run_if(tablet_is_mind_ctrl),
+                ),
+            );
     }
 }
 
@@ -29,18 +34,16 @@ pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer
         .spawn((
             ButtonBundle {
                 style: Style {
-                    size: Size::new(Val::Px(180.), Val::Px(65.)),
+                    width: Val::Px(180.),
+                    height: Val::Px(65.),
                     // center button
                     margin: UiRect::all(Val::Auto),
                     // horizontally center child text
                     justify_content: JustifyContent::Center,
                     // vertically center child text
                     align_items: AlignItems::Center,
-                    position: UiRect {
-                        right: Val::Percent(-39.),
-                        top: Val::Percent(30.),
-                        ..default()
-                    },
+                    top: Val::Percent(30.),
+                    right: Val::Percent(-39.),
                     ..default()
                 },
                 background_color: NORMAL_BUTTON.into(),
@@ -87,7 +90,7 @@ fn button_system(
     for (interaction, mut color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 // hack every hackable door
                 for door in hackable_door.iter() {
                     open_door_event.send(OpenDoorEvent(door));
@@ -118,7 +121,7 @@ pub fn place_holder_while_in_mind_control(
     for (interaction, mut color, children) in &mut interaction_query {
         let mut text = text_query.get_mut(children[0]).unwrap();
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 // *color = PRESSED_BUTTON.into();
             }
             Interaction::Hovered => {

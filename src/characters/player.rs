@@ -15,7 +15,8 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_player).add_system(player_idle);
+        app.add_systems(Startup, spawn_player)
+            .add_systems(Update, player_idle);
     }
 }
 

@@ -20,7 +20,8 @@ pub struct ChaseBehavior;
 /// DOC
 // pub struct FreezeEvent;
 
-/// DOC
+/// DOC: describe NewDirectionEvent
+#[derive(Event)]
 pub struct NewDirectionEvent(pub Entity);
 
 /// Happens in
@@ -33,6 +34,7 @@ pub struct NewDirectionEvent(pub Entity);
 ///     - Remove ChaseBehavior
 ///       Insert WalkBehavior
 ///       Ask for a new destination
+#[derive(Event)]
 pub struct ResetAggroEvent {
     pub npc: Entity,
 }

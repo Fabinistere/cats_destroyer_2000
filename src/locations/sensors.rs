@@ -19,7 +19,8 @@ use crate::{
 ///   -
 /// Read in
 ///   -
-/// DOC
+/// DOC: describe WinTriggerEvent
+#[derive(Event)]
 pub struct WinTriggerEvent {
     /// The Entity which triggered the WinEvent
     pub entity: Entity,
@@ -82,8 +83,7 @@ pub fn win_event(
                 println!("{}", congrats);
             }
         }
-        // TODO: "increment" the level
-        if current_location.0 == Location::Level1000 {
+        if current_location.get() == &Location::Level1000 {
             println!("In LevelOne");
             next_location.set(Location::OutDoor);
         }

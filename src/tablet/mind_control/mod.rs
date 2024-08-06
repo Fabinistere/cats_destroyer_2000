@@ -18,34 +18,30 @@ pub struct MindControlPlugin;
 
 impl Plugin for MindControlPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(
-            mind_control_button
-                .run_if(tablet_is_free)
-                .in_set(MindControlSet::Enter),
+        app.add_systems(
+            Update,
+            (
+                mind_control_button
+                    .run_if(tablet_is_free)
+                    .in_set(MindControlSet::Enter),
+                exit_mind_control
+                    .run_if(tablet_is_mind_ctrl)
+                    .in_set(MindControlSet::Exit)
+                    .after(MindControlSet::Enter),
+                camera_follow
+                    .after(MindControlSet::Movement)
+                    .run_if(in_state(Location::Level1000)),
+                mind_control_movement
+                    .in_set(MindControlSet::Movement)
+                    .after(MindControlSet::Enter),
+                daze_cure_by_mind_control
+                    .before(MindControlSet::Exit)
+                    .after(MindControlSet::Enter),
+            ),
         )
-        .add_system(
-            exit_mind_control
-                .run_if(tablet_is_mind_ctrl)
-                .in_set(MindControlSet::Exit)
-                .after(MindControlSet::Enter),
-        )
-        .add_system(
-            camera_follow
-                .after(MindControlSet::Movement)
-                .in_set(OnUpdate(Location::Level1000)),
-        )
-        .add_system(
-            mind_control_movement
-                .in_set(MindControlSet::Movement)
-                .after(MindControlSet::Enter),
-        )
-        .add_system(
-            daze_post_mind_control.in_base_set(CoreSet::PostUpdate), //.after(MindControlSet::Exit)
-        )
-        .add_system(
-            daze_cure_by_mind_control
-                .before(MindControlSet::Exit)
-                .after(MindControlSet::Enter),
+        .add_systems(
+            PostUpdate,
+            daze_post_mind_control, //.after(MindControlSet::Exit)
         );
     }
 }

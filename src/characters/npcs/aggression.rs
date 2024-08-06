@@ -39,6 +39,7 @@ use super::{
 ///     - remove DetectionBehavior from the entity
 ///     - insert PursuitBehavior into the entity
 ///     - insert the Target into the entity
+#[derive(Event)]
 pub struct EngagePursuitEvent {
     npc_entity: Entity,
     target_entity: Entity,

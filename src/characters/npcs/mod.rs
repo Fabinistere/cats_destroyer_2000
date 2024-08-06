@@ -24,28 +24,26 @@ pub mod movement;
 pub struct NPCsPlugin;
 
 impl Plugin for NPCsPlugin {
-    #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app
-            .add_event::<NewDirectionEvent>()
+        app.add_event::<NewDirectionEvent>()
             .add_event::<EngagePursuitEvent>()
             .add_event::<ResetAggroEvent>()
-            .add_startup_system(spawn_characters)
-            // -- Movement --
-            .add_systems((
-                movement::npc_walk_to,
-                movement::npc_walk,
-                movement::npc_chase,
-                movement::daze_wait,
-                movement::give_new_direction_event,
-            ))
-            // -- Aggression --
-            .add_systems((
-                aggression::player_detection,
-                aggression::add_pursuit_urge,
-                aggression::reset_aggro,
-            ))
-            ;
+            .add_systems(Startup, spawn_characters)
+            .add_systems(
+                Update,
+                (
+                    // -- Movement --
+                    movement::npc_walk_to,
+                    movement::npc_walk,
+                    movement::npc_chase,
+                    movement::daze_wait,
+                    movement::give_new_direction_event,
+                    // -- Aggression --
+                    aggression::player_detection,
+                    aggression::add_pursuit_urge,
+                    aggression::reset_aggro,
+                ),
+            );
     }
 }
 

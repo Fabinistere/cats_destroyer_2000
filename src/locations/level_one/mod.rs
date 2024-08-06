@@ -35,11 +35,15 @@ impl Plugin for LevelOnePlugin {
             // .add_event::<ResetLevelOneEvent>()
             // .add_event::<EnterLevelOneEvent>()
             // .add_systems((reset_level_one, enter_level_one))
-            .add_systems((setup_level_one, set_up_button).in_schedule(OnEnter(Location::Level1000)))
             .add_systems(
-                (doors::animate_door, doors::open_door_event).in_set(OnUpdate(Location::Level1000)), // .run_if(in_level_one)
+                OnEnter(Location::Level1000),
+                (setup_level_one, set_up_button),
             )
-            .add_system(despawn_level_one.in_schedule(OnExit(Location::Level1000)));
+            .add_systems(
+                Update,
+                (doors::animate_door, doors::open_door_event).run_if(in_state(Location::Level1000)), // .run_if(in_level_one)
+            )
+            .add_systems(OnExit(Location::Level1000), despawn_level_one);
     }
 }
 

@@ -8,9 +8,9 @@ edition = "2021"
 
 [dependencies]
 
-bevy = "0.10"
-bevy-inspector-egui = "0.18"
-bevy_rapier2d = { version = "0.21", features = ["simd-stable", "debug-render-2d"] }
+bevy = "0.11"
+bevy-inspector-egui = "0.20"
+bevy_rapier2d = { version = "0.22", features = ["simd-stable", "debug-render-2d"] }
 
 image = "0.23"
 
