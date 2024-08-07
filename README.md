@@ -1,5 +1,8 @@
 # Cats Destroyer 2000
 
+[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-0.11-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
+[![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/fabinistere/bevy_turn-based_combat#license)
+
 CreaJeu Edition 2023 - Theme: ***One Object Many Use***
 
 ![fast_blue_cat](https://user-images.githubusercontent.com/73140258/216720606-6e8f7768-3170-4956-a5d1-5124741783aa.gif)
