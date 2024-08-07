@@ -40,10 +40,6 @@ fn main() {
                     ..default()
                 })
                 .set(ImagePlugin::default_nearest()),
-            RapierDebugRenderPlugin {
-                mode: DebugRenderMode::all(),
-                ..default()
-            },
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.),
             // TweeningPlugin,
         ))
