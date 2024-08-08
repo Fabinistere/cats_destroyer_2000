@@ -74,7 +74,7 @@ pub fn mind_control_button(
     npc_query: Query<Entity, With<NPC>>,
     mut currently_mind_controlled: ResMut<CurrentlyMindControlled>,
 ) {
-    if keyboard_input.pressed(KeyCode::M) {
+    if keyboard_input.pressed(KeyCode::M) || keyboard_input.pressed(KeyCode::Colon) {
         if let Some(npc) = npc_query.iter().next() {
             commands.entity(npc).insert(MindControlled); // .remove::<Dazed>()
             let player = player_query.single();
