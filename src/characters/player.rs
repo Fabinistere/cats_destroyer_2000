@@ -1,10 +1,13 @@
 use crate::{
     characters::movement::{CharacterHitbox, MovementBundle, Speed},
     constants::character::{
-        npc::{movement::BLUE_CAT_STARTING_POSITION, *},
+        npcs::{movement::BLUE_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
-    locations::level_one::{CharacterLocation, Level1000Location},
+    locations::{
+        level_one::{CharacterLocation, Level1000Location},
+        Location,
+    },
     spritesheet::{AnimState, AnimationTimer, CatSheet},
     tablet::mind_control::MindControled,
 };
@@ -17,8 +20,8 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_player)
-            .add_systems(Update, player_idle);
+        app.add_systems(OnEnter(Location::Level1000), spawn_player)
+            .add_systems(Update, player_idle.run_if(in_state(Location::Level1000)));
     }
 }
 

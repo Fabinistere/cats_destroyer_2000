@@ -5,7 +5,10 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     characters::{
-        npcs::movement::{ChaseBehavior, Target, WalkBehavior},
+        npcs::{
+            movement::{ChaseBehavior, NewWayPointEvent, ResetAggroEvent, Target, WalkBehavior},
+            NPC,
+        },
         player::{Player, PlayerHitbox},
     },
     collisions::CollisionEventExt,
@@ -13,29 +16,13 @@ use crate::{
     tablet::mind_control::MindControled,
 };
 
-use super::{
-    movement::{NewDirectionEvent, ResetAggroEvent},
-    NPC,
-};
-
-// :0
-
-// Happens when:
-//   - ??? (npc::movement::pursue)
-//     - target is not found/exist
-//     - target is reach
-// Read in ??? (npc::aggression::remove_pursuit_urge)
-// pub struct StopChaseEvent {
-//     pub npc_entity: Entity,
-// }
-
 /// Happens when:
-///   - npc::aggression::player_detection
+///   - npcs::aggression::player_detection
 ///     - An npc detected a enemy
 ///       in the same Area
 ///
 /// Read in
-///   - npc::aggression::add_pursuit_urge
+///   - npcs::aggression::add_pursuit_urge
 ///     - remove DetectionBehavior from the entity
 ///     - insert PursuitBehavior into the entity
 ///     - insert the Target into the entity
@@ -142,11 +129,11 @@ pub fn reset_aggro(
     mut commands: Commands,
     mut reset_aggro_event: EventReader<ResetAggroEvent>,
 
-    mut new_direction_event: EventWriter<NewDirectionEvent>,
+    mut new_way_point_event: EventWriter<NewWayPointEvent>,
 ) {
     for ResetAggroEvent { npc } in reset_aggro_event.iter() {
         commands.entity(*npc).remove::<ChaseBehavior>();
         commands.entity(*npc).insert(WalkBehavior);
-        new_direction_event.send(NewDirectionEvent(*npc));
+        new_way_point_event.send(NewWayPointEvent(*npc));
     }
 }

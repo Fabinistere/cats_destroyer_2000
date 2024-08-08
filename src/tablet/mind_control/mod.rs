@@ -9,7 +9,7 @@ use crate::{
     characters::{effects::style::DazeAnimation, npcs::NPC, player::Player},
     constants::character::effects::DAZE_TIMER,
     locations::Location,
-    tablet::{mind_control::movement::mind_control_movement, tablet_is_free, tablet_is_mind_ctrl},
+    tablet::{tablet_is_free, tablet_is_mind_ctrl},
 };
 
 mod movement;
@@ -29,13 +29,14 @@ impl Plugin for MindControlPlugin {
                         .run_if(tablet_is_mind_ctrl)
                         .in_set(MindControlSet::Exit)
                         .after(MindControlSet::Enter),
-                    camera_follow.after(MindControlSet::Movement),
-                    mind_control_movement
-                        .in_set(MindControlSet::Movement)
-                        .after(MindControlSet::Enter),
                     daze_cure_by_mind_control
                         .before(MindControlSet::Exit)
                         .after(MindControlSet::Enter),
+                    movement::mind_control_movement
+                        .in_set(MindControlSet::Movement)
+                        .after(MindControlSet::Enter),
+                    camera_follow.after(MindControlSet::Movement),
+                    movement::freeze_dazed_character,
                 )
                     .run_if(in_state(Location::Level1000)),
             )

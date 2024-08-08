@@ -1,7 +1,10 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::{characters::movement::Speed, tablet::mind_control::MindControled};
+use crate::{
+    characters::movement::{Dazed, Speed},
+    tablet::mind_control::MindControled,
+};
 
 /// The player input will act on the current MindControled entity
 pub fn mind_control_movement(
@@ -31,5 +34,12 @@ pub fn mind_control_movement(
 
         rb_vel.linvel.x = vel_x;
         rb_vel.linvel.y = vel_y;
+    }
+}
+
+pub fn freeze_dazed_character(mut dazed_cats_query: Query<&mut Velocity, With<Dazed>>) {
+    for mut dazed_cat_velocity in dazed_cats_query.iter_mut() {
+        dazed_cat_velocity.linvel.x = 0.;
+        dazed_cat_velocity.linvel.y = 0.;
     }
 }

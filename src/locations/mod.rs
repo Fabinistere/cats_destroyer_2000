@@ -38,7 +38,8 @@ impl Plugin for LocationsPlugin {
                     sensors::win_event,
                     sensors::location_event,
                     sensors::button_event,
-                ),
+                )
+                    .run_if(in_state(Location::Level1000)),
             )
             .add_systems(
                 OnEnter(Location::OutDoor),

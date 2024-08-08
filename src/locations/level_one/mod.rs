@@ -3,7 +3,10 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     characters::Character,
-    constants::locations::{level_one::*, FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE},
+    constants::{
+        character::npcs::movement::BLACK_CAT_STARTING_POSITION,
+        locations::{level_one::*, FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE},
+    },
     locations::{
         level_one::{
             button::ButtonSensor,
@@ -18,15 +21,11 @@ use crate::{
 pub mod button;
 pub mod doors;
 
-
 pub struct LevelOnePlugin;
 
 impl Plugin for LevelOnePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<OpenDoorEvent>()
-            // .add_event::<ResetLevelOneEvent>()
-            // .add_event::<EnterLevelOneEvent>()
-            // .add_systems((reset_level_one, enter_level_one))
             .add_systems(
                 OnEnter(Location::Level1000),
                 (setup_level_one, button::set_up_button),
@@ -39,7 +38,6 @@ impl Plugin for LevelOnePlugin {
     }
 }
 
-/// DOC: rename to 1000
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Copy, Reflect)]
 pub enum Level1000Location {
     SpawnRoom,
@@ -50,35 +48,13 @@ pub enum Level1000Location {
 #[derive(Component, Reflect, PartialEq, Eq)]
 pub struct CharacterLocation(pub Level1000Location);
 
-// /// DOC
-// pub struct ResetLevelOneEvent;
+#[derive(Component, PartialEq, Eq)]
+pub enum WayPoint {
+    Top,
+    Bot,
+}
 
-// /// DOC
-// pub struct EnterLevelOneEvent;
-
-// fn reset_level_one(
-//     mut reset_level_event: EventReader<ResetLevelOneEvent>,
-//     mut location: ResMut<State<Location>>,
-//     mut enter_level_one_event: EventWriter<EnterLevelOneEvent>,
-// ) {
-//     for _ in reset_level_event.iter() {
-//         if location.current() == &Location::Level1000 {
-//             location.set(Location::Void).unwrap();
-//             enter_level_one_event.send(EnterLevelOneEvent);
-//         }
-//     }
-// }
-
-// fn enter_level_one(
-//     mut enter_level_event: EventReader<EnterLevelOneEvent>,
-//     mut location: ResMut<State<Location>>,
-// ) {
-//     for _ in enter_level_event.iter() {
-//         if location.current() != &Location::Level1000 {
-//             location.set(Location::Level1000).unwrap();
-//         }
-//     }
-// }
+/* --------------------------------- Systems -------------------------------- */
 
 fn despawn_level_one(
     mut commands: Commands,
@@ -95,6 +71,43 @@ fn setup_level_one(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
+    // -- WayPoints --
+    commands
+        .spawn((
+            SpatialBundle {
+                transform: Transform::from_translation(Vec3::new(
+                    BLACK_CAT_STARTING_POSITION.0,
+                    BLACK_CAT_STARTING_POSITION.1 - 50.,
+                    0.,
+                )),
+                visibility: Visibility::Hidden,
+                ..default()
+            },
+            Name::new("WayPoints"),
+            Location::Level1000,
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                SpatialBundle {
+                    transform: Transform::from_translation(WAYPOINT_TOP.into()),
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                Name::new("WayPoint Top"),
+                WayPoint::Top,
+            ));
+
+            parent.spawn((
+                SpatialBundle {
+                    transform: Transform::from_translation(WAYPOINT_BOT.into()),
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                Name::new("WayPoint Bot"),
+                WayPoint::Bot,
+            ));
+        });
+
     // -- Map --
 
     let walls = asset_server.load("textures/level_one/lab_wall.png");

@@ -6,12 +6,12 @@ use crate::{
         movement::{CharacterHitbox, MovementBundle, Speed},
         npcs::{
             aggression::{DetectionSensor, EngagePursuitEvent},
-            movement::{NewDirectionEvent, ResetAggroEvent, Target, WalkBehavior},
+            movement::{NewWayPointEvent, ResetAggroEvent, Target, WalkBehavior},
         },
         Character,
     },
     constants::character::{
-        npc::{movement::BLACK_CAT_STARTING_POSITION, *},
+        npcs::{movement::BLACK_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     locations::{
@@ -29,24 +29,25 @@ pub struct NPCsPlugin;
 
 impl Plugin for NPCsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<NewDirectionEvent>()
+        app.add_event::<NewWayPointEvent>()
             .add_event::<EngagePursuitEvent>()
             .add_event::<ResetAggroEvent>()
-            .add_systems(Startup, spawn_characters)
+            .add_systems(OnEnter(Location::Level1000), spawn_characters)
             .add_systems(
                 Update,
                 (
                     // -- Movement --
-                    movement::npc_walk_to,
                     movement::npc_walk,
                     movement::npc_chase,
+                    movement::npc_walk_to,
                     movement::daze_wait,
-                    movement::give_new_direction_event,
+                    movement::give_new_way_point_event,
                     // -- Aggression --
                     aggression::player_detection,
                     aggression::add_pursuit_urge,
                     aggression::reset_aggro,
-                ),
+                )
+                    .run_if(in_state(Location::Level1000)),
             );
     }
 }
@@ -55,24 +56,6 @@ impl Plugin for NPCsPlugin {
 pub struct NPC;
 
 fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
-    // initial target
-    let way_point = commands
-        .spawn((
-            SpatialBundle {
-                transform: Transform::from_translation(Vec3::new(
-                    BLACK_CAT_STARTING_POSITION.0,
-                    BLACK_CAT_STARTING_POSITION.1 - 50.,
-                    0.,
-                )),
-                visibility: Visibility::Hidden,
-                ..default()
-            },
-            Name::new("WayPoint for Black Cat"),
-            // FIXME: recreating waypoint after pursing player
-            Location::Level1000,
-        ))
-        .id();
-
     // Black Cat
     commands
         .spawn((
@@ -110,7 +93,7 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                 },
             },
             WalkBehavior,
-            Target(Some(way_point)),
+            Target(None),
             CharacterLocation(Level1000Location::Corridor),
         ))
         .with_children(|parent| {

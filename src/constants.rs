@@ -10,6 +10,7 @@ pub const RESOLUTION: f32 = 16. / 9.;
 pub const TILE_SIZE: f32 = 1.;
 
 pub const FRAME_TIME: f32 = 0.1;
+pub const CLOUD_FRAME_TIME: f32 = 0.001 * FRAME_TIME;
 
 pub mod character {
 
@@ -23,7 +24,7 @@ pub mod character {
     pub const CHAR_HITBOX_Y_OFFSET: f32 = -3.5 * CHAR_SCALE;
     pub const CHAR_HITBOX_Z_OFFSET: f32 = 0. * CHAR_SCALE;
 
-    pub mod npc {
+    pub mod npcs {
 
         pub const NPC_SCALE: f32 = super::CHAR_SCALE;
 
@@ -65,6 +66,9 @@ pub mod locations {
         pub const BUTTON_POSITION: (f32, f32, f32) = (24., 6., LEVEL_Z - 1.);
         pub const BUTTON_HITBOX_X_OFFSET: (f32, f32, f32) = (-3., 0., 0.);
         pub const BUTTON_SENSOR_POSITION: (f32, f32, f32) = (25.5, 6., LEVEL_Z);
+
+        pub const WAYPOINT_TOP: (f32, f32, f32) = (-5., 30., 0.);
+        pub const WAYPOINT_BOT: (f32, f32, f32) = (-5., -30., 0.);
     }
 }
 
