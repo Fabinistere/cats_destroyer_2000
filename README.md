@@ -1,5 +1,8 @@
 # Cats Destroyer 2000
 
+[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-0.11-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
+[![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/fabinistere/bevy_turn-based_combat#license)
+
 CreaJeu Edition 2023 - Theme: ***One Object Many Use***
 
 ![fast_blue_cat](https://user-images.githubusercontent.com/73140258/216720606-6e8f7768-3170-4956-a5d1-5124741783aa.gif)
@@ -19,7 +22,7 @@ or in the correct release note (if from other version):
 
 ### Binding
 
-- `M` to mindcontrol a cat
+- `M` or `:` to mindcontrol a cat
 - `ESC` to return to the player body
 - `Left Click` on the button *Hack* to hack doors
 - `Z Q S D` or `W A S D` or `Up Left Down Right` to move
@@ -27,7 +30,7 @@ or in the correct release note (if from other version):
 ### Future... (lmao)
 
 - [ ] TODO: LevelScene, CinematicScene
-  - [ ] TODO: MustHave - Reset the scene when touched (by an enemy)
+  - [x] Reset the scene when touched (by an enemy)
 - [ ] TODO: Background + MovingBubbles
 - [x] Final Cinematic
   - [x] Animations

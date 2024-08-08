@@ -2,7 +2,10 @@ use bevy::{prelude::*, winit::WinitSettings};
 
 use crate::{
     constants::ui::tablet::*,
-    locations::level_one::doors::{Door, OpenDoorEvent},
+    locations::{
+        level_one::doors::{Door, OpenDoorEvent},
+        Location,
+    },
     tablet::{tablet_is_free, tablet_is_mind_ctrl},
 };
 
@@ -14,19 +17,30 @@ impl Plugin for HackPlugin {
         app
             // OPTIMIZE: Only run the app when there is user input. This will significantly reduce CPU/GPU use.
             .insert_resource(WinitSettings::game())
-            .add_systems(Startup, setup_tablet_button)
+            .add_systems(OnEnter(Location::Level1000), setup_tablet_button)
             .add_systems(
                 Update,
                 (
                     button_system.run_if(tablet_is_free),
                     place_holder_while_in_mind_control.run_if(tablet_is_mind_ctrl),
-                ),
-            );
+                )
+                    .run_if(in_state(Location::Level1000)),
+            )
+            .add_systems(OnExit(Location::Level1000), remove_tablet_button);
     }
 }
 
 #[derive(Component)]
 pub struct Hackable;
+
+#[derive(Component)]
+pub struct HackButton;
+
+fn remove_tablet_button(mut commands: Commands, tablet_query: Query<Entity, With<HackButton>>) {
+    for button in tablet_query.iter() {
+        commands.entity(button).despawn_recursive();
+    }
+}
 
 pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer>) {
     // 'Hack'/Open the ALT_DOOR
@@ -50,7 +64,7 @@ pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer
                 ..default()
             },
             Name::new("Hack Button"),
-            // HackButton
+            HackButton,
         ))
         .with_children(|parent| {
             parent.spawn(TextBundle::from_section(
@@ -73,13 +87,11 @@ pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer
 ///
 /// Spamming should not work (cause of the timer being only 0.1s)
 ///
-/// TODO: feature - limit the access to tablet's features when using one
-/// Can't hack while MindCtrl -------------------^^^^^^^^
 /// REFACTOR: seperate color/text management from action
 fn button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &Children),
-        (Changed<Interaction>, With<Button>),
+        (Changed<Interaction>, With<HackButton>),
     >,
 
     mut text_query: Query<&mut Text>,
@@ -114,7 +126,7 @@ fn button_system(
 pub fn place_holder_while_in_mind_control(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &Children),
-        (Changed<Interaction>, With<Button>),
+        (Changed<Interaction>, With<HackButton>),
     >,
     mut text_query: Query<&mut Text>,
 ) {

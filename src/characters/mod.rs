@@ -16,3 +16,7 @@ impl Plugin for CharactersPlugin {
         ));
     }
 }
+
+/// Every cats have this component
+#[derive(Component)]
+pub struct Character;

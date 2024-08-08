@@ -8,7 +8,7 @@ use crate::{
         level_one::{
             button::ButtonSensor,
             doors::{Door, OpenDoorEvent},
-            CharacterLocation, LevelOneLocation,
+            CharacterLocation, Level1000Location,
         },
         Location,
     },
@@ -31,7 +31,7 @@ pub struct WinSensor;
 
 #[derive(Component)]
 pub struct LocationSensor {
-    pub location: LevelOneLocation,
+    pub location: Level1000Location,
 }
 
 /// Enter the elevator to trigger the win
@@ -71,17 +71,14 @@ pub fn win_trigger(
 pub fn win_event(
     mut win_event: EventReader<WinTriggerEvent>,
 
-    character_query: Query<&Name, Or<(With<Player>, With<NPC>)>>,
+    mind_controled_character_query: Query<&Name, Or<(With<Player>, With<NPC>)>>,
     current_location: Res<State<Location>>,
     mut next_location: ResMut<NextState<Location>>,
 ) {
     for event in win_event.iter() {
-        match character_query.get(event.entity) {
-            Err(e) => warn!("The Winner is neither a NPC or a Player... {:?}", e),
-            Ok(name) => {
-                let congrats = format!("BIEN JOUE {}!", name);
-                println!("{}", congrats);
-            }
+        if let Ok(name) = mind_controled_character_query.get(event.entity) {
+            let congrats = format!("BIEN JOUE {}!", name);
+            println!("{}", congrats);
         }
         if current_location.get() == &Location::Level1000 {
             println!("In LevelOne");

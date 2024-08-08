@@ -4,10 +4,9 @@
 use bevy::prelude::*;
 
 use crate::{
-    characters::npcs::NPC,
-    constants::{cinematics::*, locations::LEVEL_SCALE, FRAME_TIME},
+    constants::{cinematics::*, locations::LEVEL_SCALE, CLOUD_FRAME_TIME, FRAME_TIME},
     spritesheet::AnimationTimer,
-    tablet::mind_control::MindControled,
+    tablet::mind_control::CurrentlyMindControlled,
 };
 
 /* -------------------------------------------------------------------------- */
@@ -38,7 +37,7 @@ pub fn spawn_cinematic_final(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut clear_color: ResMut<ClearColor>,
 
-    blue_cat_controlled_query: Query<Entity, (Without<NPC>, With<MindControled>)>,
+    currently_mind_controlled: Res<CurrentlyMindControlled>,
 ) {
     info!("Spawn Cinematic");
 
@@ -57,7 +56,7 @@ pub fn spawn_cinematic_final(
         Name::new("Cinematics - Clouds"),
         Clouds,
         // -- Animation --
-        AnimationTimer(Timer::from_seconds(FRAME_TIME, TimerMode::Repeating)),
+        AnimationTimer(Timer::from_seconds(CLOUD_FRAME_TIME, TimerMode::Repeating)),
     ));
 
     commands.spawn((
@@ -73,7 +72,7 @@ pub fn spawn_cinematic_final(
         Name::new("Cinematics - Clouds"),
         Clouds,
         // -- Animation --
-        AnimationTimer(Timer::from_seconds(FRAME_TIME, TimerMode::Repeating)),
+        AnimationTimer(Timer::from_seconds(CLOUD_FRAME_TIME, TimerMode::Repeating)),
     ));
 
     commands.spawn((
@@ -89,13 +88,12 @@ pub fn spawn_cinematic_final(
         Name::new("Cinematics - Mountain Lab"),
     ));
 
-    // BUG: if an enemy manage to cross the win sensor without the mind controlled the wrong cinematic will proc
-    let cat_escape_image = if blue_cat_controlled_query.is_empty() {
-        info!("EasterEgg: Black Cat Escaped");
-        asset_server.load("textures/cinematics/final/black-cat-sheet.png")
-    } else {
+    let cat_escape_image = if CurrentlyMindControlled::BlueCat == *currently_mind_controlled {
         info!("NormalEnd: Blue Cat Escaped");
         asset_server.load("textures/cinematics/final/blue-cat-sheet.png")
+    } else {
+        info!("EasterEgg: Black Cat Escaped");
+        asset_server.load("textures/cinematics/final/black-cat-sheet.png")
     };
 
     let cat_escape_atlas =
@@ -122,8 +120,7 @@ pub fn spawn_cinematic_final(
 }
 
 // TODO: spawn a Quit button after x seconds
-
-// LEVEL_SCALE
+// IDEA: when leaving with an enemy, scroll through all level with the enemy with a jazzy/chill song
 
 /// Infinitly loop the clouds
 pub fn animate_clouds(
@@ -137,8 +134,7 @@ pub fn animate_clouds(
             transform.translation.x = if transform.translation.x == CLOUDS_LIMIT {
                 CLOUDS_RESET
             } else {
-                // IDEA: can be smoother if - 0.1 and faster timer
-                transform.translation.x - 1.
+                transform.translation.x - 0.1
             };
         }
     }

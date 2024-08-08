@@ -2,109 +2,68 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    characters::{npcs::NPC, player::Player},
-    constants::locations::{level_one::*, FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE},
+    characters::Character,
+    constants::{
+        character::npcs::movement::BLACK_CAT_STARTING_POSITION,
+        locations::{level_one::*, FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE},
+    },
     locations::{
         level_one::{
-            button::PushButton,
-            doors::{Door, ExitDoor, OpenDoorEvent},
+            button::ButtonSensor,
+            doors::{Door, DoorHitbox, ExitDoor, OpenDoorEvent},
         },
-        sensors::WinSensor,
+        sensors::{LocationSensor, WinSensor},
         Location,
     },
     tablet::hack::Hackable,
 };
 
-use self::{
-    button::{set_up_button, ButtonSensor},
-    doors::DoorHitbox,
-};
-
-use super::sensors::LocationSensor;
-
 pub mod button;
 pub mod doors;
-
-// TODO: level_one to level_one_thousand
 
 pub struct LevelOnePlugin;
 
 impl Plugin for LevelOnePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<OpenDoorEvent>()
-            // .add_event::<ResetLevelOneEvent>()
-            // .add_event::<EnterLevelOneEvent>()
-            // .add_systems((reset_level_one, enter_level_one))
             .add_systems(
                 OnEnter(Location::Level1000),
-                (setup_level_one, set_up_button),
+                (setup_level_one, button::set_up_button),
             )
             .add_systems(
                 Update,
-                (doors::animate_door, doors::open_door_event).run_if(in_state(Location::Level1000)), // .run_if(in_level_one)
+                (doors::animate_door, doors::open_door_event).run_if(in_state(Location::Level1000)),
             )
             .add_systems(OnExit(Location::Level1000), despawn_level_one);
     }
 }
 
 #[derive(Clone, Eq, PartialEq, Debug, Hash, Copy, Reflect)]
-pub enum LevelOneLocation {
+pub enum Level1000Location {
     SpawnRoom,
     Corridor,
     Elevator,
 }
 
-#[derive(Component, Reflect)]
-pub struct CharacterLocation(pub LevelOneLocation);
+#[derive(Component, Reflect, PartialEq, Eq)]
+pub struct CharacterLocation(pub Level1000Location);
 
-// /// DOC
-// pub struct ResetLevelOneEvent;
+#[derive(Component, PartialEq, Eq)]
+pub enum WayPoint {
+    Top,
+    Bot,
+}
 
-// /// DOC
-// pub struct EnterLevelOneEvent;
+/* --------------------------------- Systems -------------------------------- */
 
-// fn reset_level_one(
-//     mut reset_level_event: EventReader<ResetLevelOneEvent>,
-//     mut location: ResMut<State<Location>>,
-//     mut enter_level_one_event: EventWriter<EnterLevelOneEvent>,
-// ) {
-//     for _ in reset_level_event.iter() {
-//         if location.current() == &Location::Level1000 {
-//             location.set(Location::Void).unwrap();
-//             enter_level_one_event.send(EnterLevelOneEvent);
-//         }
-//     }
-// }
-
-// fn enter_level_one(
-//     mut enter_level_event: EventReader<EnterLevelOneEvent>,
-//     mut location: ResMut<State<Location>>,
-// ) {
-//     for _ in enter_level_event.iter() {
-//         if location.current() != &Location::Level1000 {
-//             location.set(Location::Level1000).unwrap();
-//         }
-//     }
-// }
-
-/// "despawn"
 fn despawn_level_one(
-    // mut commands: Commands,
-    mut query: Query<
-        (Entity, &mut Visibility, &Name),
-        Or<(
-            With<Player>,
-            With<NPC>,
-            With<Location>,
-            With<Button>,
-            With<PushButton>,
-        )>,
-    >,
+    mut commands: Commands,
+    level_1000_query: Query<(Entity, &Name), Or<(With<Character>, With<Location>)>>,
 ) {
-    for (_entity, mut visibility, name) in query.iter_mut() {
-        // commands.entity(entity).despawn_recursive();
-        info!("{} is invisible", name);
-        *visibility = Visibility::Hidden;
+    for (entity, name) in level_1000_query.iter() {
+        info!("{name} despawn");
+        commands.entity(entity).despawn_recursive();
+        // NOTE: will despawn 40v3 and 40v2 twice
     }
 }
 
@@ -113,8 +72,46 @@ fn setup_level_one(
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
 ) {
-    // -- Map --
+    // -- WayPoints --
+    commands
+        .spawn((
+            SpatialBundle {
+                transform: Transform::from_translation(Vec3::new(
+                    BLACK_CAT_STARTING_POSITION.0,
+                    BLACK_CAT_STARTING_POSITION.1 - 50.,
+                    0.,
+                )),
+                visibility: Visibility::Hidden,
+                ..default()
+            },
+            Name::new("WayPoints"),
+            Location::Level1000,
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                SpatialBundle {
+                    transform: Transform::from_translation(WAYPOINT_TOP.into()),
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                Name::new("WayPoint Top"),
+                WayPoint::Top,
+            ));
 
+            parent.spawn((
+                SpatialBundle {
+                    transform: Transform::from_translation(WAYPOINT_BOT.into()),
+                    visibility: Visibility::Hidden,
+                    ..default()
+                },
+                Name::new("WayPoint Bot"),
+                WayPoint::Bot,
+            ));
+        });
+
+    // -- Map --
+    // FIXME: as issued [here](https://github.com/bevyengine/bevy/issues/12344), the asset will wrongly unload while strong handle is alive after a State Change. It has been fixed in `13.1`
+    // Will not load a second time after being caught
     let walls = asset_server.load("textures/level_one/lab_wall.png");
     let floor = asset_server.load("textures/level_one/lab_floor.png");
 
@@ -134,7 +131,7 @@ fn setup_level_one(
                         scale: LEVEL_SCALE.into(),
                         ..default()
                     },
-                    ..SpriteBundle::default()
+                    ..default()
                 },
                 RigidBody::Fixed,
                 Name::new("floor"),
@@ -149,7 +146,7 @@ fn setup_level_one(
                             scale: LEVEL_SCALE.into(),
                             ..default()
                         },
-                        ..SpriteBundle::default()
+                        ..default()
                     },
                     RigidBody::Fixed,
                     Name::new("walls"),
@@ -272,7 +269,7 @@ fn setup_level_one(
                         ActiveEvents::COLLISION_EVENTS,
                         Sensor,
                         LocationSensor {
-                            location: LevelOneLocation::Corridor,
+                            location: Level1000Location::Corridor,
                         },
                         Name::new("Corridor Sensor From Spawn"),
                     ));
@@ -283,7 +280,7 @@ fn setup_level_one(
                         ActiveEvents::COLLISION_EVENTS,
                         Sensor,
                         LocationSensor {
-                            location: LevelOneLocation::SpawnRoom,
+                            location: Level1000Location::SpawnRoom,
                         },
                         Name::new("SpawnRoom Sensor"),
                     ));
@@ -331,7 +328,7 @@ fn setup_level_one(
                         ActiveEvents::COLLISION_EVENTS,
                         Sensor,
                         LocationSensor {
-                            location: LevelOneLocation::Corridor,
+                            location: Level1000Location::Corridor,
                         },
                         Name::new("Corridor Sensor From Exit"),
                     ));

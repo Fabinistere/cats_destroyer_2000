@@ -1,22 +1,27 @@
 use crate::{
     characters::movement::{CharacterHitbox, MovementBundle, Speed},
     constants::character::{
-        npc::{movement::BLUE_CAT_STARTING_POSITION, *},
+        npcs::{movement::BLUE_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
-    locations::level_one::{CharacterLocation, LevelOneLocation},
+    locations::{
+        level_one::{CharacterLocation, Level1000Location},
+        Location,
+    },
     spritesheet::{AnimState, AnimationTimer, CatSheet},
-    tablet::mind_control::MindControled,
+    tablet::mind_control::MindControlled,
 };
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+
+use super::Character;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_player)
-            .add_systems(Update, player_idle);
+        app.add_systems(OnEnter(Location::Level1000), spawn_player)
+            .add_systems(Update, player_idle.run_if(in_state(Location::Level1000)));
     }
 }
 
@@ -28,8 +33,8 @@ pub struct PlayerHitbox;
 
 /// # Note
 ///
-/// Player's velocity = 0 if not self MindControled to avoid being lauched
-fn player_idle(mut player_query: Query<&mut Velocity, (With<Player>, Without<MindControled>)>) {
+/// Player's velocity = 0 if not self MindControlled to avoid being lauched
+fn player_idle(mut player_query: Query<&mut Velocity, (With<Player>, Without<MindControlled>)>) {
     if let Ok(mut rb_vel) = player_query.get_single_mut() {
         rb_vel.linvel.x = 0.;
         rb_vel.linvel.y = 0.;
@@ -55,7 +60,7 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
             },
             Name::new("Player: Blue Cat"),
             Player,
-            MindControled,
+            MindControlled,
             // -- Animation --
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
             AnimState {
@@ -72,7 +77,8 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
                     angvel: 0.,
                 },
             },
-            CharacterLocation(LevelOneLocation::SpawnRoom),
+            Character,
+            CharacterLocation(Level1000Location::SpawnRoom),
         ))
         .with_children(|parent| {
             parent.spawn((

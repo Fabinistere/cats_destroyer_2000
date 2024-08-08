@@ -31,6 +31,7 @@ impl Plugin for LocationsPlugin {
         app.add_event::<WinTriggerEvent>()
             .add_state::<Location>()
             .add_plugins(level_one::LevelOnePlugin)
+            .add_systems(OnEnter(Location::Void), void_transition)
             .add_systems(
                 Update,
                 (
@@ -38,7 +39,8 @@ impl Plugin for LocationsPlugin {
                     sensors::win_event,
                     sensors::location_event,
                     sensors::button_event,
-                ),
+                )
+                    .run_if(in_state(Location::Level1000)),
             )
             .add_systems(
                 OnEnter(Location::OutDoor),
@@ -49,4 +51,8 @@ impl Plugin for LocationsPlugin {
                 (animate_clouds, animate_free_cat).run_if(in_state(Location::OutDoor)),
             );
     }
+}
+
+fn void_transition(mut next_location: ResMut<NextState<Location>>) {
+    next_location.set(Location::Level1000);
 }

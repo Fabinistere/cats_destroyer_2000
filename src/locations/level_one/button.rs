@@ -1,9 +1,12 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::constants::locations::{
-    level_one::{BUTTON_HITBOX_X_OFFSET, BUTTON_POSITION},
-    LEVEL_SCALE,
+use crate::{
+    constants::locations::{
+        level_one::{BUTTON_HITBOX_X_OFFSET, BUTTON_POSITION},
+        LEVEL_SCALE,
+    },
+    locations::Location,
 };
 
 /// # Note
@@ -49,6 +52,7 @@ pub fn set_up_button(
             },
             Name::new("OneWay Button"),
             PushButton,
+            Location::Level1000,
             RigidBody::Dynamic,
             LockedAxes::ROTATION_LOCKED,
         ))

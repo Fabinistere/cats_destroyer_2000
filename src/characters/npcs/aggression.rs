@@ -5,37 +5,24 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     characters::{
-        npcs::movement::{ChaseBehavior, Target, WalkBehavior},
+        npcs::{
+            movement::{ChaseBehavior, NewWayPointEvent, ResetAggroEvent, Target, WalkBehavior},
+            NPC,
+        },
         player::{Player, PlayerHitbox},
     },
     collisions::CollisionEventExt,
     locations::level_one::CharacterLocation,
-    tablet::mind_control::MindControled,
+    tablet::mind_control::MindControlled,
 };
-
-use super::{
-    movement::{NewDirectionEvent, ResetAggroEvent},
-    NPC,
-};
-
-// :0
-
-// Happens when:
-//   - ??? (npc::movement::pursue)
-//     - target is not found/exist
-//     - target is reach
-// Read in ??? (npc::aggression::remove_pursuit_urge)
-// pub struct StopChaseEvent {
-//     pub npc_entity: Entity,
-// }
 
 /// Happens when:
-///   - npc::aggression::player_detection
+///   - npcs::aggression::player_detection
 ///     - An npc detected a enemy
 ///       in the same Area
 ///
 /// Read in
-///   - npc::aggression::add_pursuit_urge
+///   - npcs::aggression::add_pursuit_urge
 ///     - remove DetectionBehavior from the entity
 ///     - insert PursuitBehavior into the entity
 ///     - insert the Target into the entity
@@ -91,7 +78,7 @@ pub fn player_detection(
                     match character_query.get_many([**detection_sensor.1, **player_hitbox.1]) {
                         Err(e) => warn!("{:?}", e),
                         Ok([(npc, npc_location), (player, player_location)]) => {
-                            if npc_location.0 == player_location.0 {
+                            if npc_location == player_location {
                                 // [detection_sensor, player_hitbox].1 returns the Parent Entity
                                 // Only Bad Cats have a DetectionSensor
                                 // Only the Player have a PlayerHitbox
@@ -116,7 +103,7 @@ pub fn player_detection(
 pub fn add_pursuit_urge(
     mut commands: Commands,
     mut ev_engage_pursuit: EventReader<EngagePursuitEvent>,
-    mut npc_query: Query<(Entity, &mut Target, &Name), (With<NPC>, Without<MindControled>)>,
+    mut npc_query: Query<(Entity, &mut Target, &Name), (With<NPC>, Without<MindControlled>)>,
 ) {
     for ev in ev_engage_pursuit.iter() {
         match npc_query.get_mut(ev.npc_entity) {
@@ -142,11 +129,11 @@ pub fn reset_aggro(
     mut commands: Commands,
     mut reset_aggro_event: EventReader<ResetAggroEvent>,
 
-    mut new_direction_event: EventWriter<NewDirectionEvent>,
+    mut new_way_point_event: EventWriter<NewWayPointEvent>,
 ) {
     for ResetAggroEvent { npc } in reset_aggro_event.iter() {
         commands.entity(*npc).remove::<ChaseBehavior>();
         commands.entity(*npc).insert(WalkBehavior);
-        new_direction_event.send(NewDirectionEvent(*npc));
+        new_way_point_event.send(NewWayPointEvent(*npc));
     }
 }
