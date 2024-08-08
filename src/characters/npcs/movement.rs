@@ -16,7 +16,7 @@ use crate::{
         level_one::{CharacterLocation, WayPoint},
         Location,
     },
-    tablet::mind_control::MindControled,
+    tablet::mind_control::MindControlled,
 };
 
 #[derive(Component)]
@@ -54,7 +54,7 @@ pub fn npc_walk_to(
         (
             With<NPC>,
             Or<(With<ChaseBehavior>, With<WalkBehavior>)>,
-            Without<MindControled>,
+            Without<MindControlled>,
             Without<Dazed>,
         ),
     >,
@@ -102,7 +102,7 @@ pub fn npc_walk(
         (
             With<NPC>,
             With<WalkBehavior>,
-            Without<MindControled>,
+            Without<MindControlled>,
             Without<Dazed>,
         ),
     >,
@@ -145,7 +145,7 @@ pub fn npc_chase(
         (
             With<NPC>,
             With<ChaseBehavior>,
-            Without<MindControled>,
+            Without<MindControlled>,
             Without<Dazed>,
         ),
     >,
@@ -204,18 +204,16 @@ pub fn give_new_way_point_event(
     mut new_way_point_event: EventReader<NewWayPointEvent>,
 
     mut npc_query: Query<(&mut Target, &Name), (With<NPC>, With<WalkBehavior>)>,
-    way_points_query: Query<(Entity, &WayPoint)>,
+    way_points_query: Query<Entity, With<WayPoint>>,
 ) {
     for NewWayPointEvent(npc) in new_way_point_event.iter() {
         let (mut target, _name) = npc_query.get_mut(*npc).unwrap();
 
         if target.0.is_none() {
             let mut rng = rand::thread_rng();
-            target.0 = Some(way_points_query.iter().choose(&mut rng).unwrap().0);
-        } else if let Ok((original_way_point, way_point_location)) =
-            way_points_query.get(target.0.unwrap())
-        {
-            for (way_point, _) in way_points_query.iter() {
+            target.0 = Some(way_points_query.iter().choose(&mut rng).unwrap());
+        } else if let Ok(original_way_point) = way_points_query.get(target.0.unwrap()) {
+            for way_point in way_points_query.iter() {
                 if way_point != original_way_point {
                     target.0 = Some(way_point);
                 }
@@ -224,7 +222,7 @@ pub fn give_new_way_point_event(
         } else {
             // the target is not a way point
             let mut rng = rand::thread_rng();
-            target.0 = Some(way_points_query.iter().choose(&mut rng).unwrap().0);
+            target.0 = Some(way_points_query.iter().choose(&mut rng).unwrap());
         }
     }
 }

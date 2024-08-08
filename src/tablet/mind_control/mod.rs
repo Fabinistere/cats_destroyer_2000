@@ -55,7 +55,7 @@ enum MindControlSet {
 }
 
 #[derive(Component)]
-pub struct MindControled;
+pub struct MindControlled;
 
 /// Used to choose which sprite to animate at the end cinematic
 /// When we despawned every characters.
@@ -74,8 +74,8 @@ pub enum CurrentlyMindControlled {
 ///
 /// IDEA: gamefeel - smooth transition between mind control switch
 fn camera_follow(
-    mind_controled_query: Query<&Transform, With<MindControled>>,
-    mut camera_query: Query<&mut Transform, (Without<MindControled>, With<Camera>)>,
+    mind_controled_query: Query<&Transform, With<MindControlled>>,
+    mut camera_query: Query<&mut Transform, (Without<MindControlled>, With<Camera>)>,
 ) {
     let player_transform = mind_controled_query.single();
     let mut camera_transform = camera_query.single_mut();
@@ -95,9 +95,9 @@ pub fn mind_control_button(
 ) {
     if keyboard_input.pressed(KeyCode::M) {
         if let Some(npc) = npc_query.iter().next() {
-            commands.entity(npc).insert(MindControled); // .remove::<Dazed>()
+            commands.entity(npc).insert(MindControlled); // .remove::<Dazed>()
             let player = player_query.single();
-            commands.entity(player).remove::<MindControled>();
+            commands.entity(player).remove::<MindControlled>();
 
             *currently_mind_controlled = CurrentlyMindControlled::BlackCat;
         }
@@ -110,27 +110,28 @@ fn exit_mind_control(
     keyboard_input: Res<Input<KeyCode>>,
 
     player_query: Query<Entity, With<Player>>,
-    npc_query: Query<(Entity, &Name), (With<NPC>, With<MindControled>)>,
+    npc_query: Query<(Entity, &Name), (With<NPC>, With<MindControlled>)>,
     mut currently_mind_controlled: ResMut<CurrentlyMindControlled>,
 ) {
     if keyboard_input.pressed(KeyCode::Escape) {
         for (npc, _name) in npc_query.iter() {
-            commands.entity(npc).remove::<MindControled>();
+            commands.entity(npc).remove::<MindControlled>();
         }
 
         let player = player_query.single();
-        commands.entity(player).insert(MindControled);
+        commands.entity(player).insert(MindControlled);
         *currently_mind_controlled = CurrentlyMindControlled::BlueCat;
     }
 }
 
 fn daze_post_mind_control(
     mut commands: Commands,
-    mut mind_controled_removals: RemovedComponents<MindControled>,
+    mut mind_controled_removals: RemovedComponents<MindControlled>,
 
     player_query: Query<Entity, With<Player>>,
 ) {
     for entity in mind_controled_removals.iter() {
+        info!("{entity:?} removal MindControlled");
         match player_query.get(entity) {
             // This is prbly a npc
             Err(_) => {
@@ -140,7 +141,7 @@ fn daze_post_mind_control(
             }
             Ok(_) => {
                 // Will never be decreased (no system for it)
-                // Only removed by adding MindControled back to the player
+                // Only removed by adding MindControlled back to the player
                 // So the content of the timer is useless
                 commands.entity(entity).insert(Dazed {
                     timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Repeating),
@@ -153,7 +154,7 @@ fn daze_post_mind_control(
 fn daze_cure_by_mind_control(
     mut commands: Commands,
 
-    mind_controled_query: Query<(Entity, &Name, &Children), Added<MindControled>>,
+    mind_controled_query: Query<(Entity, &Name, &Children), Added<MindControlled>>,
     daze_effect_query: Query<Entity, With<DazeAnimation>>,
 ) {
     for (entity, _name, children) in mind_controled_query.iter() {

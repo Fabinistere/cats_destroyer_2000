@@ -13,7 +13,7 @@ use crate::{
     },
     collisions::CollisionEventExt,
     locations::level_one::CharacterLocation,
-    tablet::mind_control::MindControled,
+    tablet::mind_control::MindControlled,
 };
 
 /// Happens when:
@@ -103,7 +103,7 @@ pub fn player_detection(
 pub fn add_pursuit_urge(
     mut commands: Commands,
     mut ev_engage_pursuit: EventReader<EngagePursuitEvent>,
-    mut npc_query: Query<(Entity, &mut Target, &Name), (With<NPC>, Without<MindControled>)>,
+    mut npc_query: Query<(Entity, &mut Target, &Name), (With<NPC>, Without<MindControlled>)>,
 ) {
     for ev in ev_engage_pursuit.iter() {
         match npc_query.get_mut(ev.npc_entity) {

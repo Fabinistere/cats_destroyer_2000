@@ -3,13 +3,13 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     characters::movement::{Dazed, Speed},
-    tablet::mind_control::MindControled,
+    tablet::mind_control::MindControlled,
 };
 
-/// The player input will act on the current MindControled entity
+/// The player input will act on the current MindControlled entity
 pub fn mind_control_movement(
     keyboard_input: Res<Input<KeyCode>>,
-    mut mind_controled_query: Query<(&Speed, &mut Velocity), With<MindControled>>,
+    mut mind_controled_query: Query<(&Speed, &mut Velocity), With<MindControlled>>,
 ) {
     if let Ok((speed, mut rb_vel)) = mind_controled_query.get_single_mut() {
         let up = keyboard_input.pressed(KeyCode::Z)

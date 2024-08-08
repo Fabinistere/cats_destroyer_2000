@@ -9,7 +9,7 @@ use crate::{
         Location,
     },
     spritesheet::{AnimState, AnimationTimer, CatSheet},
-    tablet::mind_control::MindControled,
+    tablet::mind_control::MindControlled,
 };
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -33,8 +33,8 @@ pub struct PlayerHitbox;
 
 /// # Note
 ///
-/// Player's velocity = 0 if not self MindControled to avoid being lauched
-fn player_idle(mut player_query: Query<&mut Velocity, (With<Player>, Without<MindControled>)>) {
+/// Player's velocity = 0 if not self MindControlled to avoid being lauched
+fn player_idle(mut player_query: Query<&mut Velocity, (With<Player>, Without<MindControlled>)>) {
     if let Ok(mut rb_vel) = player_query.get_single_mut() {
         rb_vel.linvel.x = 0.;
         rb_vel.linvel.y = 0.;
@@ -60,7 +60,7 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
             },
             Name::new("Player: Blue Cat"),
             Player,
-            MindControled,
+            MindControlled,
             // -- Animation --
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
             AnimState {
