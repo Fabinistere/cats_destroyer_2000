@@ -36,17 +36,16 @@ impl Plugin for NPCsPlugin {
             .add_systems(
                 Update,
                 (
-                    // -- Movement --
+                    aggression::player_detection,
+                    aggression::add_pursuit_urge,
                     movement::npc_walk,
                     movement::npc_chase,
                     movement::npc_walk_to,
                     movement::daze_wait,
-                    movement::give_new_way_point_event,
-                    // -- Aggression --
-                    aggression::player_detection,
-                    aggression::add_pursuit_urge,
                     aggression::reset_aggro,
+                    movement::give_new_way_point_event,
                 )
+                    .chain()
                     .run_if(in_state(Location::Level1000)),
             );
     }

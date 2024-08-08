@@ -207,22 +207,23 @@ pub fn give_new_way_point_event(
     way_points_query: Query<Entity, With<WayPoint>>,
 ) {
     for NewWayPointEvent(npc) in new_way_point_event.iter() {
-        let (mut target, _name) = npc_query.get_mut(*npc).unwrap();
-
-        if target.0.is_none() {
-            let mut rng = rand::thread_rng();
-            target.0 = Some(way_points_query.iter().choose(&mut rng).unwrap());
-        } else if let Ok(original_way_point) = way_points_query.get(target.0.unwrap()) {
-            for way_point in way_points_query.iter() {
-                if way_point != original_way_point {
-                    target.0 = Some(way_point);
+        // The entity could have been despawned after a level change
+        if let Ok((mut target, _name)) = npc_query.get_mut(*npc) {
+            if target.0.is_none() {
+                let mut rng = rand::thread_rng();
+                target.0 = Some(way_points_query.iter().choose(&mut rng).unwrap());
+            } else if let Ok(original_way_point) = way_points_query.get(target.0.unwrap()) {
+                for way_point in way_points_query.iter() {
+                    if way_point != original_way_point {
+                        target.0 = Some(way_point);
+                    }
                 }
+                // if no other waypoint is found, the npc will be stuck in the current
+            } else {
+                // the target is not a way point
+                let mut rng = rand::thread_rng();
+                target.0 = Some(way_points_query.iter().choose(&mut rng).unwrap());
             }
-            // if no other waypoint is found, the npc will be stuck in the current
-        } else {
-            // the target is not a way point
-            let mut rng = rand::thread_rng();
-            target.0 = Some(way_points_query.iter().choose(&mut rng).unwrap());
         }
     }
 }

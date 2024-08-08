@@ -58,9 +58,8 @@ fn main() {
         .add_plugins((
             debug::DebugPlugin,
             spritesheet::CatSpritePlugin,
-            tablet::hack::HackPlugin,
             locations::LocationsPlugin,
-            tablet::mind_control::MindControlPlugin,
+            tablet::TabletPlugin,
             characters::CharactersPlugin,
         ))
         .add_systems(Startup, spawn_camera);

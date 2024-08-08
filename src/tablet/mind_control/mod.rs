@@ -18,40 +18,21 @@ pub struct MindControlPlugin;
 
 impl Plugin for MindControlPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<CurrentlyMindControlled>()
-            .add_systems(
-                Update,
-                (
-                    mind_control_button
-                        .run_if(tablet_is_free)
-                        .in_set(MindControlSet::Enter),
-                    exit_mind_control
-                        .run_if(tablet_is_mind_ctrl)
-                        .in_set(MindControlSet::Exit)
-                        .after(MindControlSet::Enter),
-                    daze_cure_by_mind_control
-                        .before(MindControlSet::Exit)
-                        .after(MindControlSet::Enter),
-                    movement::mind_control_movement
-                        .in_set(MindControlSet::Movement)
-                        .after(MindControlSet::Enter),
-                    camera_follow.after(MindControlSet::Movement),
-                    movement::freeze_dazed_character,
-                )
-                    .run_if(in_state(Location::Level1000)),
+        app.init_resource::<CurrentlyMindControlled>().add_systems(
+            Update,
+            (
+                mind_control_button.run_if(tablet_is_free),
+                exit_mind_control.run_if(tablet_is_mind_ctrl),
+                daze_cure_by_mind_control,
+                daze_post_mind_control,
+                movement::mind_control_movement,
+                camera_follow,
+                movement::freeze_dazed_character,
             )
-            .add_systems(
-                PostUpdate,
-                daze_post_mind_control.run_if(in_state(Location::Level1000)), //.after(MindControlSet::Exit)
-            );
+                .chain()
+                .run_if(in_state(Location::Level1000)),
+        );
     }
-}
-
-#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
-enum MindControlSet {
-    Enter,
-    Exit,
-    Movement,
 }
 
 #[derive(Component)]
@@ -129,24 +110,20 @@ fn daze_post_mind_control(
     mut mind_controled_removals: RemovedComponents<MindControlled>,
 
     player_query: Query<Entity, With<Player>>,
+    npcs_query: Query<Entity, With<NPC>>,
 ) {
     for entity in mind_controled_removals.iter() {
-        info!("{entity:?} removal MindControlled");
-        match player_query.get(entity) {
-            // This is prbly a npc
-            Err(_) => {
-                commands.entity(entity).insert(Dazed {
-                    timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Once),
-                });
-            }
-            Ok(_) => {
-                // Will never be decreased (no system for it)
-                // Only removed by adding MindControlled back to the player
-                // So the content of the timer is useless
-                commands.entity(entity).insert(Dazed {
-                    timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Repeating),
-                });
-            }
+        if player_query.get(entity).is_ok() {
+            // Will never be decreased (no system for it)
+            // Only removed by adding MindControlled back to the player
+            // So the content of the timer is useless
+            commands.entity(entity).insert(Dazed {
+                timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Repeating),
+            });
+        } else if npcs_query.get(entity).is_ok() {
+            commands.entity(entity).insert(Dazed {
+                timer: Timer::new(Duration::from_secs(DAZE_TIMER), TimerMode::Once),
+            });
         }
     }
 }
