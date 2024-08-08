@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Back to jail - [v0.4.0](https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v0.4.0) - 2024-08-08
+
+[![v0.4.0](https://img.shields.io/badge/v0.4.0-gray?style=flat&logo=github&logoColor=181717&link=https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v0.4.0)](https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v0.4.0)
+[![**Full Commits History**](https://img.shields.io/badge/GitHubLog-gray?style=flat&logo=github&logoColor=181717&link=https://github.com/Fabinistere/cats_destroyer_2000/compare/v0.3.0...v0.4.0)](https://github.com/Fabinistere/cats_destroyer_2000/compare/v0.3.0...v0.4.0)
+
+### Features
+
+- reset the level when getting caught (bevy asset bug: the assets will wrongly unload while storng handle is alive after the level reset - fixed in `13.2`)
+- the enemies can't catch you if you're in another location's room (corridor/spawn)
+
 ## Bevy Migration - [v0.3.0](https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v0.3.0) - 2024-08-06
 
 [![v0.3.0](https://img.shields.io/badge/v0.3.0-gray?style=flat&logo=github&logoColor=181717&link=https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v0.3.0)](https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v0.3.0)

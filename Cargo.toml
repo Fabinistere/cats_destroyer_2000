@@ -1,6 +1,6 @@
 [package]
 name = "cats_destroyer_2000"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["Olf EPAIN aka Wabtey <wabtey@disroot.org>", "???"]
 edition = "2021"
 description = "Puzzle game where you play as a mind-manipulating blue hacker cat to escape the BadCats laboratory."
