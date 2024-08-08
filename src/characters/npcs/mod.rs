@@ -2,20 +2,24 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    characters::movement::{CharacterHitbox, MovementBundle, Speed},
-    characters::npcs::{
-        aggression::{DetectionSensor, EngagePursuitEvent},
-        movement::{NewDirectionEvent, ResetAggroEvent, WalkBehavior},
+    characters::{
+        movement::{CharacterHitbox, MovementBundle, Speed},
+        npcs::{
+            aggression::{DetectionSensor, EngagePursuitEvent},
+            movement::{NewWayPointEvent, ResetAggroEvent, Target, WalkBehavior},
+        },
+        Character,
     },
     constants::character::{
-        npc::{movement::BLACK_CAT_STARTING_POSITION, *},
+        npcs::{movement::BLACK_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
-    locations::level_one::{CharacterLocation, LevelOneLocation},
+    locations::{
+        level_one::{CharacterLocation, Level1000Location},
+        Location,
+    },
     spritesheet::{AnimState, AnimationTimer, CatSheet},
 };
-
-use self::movement::Target;
 
 mod aggression;
 pub mod movement;
@@ -25,24 +29,24 @@ pub struct NPCsPlugin;
 
 impl Plugin for NPCsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<NewDirectionEvent>()
+        app.add_event::<NewWayPointEvent>()
             .add_event::<EngagePursuitEvent>()
             .add_event::<ResetAggroEvent>()
-            .add_systems(Startup, spawn_characters)
+            .add_systems(OnEnter(Location::Level1000), spawn_characters)
             .add_systems(
                 Update,
                 (
-                    // -- Movement --
-                    movement::npc_walk_to,
-                    movement::npc_walk,
-                    movement::npc_chase,
-                    movement::daze_wait,
-                    movement::give_new_direction_event,
-                    // -- Aggression --
                     aggression::player_detection,
                     aggression::add_pursuit_urge,
+                    movement::npc_walk,
+                    movement::npc_chase,
+                    movement::npc_walk_to,
+                    movement::daze_wait,
                     aggression::reset_aggro,
-                ),
+                    movement::give_new_way_point_event,
+                )
+                    .chain()
+                    .run_if(in_state(Location::Level1000)),
             );
     }
 }
@@ -51,22 +55,6 @@ impl Plugin for NPCsPlugin {
 pub struct NPC;
 
 fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
-    // initial target
-    let way_point = commands
-        .spawn((
-            SpatialBundle {
-                transform: Transform::from_translation(Vec3::new(
-                    BLACK_CAT_STARTING_POSITION.0,
-                    BLACK_CAT_STARTING_POSITION.1 - 50.,
-                    0.,
-                )),
-                visibility: Visibility::Hidden,
-                ..default()
-            },
-            Name::new("WayPoint for Black Cat"),
-        ))
-        .id();
-
     // Black Cat
     commands
         .spawn((
@@ -85,6 +73,7 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
             },
             Name::new("Black Cat"),
             NPC,
+            Character,
             // -- Animation --
             AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
             AnimState {
@@ -103,8 +92,8 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
                 },
             },
             WalkBehavior,
-            Target(Some(way_point)),
-            CharacterLocation(LevelOneLocation::Corridor),
+            Target(None),
+            CharacterLocation(Level1000Location::Corridor),
         ))
         .with_children(|parent| {
             parent.spawn((

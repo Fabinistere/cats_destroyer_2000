@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{characters::player::Player, tablet::mind_control::MindControled};
+use crate::{characters::player::Player, tablet::mind_control::MindControlled};
 
 pub mod hack;
 pub mod mind_control;
@@ -13,11 +13,11 @@ impl Plugin for TabletPlugin {
     }
 }
 
-/// REFACTOR: stop checking if free by the Entity Player not being MindControled ?
-fn tablet_is_free(player_query: Query<Entity, (With<MindControled>, With<Player>)>) -> bool {
+/// REFACTOR: stop checking if free by the Entity Player not being MindControlled ?
+fn tablet_is_free(player_query: Query<Entity, (With<MindControlled>, With<Player>)>) -> bool {
     player_query.get_single().is_ok()
 }
 
-fn tablet_is_mind_ctrl(player_query: Query<Entity, (With<MindControled>, With<Player>)>) -> bool {
+fn tablet_is_mind_ctrl(player_query: Query<Entity, (With<MindControlled>, With<Player>)>) -> bool {
     player_query.get_single().is_err()
 }

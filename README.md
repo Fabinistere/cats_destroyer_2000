@@ -22,7 +22,7 @@ or in the correct release note (if from other version):
 
 ### Binding
 
-- `M` to mindcontrol a cat
+- `M` or `:` to mindcontrol a cat
 - `ESC` to return to the player body
 - `Left Click` on the button *Hack* to hack doors
 - `Z Q S D` or `W A S D` or `Up Left Down Right` to move
@@ -30,7 +30,7 @@ or in the correct release note (if from other version):
 ### Future... (lmao)
 
 - [ ] TODO: LevelScene, CinematicScene
-  - [ ] TODO: MustHave - Reset the scene when touched (by an enemy)
+  - [x] Reset the scene when touched (by an enemy)
 - [ ] TODO: Background + MovingBubbles
 - [x] Final Cinematic
   - [x] Animations

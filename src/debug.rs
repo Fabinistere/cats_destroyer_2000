@@ -4,7 +4,7 @@ use bevy_rapier2d::render::{DebugRenderMode, RapierDebugRenderPlugin};
 
 use crate::{
     characters::npcs::NPC,
-    locations::level_one::{CharacterLocation, LevelOneLocation},
+    locations::level_one::{CharacterLocation, Level1000Location},
 };
 
 pub struct DebugPlugin;
@@ -21,7 +21,7 @@ impl Plugin for DebugPlugin {
                 ))
                 .register_type::<NPC>()
                 .register_type::<CharacterLocation>()
-                .register_type::<LevelOneLocation>()
+                .register_type::<Level1000Location>()
 
                 // UI
                 ;

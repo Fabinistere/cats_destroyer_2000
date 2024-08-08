@@ -2,7 +2,9 @@
 #![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::pedantic)]
 // #![warn(missing_docs)]
 
-use bevy::{prelude::*, window::WindowResolution};
+use std::time::Duration;
+
+use bevy::{asset::ChangeWatcher, prelude::*, window::WindowResolution};
 use bevy_rapier2d::prelude::*;
 
 use constants::{RESOLUTION, TILE_SIZE};
@@ -39,16 +41,21 @@ fn main() {
                     }),
                     ..default()
                 })
-                .set(ImagePlugin::default_nearest()),
+                .set(ImagePlugin::default_nearest())
+                .set(AssetPlugin {
+                    // This tells the AssetServer to watch for changes to assets.
+                    // It enables our scenes to automatically reload in game when we modify their files.
+                    watch_for_changes: ChangeWatcher::with_delay(Duration::from_millis(200)),
+                    ..default()
+                }),
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.),
             // TweeningPlugin,
         ))
         .add_plugins((
             debug::DebugPlugin,
             spritesheet::CatSpritePlugin,
-            tablet::hack::HackPlugin,
             locations::LocationsPlugin,
-            tablet::mind_control::MindControlPlugin,
+            tablet::TabletPlugin,
             characters::CharactersPlugin,
         ))
         .add_systems(Startup, spawn_camera);
