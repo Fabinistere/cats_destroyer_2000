@@ -4,12 +4,14 @@ use crate::{
         npc::{movement::BLUE_CAT_STARTING_POSITION, *},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
-    locations::level_one::{CharacterLocation, LevelOneLocation},
+    locations::level_one::{CharacterLocation, Level1000Location},
     spritesheet::{AnimState, AnimationTimer, CatSheet},
     tablet::mind_control::MindControled,
 };
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+
+use super::Character;
 
 pub struct PlayerPlugin;
 
@@ -72,7 +74,8 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
                     angvel: 0.,
                 },
             },
-            CharacterLocation(LevelOneLocation::SpawnRoom),
+            Character,
+            CharacterLocation(Level1000Location::SpawnRoom),
         ))
         .with_children(|parent| {
             parent.spawn((

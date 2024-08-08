@@ -18,31 +18,31 @@ pub struct MindControlPlugin;
 
 impl Plugin for MindControlPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(
-            Update,
-            (
-                mind_control_button
-                    .run_if(tablet_is_free)
-                    .in_set(MindControlSet::Enter),
-                exit_mind_control
-                    .run_if(tablet_is_mind_ctrl)
-                    .in_set(MindControlSet::Exit)
-                    .after(MindControlSet::Enter),
-                camera_follow
-                    .after(MindControlSet::Movement)
+        app.init_resource::<CurrentlyMindControlled>()
+            .add_systems(
+                Update,
+                (
+                    mind_control_button
+                        .run_if(tablet_is_free)
+                        .in_set(MindControlSet::Enter),
+                    exit_mind_control
+                        .run_if(tablet_is_mind_ctrl)
+                        .in_set(MindControlSet::Exit)
+                        .after(MindControlSet::Enter),
+                    camera_follow.after(MindControlSet::Movement),
+                    mind_control_movement
+                        .in_set(MindControlSet::Movement)
+                        .after(MindControlSet::Enter),
+                    daze_cure_by_mind_control
+                        .before(MindControlSet::Exit)
+                        .after(MindControlSet::Enter),
+                )
                     .run_if(in_state(Location::Level1000)),
-                mind_control_movement
-                    .in_set(MindControlSet::Movement)
-                    .after(MindControlSet::Enter),
-                daze_cure_by_mind_control
-                    .before(MindControlSet::Exit)
-                    .after(MindControlSet::Enter),
-            ),
-        )
-        .add_systems(
-            PostUpdate,
-            daze_post_mind_control, //.after(MindControlSet::Exit)
-        );
+            )
+            .add_systems(
+                PostUpdate,
+                daze_post_mind_control.run_if(in_state(Location::Level1000)), //.after(MindControlSet::Exit)
+            );
     }
 }
 
@@ -55,6 +55,17 @@ enum MindControlSet {
 
 #[derive(Component)]
 pub struct MindControled;
+
+/// Used to choose which sprite to animate at the end cinematic
+/// When we despawned every characters.
+#[derive(Resource, PartialEq, Eq, Default)]
+pub enum CurrentlyMindControlled {
+    BlackCat,
+    #[default]
+    BlueCat,
+}
+
+/* --------------------------------- Systems -------------------------------- */
 
 /// The camera follows the current Mind Controled entity
 ///
@@ -79,12 +90,15 @@ pub fn mind_control_button(
 
     player_query: Query<Entity, With<Player>>,
     npc_query: Query<Entity, With<NPC>>,
+    mut currently_mind_controlled: ResMut<CurrentlyMindControlled>,
 ) {
     if keyboard_input.pressed(KeyCode::M) {
         if let Some(npc) = npc_query.iter().next() {
             commands.entity(npc).insert(MindControled); // .remove::<Dazed>()
             let player = player_query.single();
             commands.entity(player).remove::<MindControled>();
+
+            *currently_mind_controlled = CurrentlyMindControlled::BlackCat;
         }
     }
 }
@@ -96,6 +110,7 @@ fn exit_mind_control(
 
     player_query: Query<Entity, With<Player>>,
     npc_query: Query<(Entity, &Name), (With<NPC>, With<MindControled>)>,
+    mut currently_mind_controlled: ResMut<CurrentlyMindControlled>,
 ) {
     if keyboard_input.pressed(KeyCode::Escape) {
         for (npc, _name) in npc_query.iter() {
@@ -104,6 +119,7 @@ fn exit_mind_control(
 
         let player = player_query.single();
         commands.entity(player).insert(MindControled);
+        *currently_mind_controlled = CurrentlyMindControlled::BlueCat;
     }
 }
 
@@ -145,7 +161,7 @@ fn daze_cure_by_mind_control(
             match daze_effect_query.get(*child) {
                 Err(_) => continue,
                 Ok(daze_effect) => {
-                    // XXX: don't remove the link to their parent
+                    // XXX: it doesn't remove the link to their parent
                     commands.entity(daze_effect).despawn();
                 }
             }

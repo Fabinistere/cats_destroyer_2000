@@ -20,8 +20,6 @@ pub fn add_dazed_effect(
     effects_spritesheet: Res<DazeSheet>,
 ) {
     for entity in dazed_character_query.iter() {
-        // TODO: polish - floating Stars above their head
-
         // whatever the entity
         commands.entity(entity).with_children(|parent| {
             parent.spawn((
