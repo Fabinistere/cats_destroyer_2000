@@ -10,9 +10,9 @@ keywords = ["bevy", "puzzle", "mind-control", "game", "hack", "cat"]
 exclude = ["assets"]
 
 [dependencies]
-bevy = "0.12" # features = ["dynamic_linking"]
-bevy_rapier2d = { version = "0.23", features = ["simd-stable", "debug-render-2d"] }
-bevy-inspector-egui = "0.22"
+bevy = "0.13" # features = ["dynamic_linking"]
+bevy_rapier2d = { version = "0.25", features = ["simd-stable", "debug-render-2d"] }
+bevy-inspector-egui = "0.24"
 
 # ----- Utilitaries -----
 image = "0.23"

@@ -31,18 +31,22 @@ pub struct ButtonSensor;
 pub fn set_up_button(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     // -- Doors --
 
     let button = asset_server.load("textures/level_one/button-press.png");
-    let button_atlas = TextureAtlas::from_grid(button, Vec2::new(8., 7.), 1, 7, None, None);
+    let button_atlas = TextureAtlasLayout::from_grid(Vec2::new(8., 7.), 1, 7, None, None);
     let button_atlas_handle = texture_atlases.add(button_atlas);
 
     commands
         .spawn((
             SpriteSheetBundle {
-                texture_atlas: button_atlas_handle,
+                texture: button,
+                atlas: TextureAtlas {
+                    layout: button_atlas_handle,
+                    index: 0,
+                },
                 transform: Transform {
                     translation: BUTTON_POSITION.into(),
                     scale: LEVEL_SCALE.into(),

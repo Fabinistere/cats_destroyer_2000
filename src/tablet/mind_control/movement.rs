@@ -8,18 +8,20 @@ use crate::{
 
 /// The player input will act on the current MindControlled entity
 pub fn mind_control_movement(
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
     mut mind_controled_query: Query<(&Speed, &mut Velocity), With<MindControlled>>,
 ) {
     if let Ok((speed, mut rb_vel)) = mind_controled_query.get_single_mut() {
-        let up = keyboard_input.pressed(KeyCode::Z)
-            || keyboard_input.pressed(KeyCode::Up)
-            || keyboard_input.pressed(KeyCode::W);
-        let down = keyboard_input.pressed(KeyCode::S) || keyboard_input.pressed(KeyCode::Down);
-        let left = keyboard_input.pressed(KeyCode::Q)
-            || keyboard_input.pressed(KeyCode::Left)
-            || keyboard_input.pressed(KeyCode::A);
-        let right = keyboard_input.pressed(KeyCode::D) || keyboard_input.pressed(KeyCode::Right);
+        let up = keyboard_input.pressed(KeyCode::KeyZ)
+            || keyboard_input.pressed(KeyCode::ArrowUp)
+            || keyboard_input.pressed(KeyCode::KeyW);
+        let down =
+            keyboard_input.pressed(KeyCode::KeyS) || keyboard_input.pressed(KeyCode::ArrowDown);
+        let left = keyboard_input.pressed(KeyCode::KeyQ)
+            || keyboard_input.pressed(KeyCode::ArrowLeft)
+            || keyboard_input.pressed(KeyCode::KeyA);
+        let right =
+            keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight);
 
         let x_axis = -(left as i8) + right as i8;
         let y_axis = -(down as i8) + up as i8;

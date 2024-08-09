@@ -59,11 +59,11 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
     commands
         .spawn((
             SpriteSheetBundle {
-                sprite: TextureAtlasSprite {
+                texture: cats.texture.clone(),
+                atlas: TextureAtlas {
+                    layout: cats.atlas_handle.clone(),
                     index: BLACK_CAT_STARTING_ANIM,
-                    ..default()
                 },
-                texture_atlas: cats.0.clone(),
                 transform: Transform {
                     translation: Vec3::from(BLACK_CAT_STARTING_POSITION),
                     scale: Vec3::splat(NPC_SCALE),

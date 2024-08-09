@@ -68,13 +68,13 @@ fn camera_follow(
 pub fn mind_control_button(
     mut commands: Commands,
 
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
 
     player_query: Query<Entity, With<Player>>,
     npc_query: Query<Entity, With<NPC>>,
     mut currently_mind_controlled: ResMut<CurrentlyMindControlled>,
 ) {
-    if keyboard_input.pressed(KeyCode::M) || keyboard_input.pressed(KeyCode::Colon) {
+    if keyboard_input.pressed(KeyCode::KeyM) || keyboard_input.pressed(KeyCode::Semicolon) {
         if let Some(npc) = npc_query.iter().next() {
             commands.entity(npc).insert(MindControlled); // .remove::<Dazed>()
             let player = player_query.single();
@@ -88,7 +88,7 @@ pub fn mind_control_button(
 fn exit_mind_control(
     mut commands: Commands,
 
-    keyboard_input: Res<Input<KeyCode>>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
 
     player_query: Query<Entity, With<Player>>,
     npc_query: Query<(Entity, &Name), (With<NPC>, With<MindControlled>)>,

@@ -24,11 +24,11 @@ pub fn add_dazed_effect(
         commands.entity(entity).with_children(|parent| {
             parent.spawn((
                 SpriteSheetBundle {
-                    sprite: TextureAtlasSprite {
+                    atlas: TextureAtlas {
+                        layout: effects_spritesheet.atlas_handle.clone(),
                         index: DAZE_STARTING_ANIM,
-                        ..default()
                     },
-                    texture_atlas: effects_spritesheet.0.clone(),
+                    texture: effects_spritesheet.texture.clone(),
                     transform: Transform {
                         translation: Vec3::from(DAZE_Y_OFFSET),
                         scale: Vec3::splat(0.5),
@@ -53,23 +53,18 @@ pub fn add_dazed_effect(
 
 pub fn animate_dazed_effect(
     time: Res<Time>,
-    texture_atlases: Res<Assets<TextureAtlas>>,
+    texture_atlases: Res<Assets<TextureAtlasLayout>>,
     mut daze_effect_query: Query<
-        (
-            Entity,
-            &mut AnimationTimer,
-            &mut TextureAtlasSprite,
-            &Handle<TextureAtlas>,
-        ),
+        (Entity, &mut AnimationTimer, &mut TextureAtlas),
         With<DazeAnimation>,
     >,
 ) {
-    for (_daze_id, mut timer, mut sprite, texture_atlas_handle) in &mut daze_effect_query {
+    for (_daze_id, mut timer, mut atlas) in &mut daze_effect_query {
         timer.tick(time.delta());
         if timer.just_finished() {
-            let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
+            let layout = texture_atlases.get(atlas.layout.clone()).unwrap();
 
-            sprite.index = (sprite.index + 1) % texture_atlas.textures.len();
+            atlas.index = (atlas.index + 1) % layout.textures.len();
         }
     }
 }

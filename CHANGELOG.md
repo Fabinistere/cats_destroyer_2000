@@ -12,13 +12,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Bevy Migration to `0.14`
 
 - [Migration Guide Bevy 0.13 -> 0.14](https://bevyengine.org/learn/migration-guides/0.13-0.14/)
-- [Migration Guide Bevy 0.12 -> 0.13](https://bevyengine.org/learn/migration-guides/0.12-0.13/)
+
+### Bevy `0.13`
+
+[Migration Guide Bevy 0.12 -> 0.13](https://bevyengine.org/learn/migration-guides/0.12-0.13/)
+
+- Dependencies
+  - bevy_rapier_2d `0.25` - [changelog](https://github.com/dimforge/bevy_rapier/blob/master/CHANGELOG.md#v0250-19-feb-2024)
+    - Collisions between the character controller and sensors are now disabled by default.
+  - bevy-inspector-egui `0.24` - [changelog](https://github.com/jakobhellermann/bevy-inspector-egui/compare/v0.22.0...v0.24.0)
+- ECS
+  - [Ensure calls to `EventWriter::send` either handle the returned value, or suppress the result with `;`.](https://bevyengine.org/learn/migration-guides/0-12-to-0-13/#update-event-send-methods-to-return-eventid)
+  - [Replace `Option<With<T>>` with `Has<T>`](https://bevyengine.org/learn/migration-guides/0-12-to-0-13/#split-worldquery-into-querydata-and-queryfilter)
+  - [Rename `Input` to `ButtonInput`](https://bevyengine.org/learn/migration-guides/0-12-to-0-13/#rename-input-to-buttoninput)
+  - [Texture Atlas rework](https://bevyengine.org/learn/migration-guides/0-12-to-0-13/#texture-atlas-rework)
+    - `SpriteSheetBundle` now uses a `Sprite` instead of a `TextureAtlasSprite` component
+    - `mut atlases: ResMut<Assets<TextureAtlas>>` to `mut atlases: ResMut<Assets<TextureAtlasLayout>>`
+    - `TextureAtlas::from_grid` to `TextureAtlasLayout::from_grid`
+  - [Renamed `App::add_state` to `init_state`.](https://bevyengine.org/learn/migration-guides/0-12-to-0-13/#add-insert-state-to-app)
+  - [`KeyCode` rename](https://bevyengine.org/learn/migration-guides/0-12-to-0-13/#update-winit-dependency-to-0-29)
+    - `KeyCode::W` -> `KeyCode::KeyW`
+    - `KeyCode::Up` -> `KeyCode::ArrowUp`
+    - `KeyCode::Key1` -> `KeyCode::Digit1`
 
 ### Bevy `0.12`
 
 [Migration Guide Bevy 0.11 -> 0.12](https://bevyengine.org/learn/migration-guides/0.11-0.12/)
 
-- dependencies
+- Dependencies
   - bevy_rapier_2d `0.23` - [changelog](https://github.com/dimforge/bevy_rapier/blob/master/CHANGELOG.md#0230)
 - ECS
   - no longer need to manually configure the `ChangeWatcher` in the `AssetPlugin` as it is now configured automatically when the feature is enabled.

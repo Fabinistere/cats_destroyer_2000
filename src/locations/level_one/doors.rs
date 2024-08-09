@@ -64,28 +64,30 @@ pub fn animate_door(
     mut commands: Commands,
 
     time: Res<Time>,
-    texture_atlases: Res<Assets<TextureAtlas>>,
+    texture_atlases: Res<Assets<TextureAtlasLayout>>,
     mut door_query: Query<(
         Entity,
         &mut Door,
         &mut AnimationTimer,
-        &mut TextureAtlasSprite,
-        &Handle<TextureAtlas>,
+        &mut TextureAtlas,
         &Children,
     )>,
 
     door_hitbox_query: Query<Entity, With<DoorHitbox>>,
 ) {
-    for (door_id, mut door, mut timer, mut sprite, texture_atlas_handle, children) in
-        &mut door_query
-    {
+    for (door_id, mut door, mut timer, mut atlas, children) in &mut door_query {
         timer.tick(time.delta());
         if timer.just_finished() {
-            let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
+            let atlas_layout_len = texture_atlases
+                .get(atlas.layout.clone())
+                .unwrap()
+                .textures
+                .len();
+
             if door.current_state == DoorState::Opening || door.current_state == DoorState::Closed {
                 door.current_state = DoorState::Opening;
 
-                let new_index = (sprite.index + 1) % texture_atlas.textures.len();
+                let new_index = (atlas.index + 1) % atlas_layout_len;
                 // if last frame
                 if new_index == 0 {
                     door.current_state = DoorState::Open;
@@ -104,16 +106,16 @@ pub fn animate_door(
                         }
                     }
                 } else {
-                    sprite.index = new_index;
+                    atlas.index = new_index;
                 }
             } else if door.current_state == DoorState::Closing
                 || door.current_state == DoorState::Open
             {
                 door.current_state = DoorState::Closing;
 
-                sprite.index = (sprite.index - 1) % texture_atlas.textures.len();
+                atlas.index = (atlas.index - 1) % atlas_layout_len;
                 // if first frame
-                if sprite.index == 0 {
+                if atlas.index == 0 {
                     door.current_state = DoorState::Closed;
                     // stop the animation
                     commands.entity(door_id).remove::<AnimationTimer>();
