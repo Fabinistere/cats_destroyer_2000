@@ -45,18 +45,18 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
     // Blue Cat
     commands
         .spawn((
-            SpriteSheetBundle {
+            SpriteBundle {
                 texture: cats.texture.clone(),
-                atlas: TextureAtlas {
-                    layout: cats.atlas_handle.clone(),
-                    index: BLUE_CAT_STARTING_ANIM,
-                },
                 transform: Transform {
                     translation: Vec3::from(BLUE_CAT_STARTING_POSITION),
                     scale: Vec3::splat(NPC_SCALE),
                     ..default()
                 },
                 ..default()
+            },
+            TextureAtlas {
+                layout: cats.atlas_handle.clone(),
+                index: BLUE_CAT_STARTING_ANIM,
             },
             Name::new("Player: Blue Cat"),
             Player,

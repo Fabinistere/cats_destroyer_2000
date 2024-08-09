@@ -25,7 +25,7 @@ impl FromWorld for CatSheet {
             .unwrap()
             .load("textures/character/character_sheet_v1.png");
         // warn!("You have to download the asset see in github releases");
-        let atlas = TextureAtlasLayout::from_grid(Vec2::splat(14.), 2, 2, None, None);
+        let atlas = TextureAtlasLayout::from_grid(UVec2::splat(14), 2, 2, None, None);
 
         let atlas_handle = world
             .get_resource_mut::<Assets<TextureAtlasLayout>>()
@@ -53,7 +53,7 @@ impl FromWorld for DazeSheet {
             .unwrap()
             .load("textures/character/dazed.png");
         // warn!("You have to download the asset see in github releases");
-        let dazed_atlas = TextureAtlasLayout::from_grid(Vec2::from((35., 25.)), 12, 1, None, None);
+        let dazed_atlas = TextureAtlasLayout::from_grid(UVec2::from((35, 25)), 12, 1, None, None);
 
         let dazed_atlas_handle = world
             .get_resource_mut::<Assets<TextureAtlasLayout>>()

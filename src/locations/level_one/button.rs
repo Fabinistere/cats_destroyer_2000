@@ -36,23 +36,23 @@ pub fn set_up_button(
     // -- Doors --
 
     let button = asset_server.load("textures/level_one/button-press.png");
-    let button_atlas = TextureAtlasLayout::from_grid(Vec2::new(8., 7.), 1, 7, None, None);
+    let button_atlas = TextureAtlasLayout::from_grid(UVec2::new(8, 7), 1, 7, None, None);
     let button_atlas_handle = texture_atlases.add(button_atlas);
 
     commands
         .spawn((
-            SpriteSheetBundle {
+            SpriteBundle {
                 texture: button,
-                atlas: TextureAtlas {
-                    layout: button_atlas_handle,
-                    index: 0,
-                },
                 transform: Transform {
                     translation: BUTTON_POSITION.into(),
                     scale: LEVEL_SCALE.into(),
                     ..default()
                 },
                 ..default()
+            },
+            TextureAtlas {
+                layout: button_atlas_handle,
+                index: 0,
             },
             Name::new("OneWay Button"),
             PushButton,

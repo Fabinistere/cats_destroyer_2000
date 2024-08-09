@@ -78,11 +78,7 @@ pub fn animate_door(
     for (door_id, mut door, mut timer, mut atlas, children) in &mut door_query {
         timer.tick(time.delta());
         if timer.just_finished() {
-            let atlas_layout_len = texture_atlases
-                .get(atlas.layout.clone())
-                .unwrap()
-                .textures
-                .len();
+            let atlas_layout_len = texture_atlases.get(&atlas.layout).unwrap().textures.len();
 
             if door.current_state == DoorState::Opening || door.current_state == DoorState::Closed {
                 door.current_state = DoorState::Opening;

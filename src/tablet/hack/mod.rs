@@ -72,7 +72,7 @@ pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer
                 TextStyle {
                     font: asset_server.load("fonts/dpcomic.ttf"),
                     font_size: 40.,
-                    color: Color::rgb(0.9, 0.9, 0.9),
+                    color: Color::srgb(0.9, 0.9, 0.9),
                 },
             ));
         });

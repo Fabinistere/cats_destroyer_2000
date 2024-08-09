@@ -230,23 +230,24 @@ fn setup_level_one(
             // -- Doors --
             let horizontal_door = asset_server.load("textures/level_one/horizontal_door_anim.png");
             let horizontal_door_atlas =
-                TextureAtlasLayout::from_grid(Vec2::new(12., 3.), 1, 7, None, None);
+                TextureAtlasLayout::from_grid(UVec2::new(12, 3), 1, 7, None, None);
 
             let horizontal_door_atlas_handle = texture_atlases.add(horizontal_door_atlas);
             parent
                 .spawn((
-                    SpriteSheetBundle {
+                    SpriteBundle {
                         texture: horizontal_door.clone(),
-                        atlas: TextureAtlas {
-                            layout: horizontal_door_atlas_handle.clone(),
-                            index: 0,
-                        },
+
                         transform: Transform {
                             translation: IN_DOOR_POSITION.into(),
                             scale: LEVEL_SCALE.into(),
                             ..default()
                         },
                         ..default()
+                    },
+                    TextureAtlas {
+                        layout: horizontal_door_atlas_handle.clone(),
+                        index: 0,
                     },
                     Name::new("Front Door"),
                     RigidBody::Fixed,
@@ -287,18 +288,19 @@ fn setup_level_one(
 
             parent
                 .spawn((
-                    SpriteSheetBundle {
+                    SpriteBundle {
                         texture: horizontal_door,
-                        atlas: TextureAtlas {
-                            layout: horizontal_door_atlas_handle.clone(),
-                            index: 0,
-                        },
+
                         transform: Transform {
                             translation: OUT_DOOR_POSITION.into(),
                             scale: LEVEL_SCALE.into(),
                             ..default()
                         },
                         ..default()
+                    },
+                    TextureAtlas {
+                        layout: horizontal_door_atlas_handle.clone(),
+                        index: 0,
                     },
                     Name::new("Exit Door"),
                     RigidBody::Fixed,
@@ -338,24 +340,24 @@ fn setup_level_one(
 
             let vertical_door = asset_server.load("textures/level_one/vertical_door_anim.png");
             let vertical_door_atlas =
-                TextureAtlasLayout::from_grid(Vec2::new(3., 15.), 9, 1, None, None);
+                TextureAtlasLayout::from_grid(UVec2::new(3, 15), 9, 1, None, None);
 
             let vertical_door_atlas_handle = texture_atlases.add(vertical_door_atlas);
 
             parent
                 .spawn((
-                    SpriteSheetBundle {
+                    SpriteBundle {
                         texture: vertical_door,
-                        atlas: TextureAtlas {
-                            layout: vertical_door_atlas_handle,
-                            index: 0,
-                        },
                         transform: Transform {
                             translation: ALT_DOOR_POSITION.into(),
                             scale: LEVEL_SCALE.into(),
                             ..default()
                         },
                         ..default()
+                    },
+                    TextureAtlas {
+                        layout: vertical_door_atlas_handle,
+                        index: 0,
                     },
                     Name::new("Closet Door"),
                     RigidBody::Fixed,

@@ -21,13 +21,13 @@ fn main() {
     let mut app = App::new();
     app
         // Color::TEAL / AZURE
-        .insert_resource(ClearColor(Color::TEAL))
+        .insert_resource(ClearColor(Color::srgb(0., 0.5, 0.5)))
         .insert_resource(Msaa::Off)
         // v-- Hitbox --v
-        .insert_resource(RapierConfiguration {
-            gravity: Vec2::ZERO,
-            ..default()
-        })
+        .insert_resource(
+            // gravity: Vec2::ZERO,
+            RapierConfiguration::new(0.),
+        )
         .add_plugins((
             DefaultPlugins
                 .set(WindowPlugin {

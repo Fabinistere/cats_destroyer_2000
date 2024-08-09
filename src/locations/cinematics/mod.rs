@@ -41,7 +41,7 @@ pub fn spawn_cinematic_final(
 ) {
     info!("Spawn Cinematic");
 
-    clear_color.0 = Color::rgb(0.753, 0.126, 0.158);
+    clear_color.0 = Color::srgb(0.753, 0.126, 0.158);
 
     commands.spawn((
         SpriteBundle {
@@ -96,15 +96,11 @@ pub fn spawn_cinematic_final(
         asset_server.load("textures/cinematics/final/black-cat-sheet.png")
     };
 
-    let cat_escape_atlas = TextureAtlasLayout::from_grid(Vec2::from((19., 17.)), 14, 1, None, None);
+    let cat_escape_atlas = TextureAtlasLayout::from_grid(UVec2::from((19, 17)), 14, 1, None, None);
     let cat_escape_atlas_handle = texture_atlases.add(cat_escape_atlas);
 
     commands.spawn((
-        SpriteSheetBundle {
-            atlas: TextureAtlas {
-                layout: cat_escape_atlas_handle,
-                index: 0,
-            },
+        SpriteBundle {
             texture: cat_escape_image,
             transform: Transform {
                 translation: Vec3::from((-12., -12., 9.)),
@@ -112,6 +108,10 @@ pub fn spawn_cinematic_final(
                 ..default()
             },
             ..default()
+        },
+        TextureAtlas {
+            layout: cat_escape_atlas_handle,
+            index: 0,
         },
         Name::new("Cinematics - Cat"),
         PlayerHusk,
@@ -152,11 +152,7 @@ pub fn animate_free_cat(
         timer.tick(time.delta());
 
         if timer.just_finished() {
-            let layout_len = texture_atlases
-                .get(atlas.layout.clone())
-                .unwrap()
-                .textures
-                .len();
+            let layout_len = texture_atlases.get(&atlas.layout).unwrap().textures.len();
 
             atlas.index = if atlas.index + 1 < layout_len {
                 atlas.index + 1

@@ -58,18 +58,18 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
     // Black Cat
     commands
         .spawn((
-            SpriteSheetBundle {
+            SpriteBundle {
                 texture: cats.texture.clone(),
-                atlas: TextureAtlas {
-                    layout: cats.atlas_handle.clone(),
-                    index: BLACK_CAT_STARTING_ANIM,
-                },
                 transform: Transform {
                     translation: Vec3::from(BLACK_CAT_STARTING_POSITION),
                     scale: Vec3::splat(NPC_SCALE),
                     ..default()
                 },
                 ..default()
+            },
+            TextureAtlas {
+                layout: cats.atlas_handle.clone(),
+                index: BLACK_CAT_STARTING_ANIM,
             },
             Name::new("Black Cat"),
             NPC,

@@ -11,7 +11,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Bevy Migration to `0.14`
 
-- [Migration Guide Bevy 0.13 -> 0.14](https://bevyengine.org/learn/migration-guides/0.13-0.14/)
+### Bevy `0.14`
+
+[Migration Guide Bevy 0.13 -> 0.14](https://bevyengine.org/learn/migration-guides/0.13-0.14/)
+
+- Dependencies
+  - bevy_rapier_2d `0.27` - [bevy_rapier changelog](https://github.com/dimforge/bevy_rapier/blob/master/CHANGELOG.md#v0270-07-july-2024) and [rapier changelog `0.18` to `0.21`](https://github.com/dimforge/rapier/blob/master/CHANGELOG.md#v0210-23-june-2024)
+    - `Rapier_Configuration` doesn't derive `Default`
+  - bevy-inspector-egui `0.25` - [changelog](https://github.com/jakobhellermann/bevy-inspector-egui/compare/v0.24.0...v0.25.0)
+- ECS
+  - Colors
+    - [colors import](https://bevyengine.org/learn/migration-guides/0-13-to-0-14/#css-constants)
+    - [`rgb` to `srgb`](https://bevyengine.org/learn/migration-guides/0-13-to-0-14/#color-methods)
+  - [Deprecate `SpriteSheetBundle` and `AtlasImageBundle`](https://bevyengine.org/learn/migration-guides/0-13-to-0-14/#deprecate-spritesheetbundle-and-atlasimagebundle)
+  - [Use `UVec2` when working with texture dimensions](https://bevyengine.org/learn/migration-guides/0-13-to-0-14/#use-uvec2-when-working-with-texture-dimensions)
+  - [Schedules `Startup` runs after `OnEnter`](https://bevyengine.org/learn/migration-guides/0-13-to-0-14/#onenter-state-schedules-now-run-before-startup-schedules)
+  We don't have anything to change as we have only Startup system `spawn_camera`; the camera will only be use in `Update`.
+  Note that you can create `SubState` with a source.
+  - [ECS observers were introduced: mechanisms for immediately responding to events in the world.](https://bevyengine.org/learn/migration-guides/0-13-to-0-14/#generalised-ecs-reactivity-with-observers)
+  - [Make `apply_state_transition` private](https://bevyengine.org/learn/migration-guides/0-13-to-0-14/#make-apply-state-transition-private)
+
+#### WGPU error
+
+```text
+ERROR wgpu_hal::gles: wgpu-hal heuristics assumed that the view dimension will be equal to `D2` rather than `D2Array`.
+`D2` textures with `depth_or_array_layers == 1` are assumed to have view dimension `D2`
+`D2` textures with `depth_or_array_layers > 1` are assumed to have view dimension `D2Array`
+`D2` textures with `depth_or_array_layers == 6` are assumed to have view dimension `Cube`
+`D2` textures with `depth_or_array_layers > 6 && depth_or_array_layers % 6 == 0` are assumed to have view dimension `CubeArray`
+```
 
 ### Bevy `0.13`
 
@@ -116,11 +144,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - End cinematic
 - WebAssembly
 
-## Must Have
+## Must Have - v0.2
 
 - Back to jail (when touched by a enemy)
 
-## Should Have
+## Should Have - v0.2
 
 - UI for the Tablet
 - Vision Feature
@@ -156,13 +184,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Physical Button
     - which opens front and exit doors
 
-## Must Have
+## Must Have - v0.1
 
 - Start/End cinematic
 - Back to jail (when touched by a enemy)
 - Web Exe
 
-## Should Have
+## Should Have - v0.1
 
 - UI for the Tablet
 - Vision Feature
