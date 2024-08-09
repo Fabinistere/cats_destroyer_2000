@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Working demo! - 2024-08-08
+
+[![v1.0.0](https://img.shields.io/badge/v1.0.0-gray?style=flat&logo=github&logoColor=181717&link=https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v1.0.0)](https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v1.0.0)
+
+### Bevy Migration to `0.14`
+
+- [Migration Guide Bevy 0.13 -> 0.14](https://bevyengine.org/learn/migration-guides/0.13-0.14/)
+- [Migration Guide Bevy 0.12 -> 0.13](https://bevyengine.org/learn/migration-guides/0.12-0.13/)
+
+### Bevy `0.12`
+
+[Migration Guide Bevy 0.11 -> 0.12](https://bevyengine.org/learn/migration-guides/0.11-0.12/)
+
+- dependencies
+  - bevy_rapier_2d `0.23` - [changelog](https://github.com/dimforge/bevy_rapier/blob/master/CHANGELOG.md#0230)
+- ECS
+  - no longer need to manually configure the `ChangeWatcher` in the `AssetPlugin` as it is now configured automatically when the feature is enabled.
+  - [`EventReader::iter` to `EventReader::read`](https://bevyengine.org/learn/migration-guides/0-11-to-0-12/#refactor-eventreader-iter-to-read)
+  - [`RemovedComponents::iter` to `RemovedComponents::read`](https://bevyengine.org/learn/migration-guides/0-11-to-0-12/#rename-removedcomponents-iter-iter-with-id-to-read-read-with-id)
+  - [If you were using Bevy's `bevy_dylib` feature, use Bevy's `dynamic_linking` feature instead.](https://bevyengine.org/learn/migration-guides/0-11-to-0-12/#remove-the-bevy-dylib-feature)
+
 ## Back to jail - [v0.4.0](https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v0.4.0) - 2024-08-08
 
 [![v0.4.0](https://img.shields.io/badge/v0.4.0-gray?style=flat&logo=github&logoColor=181717&link=https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v0.4.0)](https://github.com/Fabinistere/cats_destroyer_2000/releases/tag/v0.4.0)

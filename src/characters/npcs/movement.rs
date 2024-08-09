@@ -206,7 +206,7 @@ pub fn give_new_way_point_event(
     mut npc_query: Query<(&mut Target, &Name), (With<NPC>, With<WalkBehavior>)>,
     way_points_query: Query<Entity, With<WayPoint>>,
 ) {
-    for NewWayPointEvent(npc) in new_way_point_event.iter() {
+    for NewWayPointEvent(npc) in new_way_point_event.read() {
         // The entity could have been despawned after a level change
         if let Ok((mut target, _name)) = npc_query.get_mut(*npc) {
             if target.0.is_none() {

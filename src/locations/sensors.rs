@@ -43,7 +43,7 @@ pub fn win_trigger(
 
     mut win_event: EventWriter<WinTriggerEvent>,
 ) {
-    for collision_event in collision_events.iter() {
+    for collision_event in collision_events.read() {
         match collision_event {
             CollisionEvent::Started(e1, e2, _) => {
                 let win_sensor = win_sensor_query.single();
@@ -75,7 +75,7 @@ pub fn win_event(
     current_location: Res<State<Location>>,
     mut next_location: ResMut<NextState<Location>>,
 ) {
-    for event in win_event.iter() {
+    for event in win_event.read() {
         if let Ok(name) = mind_controled_character_query.get(event.entity) {
             let congrats = format!("BIEN JOUE {}!", name);
             println!("{}", congrats);
@@ -99,7 +99,7 @@ pub fn location_event(
         Or<(With<Player>, With<NPC>)>,
     >,
 ) {
-    for collision_event in collision_events.iter() {
+    for collision_event in collision_events.read() {
         match collision_event {
             CollisionEvent::Started(e1, e2, _) => {
                 match (
@@ -150,7 +150,7 @@ pub fn button_event(
     secured_door_query: Query<Entity, (With<Door>, Without<Hackable>)>,
     mut open_door_event: EventWriter<OpenDoorEvent>,
 ) {
-    for collision_event in collision_events.iter() {
+    for collision_event in collision_events.read() {
         match collision_event {
             CollisionEvent::Started(e1, e2, _) => {
                 let button_sensor = button_sensor_query.single();

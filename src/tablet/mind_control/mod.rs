@@ -112,7 +112,7 @@ fn daze_post_mind_control(
     player_query: Query<Entity, With<Player>>,
     npcs_query: Query<Entity, With<NPC>>,
 ) {
-    for entity in mind_controled_removals.iter() {
+    for entity in mind_controled_removals.read() {
         if player_query.get(entity).is_ok() {
             // Will never be decreased (no system for it)
             // Only removed by adding MindControlled back to the player

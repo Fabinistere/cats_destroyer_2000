@@ -35,7 +35,7 @@ pub fn open_door_event(
 
     mut door_query: Query<(Entity, &mut Door)>,
 ) {
-    for event in open_door_event.iter() {
+    for event in open_door_event.read() {
         match door_query.get_mut(event.0) {
             Err(e) => warn!("{:?}", e),
             Ok((door, mut door_state)) => {

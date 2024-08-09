@@ -56,7 +56,7 @@ pub fn player_detection(
 
     mut ev_engage_pursuit: EventWriter<EngagePursuitEvent>,
 ) {
-    for collision_event in collision_events.iter() {
+    for collision_event in collision_events.read() {
         let entity_1 = collision_event.entities().0;
         let entity_2 = collision_event.entities().1;
 
@@ -105,7 +105,7 @@ pub fn add_pursuit_urge(
     mut ev_engage_pursuit: EventReader<EngagePursuitEvent>,
     mut npc_query: Query<(Entity, &mut Target, &Name), (With<NPC>, Without<MindControlled>)>,
 ) {
-    for ev in ev_engage_pursuit.iter() {
+    for ev in ev_engage_pursuit.read() {
         match npc_query.get_mut(ev.npc_entity) {
             Err(_) => continue,
             Ok((npc_entity, mut target, npc_name)) => {
@@ -131,7 +131,7 @@ pub fn reset_aggro(
 
     mut new_way_point_event: EventWriter<NewWayPointEvent>,
 ) {
-    for ResetAggroEvent { npc } in reset_aggro_event.iter() {
+    for ResetAggroEvent { npc } in reset_aggro_event.read() {
         commands.entity(*npc).remove::<ChaseBehavior>();
         commands.entity(*npc).insert(WalkBehavior);
         new_way_point_event.send(NewWayPointEvent(*npc));

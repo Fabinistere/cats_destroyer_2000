@@ -110,8 +110,6 @@ fn setup_level_one(
         });
 
     // -- Map --
-    // FIXME: as issued [here](https://github.com/bevyengine/bevy/issues/12344), the asset will wrongly unload while strong handle is alive after a State Change. It has been fixed in `13.1`
-    // Will not load a second time after being caught
     let walls = asset_server.load("textures/level_one/lab_wall.png");
     let floor = asset_server.load("textures/level_one/lab_floor.png");
 
