@@ -5,7 +5,13 @@ use crate::{
     characters::Character,
     constants::{
         character::npcs::movement::BLACK_CAT_STARTING_POSITION,
-        locations::{level_one::*, FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE},
+        locations::{
+            level_one::{
+                ALT_DOOR_POSITION, BUTTON_SENSOR_POSITION, IN_DOOR_POSITION, OUT_DOOR_POSITION,
+                WAYPOINT_BOT, WAYPOINT_TOP,
+            },
+            FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE,
+        },
     },
     locations::{
         level_one::{
@@ -28,7 +34,7 @@ impl Plugin for LevelOnePlugin {
         app.add_event::<OpenDoorEvent>()
             .add_systems(
                 OnEnter(Location::Level1000),
-                (setup_level_one, button::set_up_button),
+                (setup_level_one, button::set_up),
             )
             .add_systems(
                 Update,
@@ -67,6 +73,7 @@ fn despawn_level_one(
     }
 }
 
+#[allow(clippy::too_many_lines)]
 fn setup_level_one(
     mut commands: Commands,
     asset_server: Res<AssetServer>,

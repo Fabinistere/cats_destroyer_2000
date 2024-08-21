@@ -19,10 +19,10 @@ use crate::{
 ///   -
 /// Read in
 ///   -
-/// DOC: describe WinTriggerEvent
+/// DOC: describe `WinTriggerEvent`
 #[derive(Event)]
 pub struct WinTriggerEvent {
-    /// The Entity which triggered the WinEvent
+    /// The Entity which triggered the `WinEvent`
     pub entity: Entity,
 }
 
@@ -44,26 +44,20 @@ pub fn win_trigger(
     mut win_event: EventWriter<WinTriggerEvent>,
 ) {
     for collision_event in collision_events.read() {
-        match collision_event {
-            CollisionEvent::Started(e1, e2, _) => {
-                let win_sensor = win_sensor_query.single();
-                if *e1 == win_sensor || *e2 == win_sensor {
-                    // if this is a NPC AltWin with a the npc leaving the building happy
-                    // and the character still in.
-                    match (
-                        character_hitbox_query.get(*e1),
-                        character_hitbox_query.get(*e2),
-                    ) {
-                        (Err(_), Ok((_, character))) | (Ok((_, character)), Err(_)) => {
-                            win_event.send(WinTriggerEvent {
-                                entity: **character,
-                            });
-                        }
-                        _ => continue, // warn!("Neither {:?} or {:?} is a CharacterHitbox", *e1, *e2),
-                    }
+        if let CollisionEvent::Started(e1, e2, _) = collision_event {
+            let win_sensor = win_sensor_query.single();
+            if *e1 == win_sensor || *e2 == win_sensor {
+                // The npc can trigger the "win"
+                if let (Err(_), Ok((_, character))) | (Ok((_, character)), Err(_)) = (
+                    character_hitbox_query.get(*e1),
+                    character_hitbox_query.get(*e2),
+                ) {
+                    win_event.send(WinTriggerEvent {
+                        entity: **character,
+                    });
                 }
+                // warn!("Neither {:?} or {:?} is a CharacterHitbox", *e1, *e2),
             }
-            _ => continue,
         }
     }
 }
@@ -77,8 +71,7 @@ pub fn win_event(
 ) {
     for event in win_event.read() {
         if let Ok(name) = mind_controled_character_query.get(event.entity) {
-            let congrats = format!("BIEN JOUE {}!", name);
-            println!("{}", congrats);
+            println!("BIEN JOUE {name}!");
         }
         if current_location.get() == &Location::Level1000 {
             println!("In LevelOne");
@@ -100,41 +93,38 @@ pub fn location_event(
     >,
 ) {
     for collision_event in collision_events.read() {
-        match collision_event {
-            CollisionEvent::Started(e1, e2, _) => {
-                match (
-                    character_hitbox_query.get(*e1),
-                    character_hitbox_query.get(*e2),
-                    location_sensor_query.get(*e1),
-                    location_sensor_query.get(*e2),
-                ) {
-                    (
-                        Ok((character_hitbox, character)),
-                        Err(_),
-                        Err(_),
-                        Ok((location_sensor, location_point)),
-                    )
-                    | (
-                        Err(_),
-                        Ok((character_hitbox, character)),
-                        Ok((location_sensor, location_point)),
-                        Err(_),
-                    ) => {
-                        if (*e1 == location_sensor && *e2 == character_hitbox)
-                            || (*e1 == character_hitbox && *e2 == location_sensor)
-                        {
-                            match character_location_query.get_mut(**character) {
-                                Err(e) => warn!("Lost Character Hitbox {:?}", e),
-                                // Updates the location of the character who cross the sensor
-                                Ok((_, mut location)) => location.0 = location_point.location,
-                            }
-                            break;
+        if let CollisionEvent::Started(e1, e2, _) = collision_event {
+            match (
+                character_hitbox_query.get(*e1),
+                character_hitbox_query.get(*e2),
+                location_sensor_query.get(*e1),
+                location_sensor_query.get(*e2),
+            ) {
+                (
+                    Ok((character_hitbox, character)),
+                    Err(_),
+                    Err(_),
+                    Ok((location_sensor, location_point)),
+                )
+                | (
+                    Err(_),
+                    Ok((character_hitbox, character)),
+                    Ok((location_sensor, location_point)),
+                    Err(_),
+                ) => {
+                    if (*e1 == location_sensor && *e2 == character_hitbox)
+                        || (*e1 == character_hitbox && *e2 == location_sensor)
+                    {
+                        match character_location_query.get_mut(**character) {
+                            Err(e) => warn!("Lost Character Hitbox {:?}", e),
+                            // Updates the location of the character who cross the sensor
+                            Ok((_, mut location)) => location.0 = location_point.location,
                         }
+                        break;
                     }
-                    _ => continue,
                 }
+                _ => continue,
             }
-            _ => continue,
         }
     }
 }
@@ -151,24 +141,21 @@ pub fn button_event(
     mut open_door_event: EventWriter<OpenDoorEvent>,
 ) {
     for collision_event in collision_events.read() {
-        match collision_event {
-            CollisionEvent::Started(e1, e2, _) => {
-                let button_sensor = button_sensor_query.single();
-                // for the LevelOne: could be a single
-                for character_hitbox in character_hitbox_query.iter() {
-                    if (*e1 == button_sensor && *e2 == character_hitbox)
-                        || (*e1 == character_hitbox && *e2 == button_sensor)
-                    {
-                        for door in secured_door_query.iter() {
-                            open_door_event.send(OpenDoorEvent(door));
-                        }
-
-                        // The character hitbox has been found
-                        break;
+        if let CollisionEvent::Started(e1, e2, _) = collision_event {
+            let button_sensor = button_sensor_query.single();
+            // for the LevelOne: could be a single
+            for character_hitbox in character_hitbox_query.iter() {
+                if (*e1 == button_sensor && *e2 == character_hitbox)
+                    || (*e1 == character_hitbox && *e2 == button_sensor)
+                {
+                    for door in secured_door_query.iter() {
+                        open_door_event.send(OpenDoorEvent(door));
                     }
+
+                    // The character hitbox has been found
+                    break;
                 }
             }
-            _ => continue,
         }
     }
 }

@@ -1,6 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::pedantic)]
-// #![warn(missing_docs)]
+#![allow(clippy::type_complexity, clippy::too_many_arguments)]
+#![warn(clippy::pedantic)]
 
 use bevy::{prelude::*, window::WindowResolution};
 use bevy_rapier2d::prelude::*;

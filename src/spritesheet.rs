@@ -39,7 +39,7 @@ impl FromWorld for CatSheet {
     }
 }
 
-/// DOC: Rename it to EffectSheet
+/// DOC: Rename it to `EffectSheet`
 #[derive(Clone, Resource)]
 pub struct DazeSheet {
     pub texture: Handle<Image>,

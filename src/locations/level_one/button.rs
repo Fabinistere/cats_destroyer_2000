@@ -13,7 +13,7 @@ use crate::{
 ///
 /// Instead of creating struct to differenciate Doors,
 /// Link Doors and Button:
-/// Button { pub linked_doors: Vec<Entity> }
+/// `Button { pub linked_doors: Vec<Entity> }`
 #[derive(Component)]
 pub struct PushButton;
 
@@ -28,7 +28,7 @@ pub struct ButtonSensor;
 //     Releasing,
 // }
 
-pub fn set_up_button(
+pub fn set_up(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,

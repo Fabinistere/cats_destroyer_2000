@@ -24,7 +24,7 @@ pub enum DoorState {
 #[derive(Component)]
 pub struct ExitDoor;
 
-/// DOC: describe OpenDoorEvent
+/// DOC: describe `OpenDoorEvent`
 #[derive(Event)]
 pub struct OpenDoorEvent(pub Entity);
 
@@ -92,13 +92,10 @@ pub fn animate_door(
 
                     // We assume that a door has only hitbox as a child
                     // Or: Create and verify the DoorHitbox Component
-                    for child in children.iter() {
-                        match door_hitbox_query.get(*child) {
-                            // can be a LocationSensor or somethign else
-                            Err(_) => continue,
-                            Ok(_) => {
-                                commands.entity(*child).insert(Sensor);
-                            }
+                    for child in children {
+                        // can be a LocationSensor or somethign else
+                        if door_hitbox_query.get(*child).is_ok() {
+                            commands.entity(*child).insert(Sensor);
                         }
                     }
                 } else {
@@ -116,13 +113,10 @@ pub fn animate_door(
                     // stop the animation
                     commands.entity(door_id).remove::<AnimationTimer>();
 
-                    for child in children.iter() {
-                        match door_hitbox_query.get(*child) {
-                            // can be a LocationSensor or somethign else
-                            Err(_) => continue,
-                            Ok(_) => {
-                                commands.entity(*child).remove::<Sensor>();
-                            }
+                    // can be a LocationSensor or somethign else
+                    for child in children {
+                        if door_hitbox_query.get(*child).is_ok() {
+                            commands.entity(*child).remove::<Sensor>();
                         }
                     }
                 }

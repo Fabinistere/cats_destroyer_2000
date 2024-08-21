@@ -4,7 +4,11 @@
 use bevy::prelude::*;
 
 use crate::{
-    constants::{cinematics::*, locations::LEVEL_SCALE, CLOUD_FRAME_TIME, FRAME_TIME},
+    constants::{
+        cinematics::{CLOUDS_LIMIT, CLOUDS_RESET, SECOND_CLOUDS_INIT},
+        locations::LEVEL_SCALE,
+        CLOUD_FRAME_TIME, FRAME_TIME,
+    },
     spritesheet::AnimationTimer,
     tablet::mind_control::CurrentlyMindControlled,
 };
@@ -27,7 +31,7 @@ pub fn cinematic_camera(mut camera_query: Query<&mut Transform, With<Camera>>) {
     camera_transform.translation.x = 0.;
     camera_transform.translation.y = 3.;
 
-    camera_transform.scale = Vec3::new(1.3, 1.3, 1.3)
+    camera_transform.scale = Vec3::new(1.3, 1.3, 1.3);
     // TODO: adpat the camera to be centered on the endcinematic
 }
 

@@ -17,14 +17,14 @@ use crate::{
 };
 
 /// Happens when:
-///   - npcs::aggression::player_detection
+///   - `npcs::aggression::player_detection`
 ///     - An npc detected a enemy
 ///       in the same Area
 ///
 /// Read in
-///   - npcs::aggression::add_pursuit_urge
-///     - remove DetectionBehavior from the entity
-///     - insert PursuitBehavior into the entity
+///   - `npcs::aggression::add_pursuit_urge`
+///     - remove `DetectionBehavior` from the entity
+///     - insert `PursuitBehavior` into the entity
 ///     - insert the Target into the entity
 #[derive(Event)]
 pub struct EngagePursuitEvent {
@@ -40,7 +40,7 @@ pub struct DetectionSensor;
 ///   - Engagement
 ///     - targeting after the detection event
 ///   - Disengagement
-///     - If the target outran the chaser remove the PursuitBehavior
+///     - If the target outran the chaser remove the `PursuitBehavior`
 pub fn player_detection(
     mut collision_events: EventReader<CollisionEvent>,
 
@@ -106,24 +106,21 @@ pub fn add_pursuit_urge(
     mut npc_query: Query<(Entity, &mut Target, &Name), (With<NPC>, Without<MindControlled>)>,
 ) {
     for ev in ev_engage_pursuit.read() {
-        match npc_query.get_mut(ev.npc_entity) {
-            Err(_) => continue,
-            Ok((npc_entity, mut target, npc_name)) => {
-                info!("add pursuit urge to {}", npc_name);
-                commands
-                    .entity(npc_entity)
-                    .insert(ChaseBehavior)
-                    .remove::<WalkBehavior>();
-                target.0 = Some(ev.target_entity);
-            }
+        if let Ok((npc_entity, mut target, npc_name)) = npc_query.get_mut(ev.npc_entity) {
+            info!("add pursuit urge to {npc_name}");
+            commands
+                .entity(npc_entity)
+                .insert(ChaseBehavior)
+                .remove::<WalkBehavior>();
+            target.0 = Some(ev.target_entity);
         }
     }
 }
 
 /// The npc returns to walk peacefully
 ///
-/// - Remove ChaseBehavior
-/// - Insert WalkBehavior
+/// - Remove `ChaseBehavior`
+/// - Insert `WalkBehavior`
 /// - Ask for a new destination
 pub fn reset_aggro(
     mut commands: Commands,

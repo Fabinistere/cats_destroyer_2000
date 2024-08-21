@@ -137,12 +137,9 @@ fn daze_cure_by_mind_control(
     for (entity, _name, children) in mind_controled_query.iter() {
         commands.entity(entity).remove::<Dazed>();
         for child in children {
-            match daze_effect_query.get(*child) {
-                Err(_) => continue,
-                Ok(daze_effect) => {
-                    // XXX: it doesn't remove the link to their parent
-                    commands.entity(daze_effect).despawn();
-                }
+            if let Ok(daze_effect) = daze_effect_query.get(*child) {
+                // XXX: it doesn't remove the link to their parent
+                commands.entity(daze_effect).despawn();
             }
         }
     }

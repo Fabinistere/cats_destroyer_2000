@@ -1,7 +1,9 @@
 use bevy::{prelude::*, winit::WinitSettings};
 
 use crate::{
-    constants::ui::tablet::*,
+    constants::ui::tablet::{
+        HOVERED_BUTTON, HOVERED_INACTIVE_BUTTON, INACTIVE_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON,
+    },
     locations::{
         level_one::doors::{Door, OpenDoorEvent},
         Location,

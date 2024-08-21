@@ -1,7 +1,7 @@
 use crate::{
     characters::movement::{CharacterHitbox, MovementBundle, Speed},
     constants::character::{
-        npcs::{movement::BLUE_CAT_STARTING_POSITION, *},
+        npcs::{movement::BLUE_CAT_STARTING_POSITION, BLUE_CAT_STARTING_ANIM, NPC_SCALE},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     locations::{
@@ -33,7 +33,7 @@ pub struct PlayerHitbox;
 
 /// # Note
 ///
-/// Player's velocity = 0 if not self MindControlled to avoid being lauched
+/// Player's velocity = 0 if not self `MindControlled` to avoid being lauched
 fn player_idle(mut player_query: Query<&mut Velocity, (With<Player>, Without<MindControlled>)>) {
     if let Ok(mut rb_vel) = player_query.get_single_mut() {
         rb_vel.linvel.x = 0.;

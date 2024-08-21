@@ -11,7 +11,7 @@ use crate::{
         Character,
     },
     constants::character::{
-        npcs::{movement::BLACK_CAT_STARTING_POSITION, *},
+        npcs::{movement::BLACK_CAT_STARTING_POSITION, BLACK_CAT_STARTING_ANIM, NPC_SCALE},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     locations::{
