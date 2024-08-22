@@ -36,6 +36,7 @@ impl Plugin for HackPlugin {
 pub struct Hackable;
 
 #[derive(Component)]
+#[allow(clippy::module_name_repetitions)]
 pub struct HackButton;
 
 fn remove_tablet_button(mut commands: Commands, tablet_query: Query<Entity, With<HackButton>>) {
@@ -125,6 +126,9 @@ fn button_system(
     }
 }
 
+/// # Panics
+///
+/// Will panic if the button doesn't have as first child a `Text`
 pub fn place_holder_while_in_mind_control(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &Children),

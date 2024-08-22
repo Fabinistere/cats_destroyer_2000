@@ -51,6 +51,9 @@ pub fn add_dazed_effect(
 
 // pub fn remove_daze_effect(daze_removal: RemovedComponents<Dazed>) {}
 
+/// # Panics
+///
+/// Could panic if the spritesheet of the effects has not been loaded.
 pub fn animate_dazed_effect(
     time: Res<Time>,
     texture_atlases: Res<Assets<TextureAtlasLayout>>,

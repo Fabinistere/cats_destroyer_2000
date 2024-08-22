@@ -60,6 +60,9 @@ pub fn open_door_event(
     }
 }
 
+/// # Panics
+///
+/// Will panic if the door spritesheet has not been loaded.
 pub fn animate_door(
     mut commands: Commands,
 

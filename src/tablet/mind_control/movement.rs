@@ -7,6 +7,7 @@ use crate::{
 };
 
 /// The player input will act on the current `MindControlled` entity
+#[allow(clippy::module_name_repetitions)]
 pub fn mind_control_movement(
     keyboard_input: Res<ButtonInput<KeyCode>>,
     mut mind_controled_query: Query<(&Speed, &mut Velocity), With<MindControlled>>,
@@ -23,8 +24,8 @@ pub fn mind_control_movement(
         let right =
             keyboard_input.pressed(KeyCode::KeyD) || keyboard_input.pressed(KeyCode::ArrowRight);
 
-        let x_axis = -(i8::from(left)) + i8::from(right);
-        let y_axis = -(i8::from(down)) + i8::from(up);
+        let x_axis = -i8::from(left) + i8::from(right);
+        let y_axis = -i8::from(down) + i8::from(up);
 
         let mut vel_x = f32::from(x_axis) * **speed;
         let mut vel_y = f32::from(y_axis) * **speed;

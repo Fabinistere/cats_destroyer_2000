@@ -147,6 +147,9 @@ pub fn animate_clouds(
     }
 }
 
+/// # Panics
+///
+/// Will panic if the cat's spritesheet has not been loaded.
 pub fn animate_free_cat(
     time: Res<Time>,
     texture_atlases: Res<Assets<TextureAtlasLayout>>,

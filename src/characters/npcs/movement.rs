@@ -48,6 +48,12 @@ pub struct ResetAggroEvent {
 pub struct Target(pub Option<Entity>);
 
 /// Control the npcs' movement
+///
+/// # Panics
+///
+/// `target.0.unwrap()` won't panic as `is_none` is tested just before.
+///
+/// Morever, it will panic if the target doesn't have the `Transform` component.
 pub fn npc_walk_to(
     mut npc_query: Query<
         (Entity, &Transform, &Speed, &mut Velocity, &Target, &Name),
@@ -75,8 +81,8 @@ pub fn npc_walk_to(
         let left = destination.x < npc_transform.translation.x;
         let right = destination.x > npc_transform.translation.x;
 
-        let x_axis = -(i8::from(left)) + i8::from(right);
-        let y_axis = -(i8::from(down)) + i8::from(up);
+        let x_axis = -i8::from(left) + i8::from(right);
+        let y_axis = -i8::from(down) + i8::from(up);
 
         // println!("x: {}, y: {}", x_axis, y_axis);
 
@@ -96,6 +102,12 @@ pub fn npc_walk_to(
 }
 
 /// For all npcs with the `WalkBehavior`
+///
+/// # Panics
+///
+/// `target.0.unwrap()` won't panic as `is_none` is tested just before.
+///
+/// Morever, it will panic if the target doesn't have the `Transform` component.
 pub fn npc_walk(
     mut npc_query: Query<
         (Entity, &Transform, &mut Target, &Name),
@@ -138,6 +150,12 @@ pub fn npc_walk(
 }
 
 /// For all npcs with the `ChaseBehavior`
+///
+/// # Panics
+///
+/// `target.0.unwrap()` won't panic as `is_none` is tested just before.
+///
+/// Morever, it will panic if the target doesn't have the `Transform` component.
 pub fn npc_chase(
     mut commands: Commands,
     mut npc_query: Query<
@@ -200,6 +218,11 @@ pub fn npc_chase(
 ///
 /// If the requested npc's target was already a way point give its a different one
 /// Else give its a random way point
+///
+/// # Panics
+///
+/// It will panic if there is no waypoints registered (with the `WayPoint` component),
+/// or if the current waypoint doesn't have the `Transfrom` component.
 pub fn give_new_way_point_event(
     mut new_way_point_event: EventReader<NewWayPointEvent>,
 

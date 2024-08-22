@@ -21,7 +21,7 @@ impl Plugin for MindControlPlugin {
         app.init_resource::<CurrentlyMindControlled>().add_systems(
             Update,
             (
-                mind_control_button.run_if(tablet_is_free),
+                trigger_button.run_if(tablet_is_free),
                 exit_mind_control.run_if(tablet_is_mind_ctrl),
                 daze_cure_by_mind_control,
                 daze_post_mind_control,
@@ -65,7 +65,8 @@ fn camera_follow(
     camera_transform.translation.y = player_transform.translation.y;
 }
 
-pub fn mind_control_button(
+/// the `MindControl` trigger
+pub fn trigger_button(
     mut commands: Commands,
 
     keyboard_input: Res<ButtonInput<KeyCode>>,

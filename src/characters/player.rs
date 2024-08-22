@@ -29,6 +29,7 @@ impl Plugin for PlayerPlugin {
 pub struct Player;
 
 #[derive(Component)]
+#[allow(clippy::module_name_repetitions)]
 pub struct PlayerHitbox;
 
 /// # Note

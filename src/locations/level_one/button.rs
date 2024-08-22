@@ -15,9 +15,11 @@ use crate::{
 /// Link Doors and Button:
 /// `Button { pub linked_doors: Vec<Entity> }`
 #[derive(Component)]
+#[allow(clippy::module_name_repetitions)]
 pub struct PushButton;
 
 #[derive(Component)]
+#[allow(clippy::module_name_repetitions)]
 pub struct ButtonSensor;
 
 // #[derive(PartialEq)]
