@@ -1,7 +1,9 @@
 use bevy::{prelude::*, winit::WinitSettings};
 
 use crate::{
-    constants::ui::tablet::*,
+    constants::ui::tablet::{
+        HOVERED_BUTTON, HOVERED_INACTIVE_BUTTON, INACTIVE_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON,
+    },
     locations::{
         level_one::doors::{Door, OpenDoorEvent},
         Location,
@@ -34,6 +36,7 @@ impl Plugin for HackPlugin {
 pub struct Hackable;
 
 #[derive(Component)]
+#[allow(clippy::module_name_repetitions)]
 pub struct HackButton;
 
 fn remove_tablet_button(mut commands: Commands, tablet_query: Query<Entity, With<HackButton>>) {
@@ -72,7 +75,7 @@ pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer
                 TextStyle {
                     font: asset_server.load("fonts/dpcomic.ttf"),
                     font_size: 40.,
-                    color: Color::rgb(0.9, 0.9, 0.9),
+                    color: Color::srgb(0.9, 0.9, 0.9),
                 },
             ));
         });
@@ -123,6 +126,9 @@ fn button_system(
     }
 }
 
+/// # Panics
+///
+/// Will panic if the button doesn't have as first child a `Text`
 pub fn place_holder_while_in_mind_control(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &Children),

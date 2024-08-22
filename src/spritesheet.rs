@@ -13,7 +13,10 @@ impl Plugin for CatSpritePlugin {
 }
 
 #[derive(Clone, Resource)]
-pub struct CatSheet(pub Handle<TextureAtlas>);
+pub struct CatSheet {
+    pub texture: Handle<Image>,
+    pub atlas_handle: Handle<TextureAtlasLayout>,
+}
 
 impl FromWorld for CatSheet {
     fn from_world(world: &mut World) -> Self {
@@ -22,20 +25,26 @@ impl FromWorld for CatSheet {
             .unwrap()
             .load("textures/character/character_sheet_v1.png");
         // warn!("You have to download the asset see in github releases");
-        let atlas = TextureAtlas::from_grid(image, Vec2::splat(14.), 2, 2, None, None);
+        let atlas = TextureAtlasLayout::from_grid(UVec2::splat(14), 2, 2, None, None);
 
         let atlas_handle = world
-            .get_resource_mut::<Assets<TextureAtlas>>()
+            .get_resource_mut::<Assets<TextureAtlasLayout>>()
             .unwrap()
             .add(atlas);
 
-        CatSheet(atlas_handle)
+        CatSheet {
+            texture: image,
+            atlas_handle,
+        }
     }
 }
 
-/// DOC: Rename it to EffectSheet
+/// DOC: Rename it to `EffectSheet`
 #[derive(Clone, Resource)]
-pub struct DazeSheet(pub Handle<TextureAtlas>);
+pub struct DazeSheet {
+    pub texture: Handle<Image>,
+    pub atlas_handle: Handle<TextureAtlasLayout>,
+}
 
 impl FromWorld for DazeSheet {
     fn from_world(world: &mut World) -> Self {
@@ -44,15 +53,17 @@ impl FromWorld for DazeSheet {
             .unwrap()
             .load("textures/character/dazed.png");
         // warn!("You have to download the asset see in github releases");
-        let dazed_atlas =
-            TextureAtlas::from_grid(dazed_image, Vec2::from((35., 25.)), 12, 1, None, None);
+        let dazed_atlas = TextureAtlasLayout::from_grid(UVec2::from((35, 25)), 12, 1, None, None);
 
         let dazed_atlas_handle = world
-            .get_resource_mut::<Assets<TextureAtlas>>()
+            .get_resource_mut::<Assets<TextureAtlasLayout>>()
             .unwrap()
             .add(dazed_atlas);
 
-        DazeSheet(dazed_atlas_handle)
+        DazeSheet {
+            texture: dazed_image,
+            atlas_handle: dazed_atlas_handle,
+        }
     }
 }
 #[derive(Component, Deref, DerefMut)]
@@ -66,29 +77,23 @@ pub struct AnimState {
 
 pub fn animate_sprite(
     time: Res<Time>,
-    _texture_atlases: Res<Assets<TextureAtlas>>,
     mut query: Query<
-        (
-            &mut AnimationTimer,
-            &mut AnimState,
-            &mut TextureAtlasSprite,
-            &Handle<TextureAtlas>,
-        ),
+        (&mut AnimationTimer, &mut AnimState, &mut TextureAtlas),
         Or<(With<Player>, With<NPC>)>,
     >,
 ) {
-    for (mut timer, mut state, mut sprite, _texture_atlas_handle) in &mut query {
+    for (mut timer, mut state, mut atlas) in &mut query {
         timer.tick(time.delta());
         if timer.just_finished() {
             // let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
             // disco cats:
-            // sprite.index = (sprite.index + 1) % texture_atlas.textures.len();
-            sprite.index = if state.current == state.initial {
-                sprite.index + 1
+            // atlas.index = (atlas.index + 1) % texture_atlas.textures.len();
+            atlas.index = if state.current == state.initial {
+                atlas.index + 1
             } else {
-                sprite.index - 1
+                atlas.index - 1
             };
-            state.current = sprite.index;
+            state.current = atlas.index;
         }
     }
 }

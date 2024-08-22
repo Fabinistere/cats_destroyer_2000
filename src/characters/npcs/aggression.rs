@@ -17,14 +17,14 @@ use crate::{
 };
 
 /// Happens when:
-///   - npcs::aggression::player_detection
+///   - `npcs::aggression::player_detection`
 ///     - An npc detected a enemy
 ///       in the same Area
 ///
 /// Read in
-///   - npcs::aggression::add_pursuit_urge
-///     - remove DetectionBehavior from the entity
-///     - insert PursuitBehavior into the entity
+///   - `npcs::aggression::add_pursuit_urge`
+///     - remove `DetectionBehavior` from the entity
+///     - insert `PursuitBehavior` into the entity
 ///     - insert the Target into the entity
 #[derive(Event)]
 pub struct EngagePursuitEvent {
@@ -40,7 +40,7 @@ pub struct DetectionSensor;
 ///   - Engagement
 ///     - targeting after the detection event
 ///   - Disengagement
-///     - If the target outran the chaser remove the PursuitBehavior
+///     - If the target outran the chaser remove the `PursuitBehavior`
 pub fn player_detection(
     mut collision_events: EventReader<CollisionEvent>,
 
@@ -56,7 +56,7 @@ pub fn player_detection(
 
     mut ev_engage_pursuit: EventWriter<EngagePursuitEvent>,
 ) {
-    for collision_event in collision_events.iter() {
+    for collision_event in collision_events.read() {
         let entity_1 = collision_event.entities().0;
         let entity_2 = collision_event.entities().1;
 
@@ -105,25 +105,22 @@ pub fn add_pursuit_urge(
     mut ev_engage_pursuit: EventReader<EngagePursuitEvent>,
     mut npc_query: Query<(Entity, &mut Target, &Name), (With<NPC>, Without<MindControlled>)>,
 ) {
-    for ev in ev_engage_pursuit.iter() {
-        match npc_query.get_mut(ev.npc_entity) {
-            Err(_) => continue,
-            Ok((npc_entity, mut target, npc_name)) => {
-                info!("add pursuit urge to {}", npc_name);
-                commands
-                    .entity(npc_entity)
-                    .insert(ChaseBehavior)
-                    .remove::<WalkBehavior>();
-                target.0 = Some(ev.target_entity);
-            }
+    for ev in ev_engage_pursuit.read() {
+        if let Ok((npc_entity, mut target, npc_name)) = npc_query.get_mut(ev.npc_entity) {
+            info!("add pursuit urge to {npc_name}");
+            commands
+                .entity(npc_entity)
+                .insert(ChaseBehavior)
+                .remove::<WalkBehavior>();
+            target.0 = Some(ev.target_entity);
         }
     }
 }
 
 /// The npc returns to walk peacefully
 ///
-/// - Remove ChaseBehavior
-/// - Insert WalkBehavior
+/// - Remove `ChaseBehavior`
+/// - Insert `WalkBehavior`
 /// - Ask for a new destination
 pub fn reset_aggro(
     mut commands: Commands,
@@ -131,7 +128,7 @@ pub fn reset_aggro(
 
     mut new_way_point_event: EventWriter<NewWayPointEvent>,
 ) {
-    for ResetAggroEvent { npc } in reset_aggro_event.iter() {
+    for ResetAggroEvent { npc } in reset_aggro_event.read() {
         commands.entity(*npc).remove::<ChaseBehavior>();
         commands.entity(*npc).insert(WalkBehavior);
         new_way_point_event.send(NewWayPointEvent(*npc));

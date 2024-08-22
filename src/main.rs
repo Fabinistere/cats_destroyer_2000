@@ -1,10 +1,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-#![allow(clippy::type_complexity, clippy::too_many_arguments, clippy::pedantic)]
-// #![warn(missing_docs)]
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::type_complexity,
+    clippy::too_many_arguments,
+    clippy::needless_pass_by_value, // required by Bevy systems' structure
+    clippy::module_name_repetitions // could be removed but currently follwoing Bevy community examples
+)]
 
-use std::time::Duration;
-
-use bevy::{asset::ChangeWatcher, prelude::*, window::WindowResolution};
+use bevy::{prelude::*, window::WindowResolution};
 use bevy_rapier2d::prelude::*;
 
 use constants::{RESOLUTION, TILE_SIZE};
@@ -23,13 +26,13 @@ fn main() {
     let mut app = App::new();
     app
         // Color::TEAL / AZURE
-        .insert_resource(ClearColor(Color::TEAL))
+        .insert_resource(ClearColor(Color::srgb(0., 0.5, 0.5)))
         .insert_resource(Msaa::Off)
         // v-- Hitbox --v
-        .insert_resource(RapierConfiguration {
-            gravity: Vec2::ZERO,
-            ..default()
-        })
+        .insert_resource(
+            // gravity: Vec2::ZERO,
+            RapierConfiguration::new(0.),
+        )
         .add_plugins((
             DefaultPlugins
                 .set(WindowPlugin {
@@ -41,13 +44,7 @@ fn main() {
                     }),
                     ..default()
                 })
-                .set(ImagePlugin::default_nearest())
-                .set(AssetPlugin {
-                    // This tells the AssetServer to watch for changes to assets.
-                    // It enables our scenes to automatically reload in game when we modify their files.
-                    watch_for_changes: ChangeWatcher::with_delay(Duration::from_millis(200)),
-                    ..default()
-                }),
+                .set(ImagePlugin::default_nearest()),
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.),
             // TweeningPlugin,
         ))

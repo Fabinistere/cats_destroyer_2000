@@ -11,7 +11,7 @@ use crate::{
         Character,
     },
     constants::character::{
-        npcs::{movement::BLACK_CAT_STARTING_POSITION, *},
+        npcs::{movement::BLACK_CAT_STARTING_POSITION, BLACK_CAT_STARTING_ANIM, NPC_SCALE},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     locations::{
@@ -58,18 +58,18 @@ fn spawn_characters(mut commands: Commands, cats: Res<CatSheet>) {
     // Black Cat
     commands
         .spawn((
-            SpriteSheetBundle {
-                sprite: TextureAtlasSprite {
-                    index: BLACK_CAT_STARTING_ANIM,
-                    ..default()
-                },
-                texture_atlas: cats.0.clone(),
+            SpriteBundle {
+                texture: cats.texture.clone(),
                 transform: Transform {
                     translation: Vec3::from(BLACK_CAT_STARTING_POSITION),
                     scale: Vec3::splat(NPC_SCALE),
                     ..default()
                 },
                 ..default()
+            },
+            TextureAtlas {
+                layout: cats.atlas_handle.clone(),
+                index: BLACK_CAT_STARTING_ANIM,
             },
             Name::new("Black Cat"),
             NPC,

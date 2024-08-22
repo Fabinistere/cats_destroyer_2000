@@ -24,7 +24,7 @@ pub enum DoorState {
 #[derive(Component)]
 pub struct ExitDoor;
 
-/// DOC: describe OpenDoorEvent
+/// DOC: describe `OpenDoorEvent`
 #[derive(Event)]
 pub struct OpenDoorEvent(pub Entity);
 
@@ -35,7 +35,7 @@ pub fn open_door_event(
 
     mut door_query: Query<(Entity, &mut Door)>,
 ) {
-    for event in open_door_event.iter() {
+    for event in open_door_event.read() {
         match door_query.get_mut(event.0) {
             Err(e) => warn!("{:?}", e),
             Ok((door, mut door_state)) => {
@@ -60,32 +60,33 @@ pub fn open_door_event(
     }
 }
 
+/// # Panics
+///
+/// Will panic if the door spritesheet has not been loaded.
 pub fn animate_door(
     mut commands: Commands,
 
     time: Res<Time>,
-    texture_atlases: Res<Assets<TextureAtlas>>,
+    texture_atlases: Res<Assets<TextureAtlasLayout>>,
     mut door_query: Query<(
         Entity,
         &mut Door,
         &mut AnimationTimer,
-        &mut TextureAtlasSprite,
-        &Handle<TextureAtlas>,
+        &mut TextureAtlas,
         &Children,
     )>,
 
     door_hitbox_query: Query<Entity, With<DoorHitbox>>,
 ) {
-    for (door_id, mut door, mut timer, mut sprite, texture_atlas_handle, children) in
-        &mut door_query
-    {
+    for (door_id, mut door, mut timer, mut atlas, children) in &mut door_query {
         timer.tick(time.delta());
         if timer.just_finished() {
-            let texture_atlas = texture_atlases.get(texture_atlas_handle).unwrap();
+            let atlas_layout_len = texture_atlases.get(&atlas.layout).unwrap().textures.len();
+
             if door.current_state == DoorState::Opening || door.current_state == DoorState::Closed {
                 door.current_state = DoorState::Opening;
 
-                let new_index = (sprite.index + 1) % texture_atlas.textures.len();
+                let new_index = (atlas.index + 1) % atlas_layout_len;
                 // if last frame
                 if new_index == 0 {
                     door.current_state = DoorState::Open;
@@ -94,37 +95,31 @@ pub fn animate_door(
 
                     // We assume that a door has only hitbox as a child
                     // Or: Create and verify the DoorHitbox Component
-                    for child in children.iter() {
-                        match door_hitbox_query.get(*child) {
-                            // can be a LocationSensor or somethign else
-                            Err(_) => continue,
-                            Ok(_) => {
-                                commands.entity(*child).insert(Sensor);
-                            }
+                    for child in children {
+                        // can be a LocationSensor or somethign else
+                        if door_hitbox_query.get(*child).is_ok() {
+                            commands.entity(*child).insert(Sensor);
                         }
                     }
                 } else {
-                    sprite.index = new_index;
+                    atlas.index = new_index;
                 }
             } else if door.current_state == DoorState::Closing
                 || door.current_state == DoorState::Open
             {
                 door.current_state = DoorState::Closing;
 
-                sprite.index = (sprite.index - 1) % texture_atlas.textures.len();
+                atlas.index = (atlas.index - 1) % atlas_layout_len;
                 // if first frame
-                if sprite.index == 0 {
+                if atlas.index == 0 {
                     door.current_state = DoorState::Closed;
                     // stop the animation
                     commands.entity(door_id).remove::<AnimationTimer>();
 
-                    for child in children.iter() {
-                        match door_hitbox_query.get(*child) {
-                            // can be a LocationSensor or somethign else
-                            Err(_) => continue,
-                            Ok(_) => {
-                                commands.entity(*child).remove::<Sensor>();
-                            }
+                    // can be a LocationSensor or somethign else
+                    for child in children {
+                        if door_hitbox_query.get(*child).is_ok() {
+                            commands.entity(*child).remove::<Sensor>();
                         }
                     }
                 }

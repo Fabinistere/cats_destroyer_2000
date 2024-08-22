@@ -13,7 +13,7 @@ impl Plugin for TabletPlugin {
     }
 }
 
-/// REFACTOR: stop checking if free by the Entity Player not being MindControlled ?
+/// REFACTOR: stop checking if free by the Entity Player not being `MindControlled` ?
 fn tablet_is_free(player_query: Query<Entity, (With<MindControlled>, With<Player>)>) -> bool {
     player_query.get_single().is_ok()
 }

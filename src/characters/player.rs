@@ -1,7 +1,7 @@
 use crate::{
     characters::movement::{CharacterHitbox, MovementBundle, Speed},
     constants::character::{
-        npcs::{movement::BLUE_CAT_STARTING_POSITION, *},
+        npcs::{movement::BLUE_CAT_STARTING_POSITION, BLUE_CAT_STARTING_ANIM, NPC_SCALE},
         CHAR_HITBOX_HEIGHT, CHAR_HITBOX_WIDTH, CHAR_HITBOX_Y_OFFSET, CHAR_HITBOX_Z_OFFSET,
     },
     locations::{
@@ -29,11 +29,12 @@ impl Plugin for PlayerPlugin {
 pub struct Player;
 
 #[derive(Component)]
+#[allow(clippy::module_name_repetitions)]
 pub struct PlayerHitbox;
 
 /// # Note
 ///
-/// Player's velocity = 0 if not self MindControlled to avoid being lauched
+/// Player's velocity = 0 if not self `MindControlled` to avoid being lauched
 fn player_idle(mut player_query: Query<&mut Velocity, (With<Player>, Without<MindControlled>)>) {
     if let Ok(mut rb_vel) = player_query.get_single_mut() {
         rb_vel.linvel.x = 0.;
@@ -45,18 +46,18 @@ fn spawn_player(mut commands: Commands, cats: Res<CatSheet>) {
     // Blue Cat
     commands
         .spawn((
-            SpriteSheetBundle {
-                sprite: TextureAtlasSprite {
-                    index: BLUE_CAT_STARTING_ANIM,
-                    ..default()
-                },
-                texture_atlas: cats.0.clone(),
+            SpriteBundle {
+                texture: cats.texture.clone(),
                 transform: Transform {
                     translation: Vec3::from(BLUE_CAT_STARTING_POSITION),
                     scale: Vec3::splat(NPC_SCALE),
                     ..default()
                 },
                 ..default()
+            },
+            TextureAtlas {
+                layout: cats.atlas_handle.clone(),
+                index: BLUE_CAT_STARTING_ANIM,
             },
             Name::new("Player: Blue Cat"),
             Player,

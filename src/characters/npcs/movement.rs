@@ -25,19 +25,19 @@ pub struct WalkBehavior;
 #[derive(Component)]
 pub struct ChaseBehavior;
 
-/// DOC: describe NewWayPointEvent
+/// DOC: describe `NewWayPointEvent`
 #[derive(Event)]
 pub struct NewWayPointEvent(pub Entity);
 
 /// Happens in
-///   - npcs::movement::npc_chase
-///     - target in ChaseBehavior is not a player
+///   - `npcs::movement::npc_chase`
+///     - target in `ChaseBehavior` is not a player
 ///     - target is reached
 ///
 /// Read in
-///   - npcs::aggresion::reset_aggro
-///     - Remove ChaseBehavior
-///       Insert WalkBehavior
+///   - `npcs::aggresion::reset_aggro`
+///     - Remove `ChaseBehavior`
+///       Insert `WalkBehavior`
 ///       Ask for a new destination
 #[derive(Event)]
 pub struct ResetAggroEvent {
@@ -48,6 +48,12 @@ pub struct ResetAggroEvent {
 pub struct Target(pub Option<Entity>);
 
 /// Control the npcs' movement
+///
+/// # Panics
+///
+/// `target.0.unwrap()` won't panic as `is_none` is tested just before.
+///
+/// Morever, it will panic if the target doesn't have the `Transform` component.
 pub fn npc_walk_to(
     mut npc_query: Query<
         (Entity, &Transform, &Speed, &mut Velocity, &Target, &Name),
@@ -61,7 +67,7 @@ pub fn npc_walk_to(
     transforms_query: Query<&Transform>,
     mut new_direction_event: EventWriter<NewWayPointEvent>,
 ) {
-    for (npc, npc_transform, speed, mut rb_vel, target, _npc_name) in npc_query.iter_mut() {
+    for (npc, npc_transform, speed, mut rb_vel, target, _npc_name) in &mut npc_query {
         if target.0.is_none() {
             new_direction_event.send(NewWayPointEvent(npc));
             return;
@@ -75,13 +81,13 @@ pub fn npc_walk_to(
         let left = destination.x < npc_transform.translation.x;
         let right = destination.x > npc_transform.translation.x;
 
-        let x_axis = -(left as i8) + right as i8;
-        let y_axis = -(down as i8) + up as i8;
+        let x_axis = -i8::from(left) + i8::from(right);
+        let y_axis = -i8::from(down) + i8::from(up);
 
         // println!("x: {}, y: {}", x_axis, y_axis);
 
-        let mut vel_x = x_axis as f32 * **speed;
-        let mut vel_y = y_axis as f32 * **speed;
+        let mut vel_x = f32::from(x_axis) * **speed;
+        let mut vel_y = f32::from(y_axis) * **speed;
 
         if x_axis != 0 && y_axis != 0 {
             vel_x *= (std::f32::consts::PI / 4.).cos();
@@ -96,6 +102,12 @@ pub fn npc_walk_to(
 }
 
 /// For all npcs with the `WalkBehavior`
+///
+/// # Panics
+///
+/// `target.0.unwrap()` won't panic as `is_none` is tested just before.
+///
+/// Morever, it will panic if the target doesn't have the `Transform` component.
 pub fn npc_walk(
     mut npc_query: Query<
         (Entity, &Transform, &mut Target, &Name),
@@ -110,7 +122,7 @@ pub fn npc_walk(
 
     mut new_direction_event: EventWriter<NewWayPointEvent>,
 ) {
-    for (npc, npc_transform, target, _npc_name) in npc_query.iter_mut() {
+    for (npc, npc_transform, target, _npc_name) in &mut npc_query {
         if target.0.is_none() {
             new_direction_event.send(NewWayPointEvent(npc));
             return;
@@ -138,6 +150,12 @@ pub fn npc_walk(
 }
 
 /// For all npcs with the `ChaseBehavior`
+///
+/// # Panics
+///
+/// `target.0.unwrap()` won't panic as `is_none` is tested just before.
+///
+/// Morever, it will panic if the target doesn't have the `Transform` component.
 pub fn npc_chase(
     mut commands: Commands,
     mut npc_query: Query<
@@ -154,7 +172,7 @@ pub fn npc_chase(
     mut reset_aggro_event: EventWriter<ResetAggroEvent>,
     mut next_location: ResMut<NextState<Location>>,
 ) {
-    for (npc, npc_transform, target, npc_name, npc_location) in npc_query.iter_mut() {
+    for (npc, npc_transform, target, npc_name, npc_location) in &mut npc_query {
         if target.0.is_none() {
             reset_aggro_event.send(ResetAggroEvent { npc });
             return;
@@ -200,13 +218,18 @@ pub fn npc_chase(
 ///
 /// If the requested npc's target was already a way point give its a different one
 /// Else give its a random way point
+///
+/// # Panics
+///
+/// It will panic if there is no waypoints registered (with the `WayPoint` component),
+/// or if the current waypoint doesn't have the `Transfrom` component.
 pub fn give_new_way_point_event(
     mut new_way_point_event: EventReader<NewWayPointEvent>,
 
     mut npc_query: Query<(&mut Target, &Name), (With<NPC>, With<WalkBehavior>)>,
     way_points_query: Query<Entity, With<WayPoint>>,
 ) {
-    for NewWayPointEvent(npc) in new_way_point_event.iter() {
+    for NewWayPointEvent(npc) in new_way_point_event.read() {
         // The entity could have been despawned after a level change
         if let Ok((mut target, _name)) = npc_query.get_mut(*npc) {
             if target.0.is_none() {
@@ -239,7 +262,7 @@ pub fn daze_wait(
     >,
     daze_effect_query: Query<Entity, With<DazeAnimation>>,
 ) {
-    for (npc, mut daze_timer, mut _rb_vel, children, name) in npc_query.iter_mut() {
+    for (npc, mut daze_timer, mut _rb_vel, children, name) in &mut npc_query {
         daze_timer.timer.tick(time.delta());
 
         // not required to control velocity because it is managed elsewhere
@@ -250,11 +273,8 @@ pub fn daze_wait(
             // REFACTOR: Abstract Daze Cure by event (also in daze_cure_by_mind_control())
             commands.entity(npc).remove::<Dazed>();
             for child in children {
-                match daze_effect_query.get(*child) {
-                    Err(_) => continue,
-                    Ok(daze_effect) => {
-                        commands.entity(daze_effect).despawn();
-                    }
+                if let Ok(daze_effect) = daze_effect_query.get(*child) {
+                    commands.entity(daze_effect).despawn();
                 }
             }
         }

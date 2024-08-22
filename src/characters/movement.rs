@@ -24,6 +24,7 @@ impl Default for Speed {
 }
 
 #[derive(Bundle)]
+#[allow(clippy::module_name_repetitions)]
 pub struct MovementBundle {
     pub speed: Speed,
     pub velocity: Velocity,
