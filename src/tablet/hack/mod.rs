@@ -1,14 +1,17 @@
 use bevy::{prelude::*, winit::WinitSettings};
+use bevy_tweening::{lens::UiPositionLens, Animator, EaseFunction, Tween, TweenCompleted};
+use std::time::Duration;
 
 use crate::{
     constants::ui::tablet::{
-        HOVERED_BUTTON, HOVERED_INACTIVE_BUTTON, INACTIVE_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON,
+        HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON, TABLET_ANIMATION_OFFSET,
+        TABLET_ANIMATION_TIME_MS,
     },
     locations::{
         level_one::doors::{Door, OpenDoorEvent},
         Location,
     },
-    tablet::{tablet_is_free, tablet_is_mind_ctrl},
+    HudState,
 };
 
 pub struct HackPlugin;
@@ -16,21 +19,25 @@ pub struct HackPlugin;
 impl Plugin for HackPlugin {
     // #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app
-            // OPTIMIZE: Only run the app when there is user input. This will significantly reduce CPU/GPU use.
-            .insert_resource(WinitSettings::game())
-            .add_systems(OnEnter(Location::Level1000), setup_tablet_button)
+        app.insert_resource(WinitSettings::game())
             .add_systems(
                 Update,
-                (
-                    button_system.run_if(tablet_is_free),
-                    place_holder_while_in_mind_control.run_if(tablet_is_mind_ctrl),
-                )
-                    .run_if(in_state(Location::Level1000)),
+                button_system
+                    // .run_if(tablet_is_free)
+                    .run_if(in_state(Location::Level1000))
+                    .run_if(in_state(HudState::Tablet)),
             )
-            .add_systems(OnExit(Location::Level1000), remove_tablet_button);
+            .add_systems(OnExit(Location::Level1000), remove_tablet_button)
+            .add_systems(
+                Update,
+                (create_tablet_on_key_press, despawn_tablet).run_if(in_state(Location::Level1000)),
+            )
+            .add_systems(OnEnter(HudState::Tablet), create_tablet)
+            .add_systems(OnExit(HudState::Tablet), close_tablet);
     }
 }
+
+/* ------------------------------- Components ------------------------------- */
 
 #[derive(Component)]
 pub struct Hackable;
@@ -39,56 +46,167 @@ pub struct Hackable;
 #[allow(clippy::module_name_repetitions)]
 pub struct HackButton;
 
+#[derive(Component)]
+pub struct Tablet;
+
+/* --------------------------------- Systems -------------------------------- */
+
 fn remove_tablet_button(mut commands: Commands, tablet_query: Query<Entity, With<HackButton>>) {
     for button in tablet_query.iter() {
         commands.entity(button).despawn_recursive();
     }
 }
 
-pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // 'Hack'/Open the ALT_DOOR
+pub fn create_tablet_on_key_press(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    tablet_query: Query<(Entity, &Animator<Style>, &Style), With<Tablet>>,
+
+    mut next_game_state: ResMut<NextState<HudState>>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        if let Ok((_entity, animator, _style)) = tablet_query.get_single() {
+            if animator.tweenable().progress() >= 1. {
+                next_game_state.set(HudState::Closed);
+            }
+        } else {
+            next_game_state.set(HudState::Tablet);
+        }
+    }
+}
+
+pub fn close_tablet(
+    mut commands: Commands,
+    mut query: Query<(Entity, &mut Animator<Style>, &Style), With<Tablet>>,
+) {
+    if let Ok((entity, mut _animator, style)) = query.get_single_mut() {
+        let tablet_tween = Tween::new(
+            EaseFunction::ExponentialIn, // EaseFunction::CircularIn,
+            Duration::from_millis(TABLET_ANIMATION_TIME_MS),
+            UiPositionLens {
+                start: UiRect {
+                    left: style.left,
+                    right: style.right,
+                    top: style.top,
+                    bottom: style.bottom,
+                },
+                end: UiRect {
+                    top: Val::Auto,
+                    right: Val::Auto,
+                    left: Val::Px(TABLET_ANIMATION_OFFSET),
+                    bottom: Val::Px(TABLET_ANIMATION_OFFSET),
+                },
+            },
+        )
+        .with_completed_event(0);
+
+        commands
+            .entity(entity)
+            .remove::<Animator<Style>>()
+            .insert(Animator::new(tablet_tween));
+    }
+}
+
+pub fn despawn_tablet(mut commands: Commands, mut completed_event: EventReader<TweenCompleted>) {
+    for TweenCompleted { entity, user_data } in completed_event.read() {
+        if *user_data == 0 {
+            commands.entity(*entity).despawn_recursive();
+        }
+    }
+}
+
+pub fn create_tablet(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let tablet = asset_server.load("textures/UI/Tablet.png");
+
+    // Tablet's motion
+    let tablet_tween = Tween::new(
+        EaseFunction::ExponentialOut, // EaseFunction::CircularOut,
+        Duration::from_millis(TABLET_ANIMATION_TIME_MS),
+        UiPositionLens {
+            start: UiRect {
+                top: Val::Auto,
+                right: Val::Auto,
+                left: Val::Px(TABLET_ANIMATION_OFFSET),
+                bottom: Val::Px(TABLET_ANIMATION_OFFSET),
+            },
+            end: UiRect {
+                top: Val::Auto,
+                right: Val::Auto,
+                left: Val::Px(0.),
+                bottom: Val::Px(0.),
+            },
+        },
+    );
+
     commands
         .spawn((
-            ButtonBundle {
+            ImageBundle {
+                image: tablet.into(),
                 style: Style {
-                    width: Val::Px(180.),
-                    height: Val::Px(65.),
-                    // center button
-                    margin: UiRect::all(Val::Auto),
-                    // horizontally center child text
-                    justify_content: JustifyContent::Center,
-                    // vertically center child text
+                    display: Display::Flex,
+                    flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
-                    top: Val::Percent(30.),
-                    right: Val::Percent(-39.),
+                    justify_content: JustifyContent::Center,
+                    position_type: PositionType::Relative,
+                    top: Val::Px(0.),
+                    left: Val::Px(TABLET_ANIMATION_OFFSET),
+                    bottom: Val::Px(0.),
+                    margin: UiRect {
+                        right: Val::Auto,
+                        left: Val::Px(0.),
+                        top: Val::Auto,
+                        bottom: Val::Px(0.),
+                    },
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
+                    aspect_ratio: Some(284. / 400.),
                     ..default()
                 },
-                background_color: NORMAL_BUTTON.into(),
                 ..default()
             },
-            Name::new("Hack Button"),
-            HackButton,
+            Tablet,
+            Animator::new(tablet_tween),
+            Name::new("Tablet"),
         ))
         .with_children(|parent| {
-            parent.spawn(TextBundle::from_section(
-                "HACK",
-                TextStyle {
-                    font: asset_server.load("fonts/dpcomic.ttf"),
-                    font_size: 40.,
-                    color: Color::srgb(0.9, 0.9, 0.9),
-                },
-            ));
+            // 'Hack'/Open the ALT_DOOR
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: Style {
+                            width: Val::Px(180.),
+                            height: Val::Px(65.),
+                            // center button
+                            margin: UiRect::all(Val::Auto),
+                            // horizontally center child text
+                            justify_content: JustifyContent::Center,
+                            // vertically center child text
+                            align_items: AlignItems::Center,
+                            top: Val::Percent(30.),
+                            right: Val::Percent(-39.),
+                            ..default()
+                        },
+                        background_color: NORMAL_BUTTON.into(),
+                        ..default()
+                    },
+                    Name::new("Hack Button"),
+                    HackButton,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "HACK",
+                        TextStyle {
+                            font: asset_server.load("fonts/dpcomic.ttf"),
+                            font_size: 40.,
+                            color: Color::srgb(0.9, 0.9, 0.9),
+                        },
+                    ));
+                });
         });
 }
 
-// pub fn hack_door(
-//     mut open_doors_alt_event: EventWriter<OpenAltDoorsEvent>,
-// ) {
-// }
-
 /// # Note
 ///
-/// Spamming should not work (cause of the timer being only 0.1s)
+/// Spam proof (cause of the timer being only 0.1s)
 ///
 /// REFACTOR: seperate color/text management from action
 fn button_system(
@@ -121,34 +239,6 @@ fn button_system(
             Interaction::None => {
                 text.sections[0].value = String::from("HACK");
                 *color = NORMAL_BUTTON.into();
-            }
-        }
-    }
-}
-
-/// # Panics
-///
-/// Will panic if the button doesn't have as first child a `Text`
-pub fn place_holder_while_in_mind_control(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &Children),
-        (Changed<Interaction>, With<HackButton>),
-    >,
-    mut text_query: Query<&mut Text>,
-) {
-    for (interaction, mut color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                // *color = PRESSED_BUTTON.into();
-            }
-            Interaction::Hovered => {
-                *color = HOVERED_INACTIVE_BUTTON.into();
-                text.sections[0].value = String::from("In MindCtrl");
-            }
-            Interaction::None => {
-                *color = INACTIVE_BUTTON.into();
-                text.sections[0].value = String::from("In MindCtrl");
             }
         }
     }

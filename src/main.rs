@@ -46,7 +46,7 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest()),
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.),
-            // TweeningPlugin,
+            bevy_tweening::TweeningPlugin,
         ))
         .add_plugins((
             debug::DebugPlugin,
@@ -55,9 +55,26 @@ fn main() {
             tablet::TabletPlugin,
             characters::CharactersPlugin,
         ))
+        .init_state::<GameState>()
+        .add_sub_state::<HudState>()
         .add_systems(Startup, spawn_camera);
 
     app.run();
+}
+
+#[derive(States, PartialEq, Eq, Clone, Hash, Debug, Default)]
+pub enum GameState {
+    MainMenu,
+    #[default]
+    InGame,
+}
+
+#[derive(SubStates, PartialEq, Eq, Clone, Hash, Debug, Default)]
+#[source(GameState = GameState::InGame)]
+pub enum HudState {
+    #[default]
+    Closed,
+    Tablet,
 }
 
 fn spawn_camera(mut commands: Commands) {

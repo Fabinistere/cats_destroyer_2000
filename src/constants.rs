@@ -88,6 +88,9 @@ pub mod ui {
 
         pub const HOVERED_INACTIVE_BUTTON: Color = Color::srgb(0.75, 0.75, 0.75);
         pub const INACTIVE_BUTTON: Color = Color::srgb(0.5, 0.5, 0.5);
+
+        pub const TABLET_ANIMATION_OFFSET: f32 = -1000.;
+        pub const TABLET_ANIMATION_TIME_MS: u64 = 500;
     }
 
     pub const DRAGGED_ENTITY_Z: f32 = 100.;

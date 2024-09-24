@@ -29,7 +29,7 @@ or in the correct release note (if from other version):
 
 ### Future... (lmao)
 
-- [ ] TODO: LevelScene, CinematicScene
+- [x] LevelScene, CinematicScene
   - [x] Reset the scene when touched (by an enemy)
 - [ ] TODO: Background + MovingBubbles
 - [x] Final Cinematic
