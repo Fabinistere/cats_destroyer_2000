@@ -82,6 +82,8 @@ pub mod ui {
     pub mod tablet {
         use bevy::prelude::Color;
 
+        use crate::constants::character::CHAR_Z;
+
         pub const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
         pub const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
         pub const PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
@@ -91,6 +93,8 @@ pub mod ui {
 
         pub const TABLET_ANIMATION_OFFSET: f32 = -1000.;
         pub const TABLET_ANIMATION_TIME_MS: u64 = 500;
+
+        pub const MINI_MAP_Z: f32 = CHAR_Z + 1.;
     }
 
     pub const DRAGGED_ENTITY_Z: f32 = 100.;

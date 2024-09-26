@@ -9,7 +9,7 @@ use crate::{
     constants::character::effects::DAZE_TIMER,
     locations::Location,
     tablet::{tablet_is_free, tablet_is_mind_ctrl},
-    HudState,
+    HudState, PlayerCamera,
 };
 
 mod movement;
@@ -57,7 +57,10 @@ pub enum CurrentlyMindControlled {
 /// IDEA: gamefeel - smooth transition between mind control switch
 fn camera_follow(
     mind_controled_query: Query<&Transform, With<MindControlled>>,
-    mut camera_query: Query<&mut Transform, (Without<MindControlled>, With<Camera>)>,
+    mut camera_query: Query<
+        &mut Transform,
+        (With<PlayerCamera>, With<Camera>, Without<MindControlled>),
+    >,
 ) {
     let player_transform = mind_controled_query.single();
     let mut camera_transform = camera_query.single_mut();

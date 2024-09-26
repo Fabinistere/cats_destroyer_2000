@@ -11,7 +11,7 @@ use crate::{
         level_one::doors::{Door, OpenDoorEvent},
         Location,
     },
-    HudState,
+    HudState, PlayerCamera,
 };
 
 pub struct HackPlugin;
@@ -22,18 +22,18 @@ impl Plugin for HackPlugin {
         app.insert_resource(WinitSettings::game())
             .add_systems(
                 Update,
+                (create_tablet_on_key_press, despawn_tablet).run_if(in_state(Location::Level1000)),
+            )
+            .add_systems(OnEnter(HudState::Tablet), create_tablet)
+            .add_systems(
+                Update,
                 button_system
                     // .run_if(tablet_is_free)
                     .run_if(in_state(Location::Level1000))
                     .run_if(in_state(HudState::Tablet)),
             )
-            .add_systems(OnExit(Location::Level1000), remove_tablet_button)
-            .add_systems(
-                Update,
-                (create_tablet_on_key_press, despawn_tablet).run_if(in_state(Location::Level1000)),
-            )
-            .add_systems(OnEnter(HudState::Tablet), create_tablet)
-            .add_systems(OnExit(HudState::Tablet), close_tablet);
+            .add_systems(OnExit(HudState::Tablet), close_tablet)
+            .add_systems(OnExit(Location::Level1000), close_tablet);
     }
 }
 
@@ -49,13 +49,10 @@ pub struct HackButton;
 #[derive(Component)]
 pub struct Tablet;
 
-/* --------------------------------- Systems -------------------------------- */
+#[derive(Component)]
+pub struct MiniMap;
 
-fn remove_tablet_button(mut commands: Commands, tablet_query: Query<Entity, With<HackButton>>) {
-    for button in tablet_query.iter() {
-        commands.entity(button).despawn_recursive();
-    }
-}
+/* --------------------------------- Systems -------------------------------- */
 
 pub fn create_tablet_on_key_press(
     keyboard_input: Res<ButtonInput<KeyCode>>,
@@ -106,17 +103,27 @@ pub fn close_tablet(
     }
 }
 
-pub fn despawn_tablet(mut commands: Commands, mut completed_event: EventReader<TweenCompleted>) {
+pub fn despawn_tablet(
+    mut commands: Commands,
+    mut completed_event: EventReader<TweenCompleted>,
+    minimap_camera_query: Query<Entity, With<MiniMap>>,
+) {
     for TweenCompleted { entity, user_data } in completed_event.read() {
         if *user_data == 0 {
             commands.entity(*entity).despawn_recursive();
+            let minimap = minimap_camera_query.single();
+            commands.entity(minimap).despawn();
         }
     }
 }
 
-pub fn create_tablet(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let tablet = asset_server.load("textures/UI/Tablet.png");
+// #[allow(clippy::too_many_lines)]
+pub fn create_tablet(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
 
+    player_camera_query: Query<Entity, With<PlayerCamera>>,
+) {
     // Tablet's motion
     let tablet_tween = Tween::new(
         EaseFunction::ExponentialOut, // EaseFunction::CircularOut,
@@ -137,13 +144,16 @@ pub fn create_tablet(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
     );
 
+    let player_camera = player_camera_query.single();
+    let tablet = asset_server.load("textures/UI/Tablet.png");
+
     commands
         .spawn((
             ImageBundle {
                 image: tablet.into(),
                 style: Style {
                     display: Display::Flex,
-                    flex_direction: FlexDirection::Column,
+                    flex_direction: FlexDirection::Row,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     position_type: PositionType::Relative,
@@ -156,19 +166,20 @@ pub fn create_tablet(mut commands: Commands, asset_server: Res<AssetServer>) {
                         top: Val::Auto,
                         bottom: Val::Px(0.),
                     },
-                    width: Val::Percent(100.),
+                    // width: Val::Percent(100.),
                     height: Val::Percent(100.),
-                    aspect_ratio: Some(284. / 400.),
+                    aspect_ratio: Some(16. / 9.),
                     ..default()
                 },
                 ..default()
             },
+            TargetCamera(player_camera),
             Tablet,
             Animator::new(tablet_tween),
             Name::new("Tablet"),
         ))
         .with_children(|parent| {
-            // 'Hack'/Open the ALT_DOOR
+            // -- Hack/Open the ALT_DOOR --
             parent
                 .spawn((
                     ButtonBundle {
@@ -202,6 +213,26 @@ pub fn create_tablet(mut commands: Commands, asset_server: Res<AssetServer>) {
                     ));
                 });
         });
+
+    // Minimap
+    commands.spawn((
+        Camera2dBundle {
+            camera: Camera {
+                // renders after / on top of the main camera
+                order: 1,
+                clear_color: ClearColorConfig::None,
+                ..default()
+            },
+            transform: Transform::from_translation(Vec3::new(0., 0., 11.)),
+            projection: OrthographicProjection {
+                scale: -0.2,
+                ..default()
+            },
+            ..default()
+        },
+        MiniMap,
+        Name::new("Tablet Camera"),
+    ));
 }
 
 /// # Note

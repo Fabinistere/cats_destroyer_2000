@@ -77,10 +77,13 @@ pub enum HudState {
     Tablet,
 }
 
+#[derive(Component)]
+pub struct PlayerCamera;
+
 fn spawn_camera(mut commands: Commands) {
     let mut camera = Camera2dBundle::default();
 
     camera.projection.scale = 0.1;
 
-    commands.spawn(camera);
+    commands.spawn((camera, PlayerCamera, Name::new("Player Camera")));
 }
