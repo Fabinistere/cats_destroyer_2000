@@ -95,6 +95,13 @@ pub mod ui {
         pub const TABLET_ANIMATION_TIME_MS: u64 = 500;
 
         pub const MINI_MAP_Z: f32 = CHAR_Z + 1.;
+        /// (200., 200., 200.)
+        pub const MINIMAP_ANIMATION_OFFSET: (f32, f32, f32) = (
+            -TABLET_ANIMATION_OFFSET / 5.,
+            -TABLET_ANIMATION_OFFSET / 5.,
+            MINI_MAP_Z,
+        );
+        // pub const MINIMAP_ANIMATION_OFFSET: (f32, f32, f32) = (-1000., -1000., MINI_MAP_Z);
     }
 
     pub const DRAGGED_ENTITY_Z: f32 = 100.;

@@ -1,11 +1,14 @@
 use bevy::{prelude::*, winit::WinitSettings};
-use bevy_tweening::{lens::UiPositionLens, Animator, EaseFunction, Tween, TweenCompleted};
+use bevy_tweening::{
+    lens::{TransformPositionLens, UiPositionLens},
+    Animator, EaseFunction, Tween, TweenCompleted,
+};
 use std::time::Duration;
 
 use crate::{
     constants::ui::tablet::{
-        HOVERED_BUTTON, NORMAL_BUTTON, PRESSED_BUTTON, TABLET_ANIMATION_OFFSET,
-        TABLET_ANIMATION_TIME_MS,
+        HOVERED_BUTTON, MINIMAP_ANIMATION_OFFSET, MINI_MAP_Z, NORMAL_BUTTON, PRESSED_BUTTON,
+        TABLET_ANIMATION_OFFSET, TABLET_ANIMATION_TIME_MS,
     },
     locations::{
         level_one::doors::{Door, OpenDoorEvent},
@@ -73,9 +76,10 @@ pub fn create_tablet_on_key_press(
 
 pub fn close_tablet(
     mut commands: Commands,
-    mut query: Query<(Entity, &mut Animator<Style>, &Style), With<Tablet>>,
+    mut tablet_query: Query<(Entity, &mut Animator<Style>, &Style), With<Tablet>>,
+    minimap_camera_query: Query<Entity, With<MiniMap>>,
 ) {
-    if let Ok((entity, mut _animator, style)) = query.get_single_mut() {
+    if let Ok((entity, mut _animator, style)) = tablet_query.get_single_mut() {
         let tablet_tween = Tween::new(
             EaseFunction::ExponentialIn, // EaseFunction::CircularIn,
             Duration::from_millis(TABLET_ANIMATION_TIME_MS),
@@ -100,24 +104,37 @@ pub fn close_tablet(
             .entity(entity)
             .remove::<Animator<Style>>()
             .insert(Animator::new(tablet_tween));
+
+        // minimap
+        let minimap = minimap_camera_query.single();
+        let minimap_tween = Tween::new(
+            EaseFunction::ExponentialIn, // EaseFunction::CircularIn,
+            Duration::from_millis(TABLET_ANIMATION_TIME_MS),
+            TransformPositionLens {
+                start: Vec3::new(0., 0., MINI_MAP_Z),
+                // left bottom
+                end: MINIMAP_ANIMATION_OFFSET.into(),
+            },
+        )
+        .with_completed_event(0);
+
+        commands
+            .entity(minimap)
+            .remove::<Animator<Transform>>()
+            .insert(Animator::new(minimap_tween));
     }
 }
 
-pub fn despawn_tablet(
-    mut commands: Commands,
-    mut completed_event: EventReader<TweenCompleted>,
-    minimap_camera_query: Query<Entity, With<MiniMap>>,
-) {
+/// Despawn the tablet and its camera once the animation is done.
+pub fn despawn_tablet(mut commands: Commands, mut completed_event: EventReader<TweenCompleted>) {
     for TweenCompleted { entity, user_data } in completed_event.read() {
         if *user_data == 0 {
             commands.entity(*entity).despawn_recursive();
-            let minimap = minimap_camera_query.single();
-            commands.entity(minimap).despawn();
         }
     }
 }
 
-// #[allow(clippy::too_many_lines)]
+#[allow(clippy::too_many_lines)]
 pub fn create_tablet(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
@@ -125,7 +142,7 @@ pub fn create_tablet(
     player_camera_query: Query<Entity, With<PlayerCamera>>,
 ) {
     // Tablet's motion
-    let tablet_tween = Tween::new(
+    let tablet_motion = (
         EaseFunction::ExponentialOut, // EaseFunction::CircularOut,
         Duration::from_millis(TABLET_ANIMATION_TIME_MS),
         UiPositionLens {
@@ -143,6 +160,7 @@ pub fn create_tablet(
             },
         },
     );
+    let tablet_tween = Tween::new(tablet_motion.0, tablet_motion.1, tablet_motion.2);
 
     let player_camera = player_camera_query.single();
     let tablet = asset_server.load("textures/UI/Tablet.png");
@@ -157,16 +175,15 @@ pub fn create_tablet(
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
                     position_type: PositionType::Relative,
-                    top: Val::Px(0.),
-                    left: Val::Px(TABLET_ANIMATION_OFFSET),
-                    bottom: Val::Px(0.),
+                    // top: Val::Px(0.),
+                    // left: Val::Px(TABLET_ANIMATION_OFFSET),
+                    // bottom: Val::Px(0.),
                     margin: UiRect {
                         right: Val::Auto,
                         left: Val::Px(0.),
                         top: Val::Auto,
                         bottom: Val::Px(0.),
                     },
-                    // width: Val::Percent(100.),
                     height: Val::Percent(100.),
                     aspect_ratio: Some(16. / 9.),
                     ..default()
@@ -186,11 +203,8 @@ pub fn create_tablet(
                         style: Style {
                             width: Val::Px(180.),
                             height: Val::Px(65.),
-                            // center button
                             margin: UiRect::all(Val::Auto),
-                            // horizontally center child text
                             justify_content: JustifyContent::Center,
-                            // vertically center child text
                             align_items: AlignItems::Center,
                             top: Val::Percent(30.),
                             right: Val::Percent(-39.),
@@ -215,6 +229,17 @@ pub fn create_tablet(
         });
 
     // Minimap
+    let minimap_tween = Tween::new(
+        tablet_motion.0,
+        tablet_motion.1,
+        TransformPositionLens {
+            // left bottom
+            start: MINIMAP_ANIMATION_OFFSET.into(),
+            end: Vec3::new(0., 0., MINI_MAP_Z),
+        },
+    );
+
+    // BUG: Visual - Sometimes the black cat is being drawn below the camera at a certain Y
     commands.spawn((
         Camera2dBundle {
             camera: Camera {
@@ -223,13 +248,14 @@ pub fn create_tablet(
                 clear_color: ClearColorConfig::None,
                 ..default()
             },
-            transform: Transform::from_translation(Vec3::new(0., 0., 11.)),
+            transform: Transform::from_translation(Vec3::new(0., 0., MINI_MAP_Z)),
             projection: OrthographicProjection {
                 scale: -0.2,
                 ..default()
             },
             ..default()
         },
+        Animator::new(minimap_tween),
         MiniMap,
         Name::new("Tablet Camera"),
     ));
