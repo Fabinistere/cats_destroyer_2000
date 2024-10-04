@@ -25,7 +25,18 @@ pub struct WalkBehavior;
 #[derive(Component)]
 pub struct ChaseBehavior;
 
-/// DOC: describe `NewWayPointEvent`
+/// Happens when:
+/// - [`characters::npcs::aggression::reset_aggro`]
+///   - A NPC returns to walk peacefully.
+/// - [`characters::npcs::movement::npc_walk_to`]
+///   - The NPC don't have a target.
+/// - [`characters::npcs::movement::npc_walk`]
+///   - The NPC don't have a target.
+///   - The NPC reached the way point.
+///
+/// Read in:
+/// - [`characters::npcs::movement::give_new_way_point_event`]
+///   - Find another waypoint for the npc to walk to.
 #[derive(Event)]
 pub struct NewWayPointEvent(pub Entity);
 

@@ -239,7 +239,7 @@ pub fn create_tablet(
         },
     );
 
-    // BUG: Visual - Sometimes the black cat is being drawn below the camera at a certain Y
+    // BUG: Visual - Sometimes an asset (BlackCat) is not being drawn outside the PlayerCamera
     commands.spawn((
         Camera2dBundle {
             camera: Camera {
