@@ -1,4 +1,4 @@
-use bevy::{prelude::*, winit::WinitSettings};
+use bevy::{prelude::*, window::PrimaryWindow, winit::WinitSettings};
 use bevy_tweening::{
     lens::{TransformPositionLens, UiPositionLens},
     Animator, EaseFunction, Tween, TweenCompleted,
@@ -30,7 +30,7 @@ impl Plugin for HackPlugin {
             .add_systems(OnEnter(HudState::Tablet), create_tablet)
             .add_systems(
                 Update,
-                button_system
+                (button_system, click_to_hack)
                     // .run_if(tablet_is_free)
                     .run_if(in_state(Location::Level1000))
                     .run_if(in_state(HudState::Tablet)),
@@ -251,6 +251,7 @@ pub fn create_tablet(
             transform: Transform::from_translation(Vec3::new(0., 0., MINI_MAP_Z)),
             projection: OrthographicProjection {
                 scale: -0.2,
+                // near: -1000.,
                 ..default()
             },
             ..default()
@@ -265,7 +266,7 @@ pub fn create_tablet(
 ///
 /// Spam proof (cause of the timer being only 0.1s)
 ///
-/// REFACTOR: seperate color/text management from action
+/// REFACTOR: separate color/text management from action
 fn button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, &Children),
@@ -296,6 +297,49 @@ fn button_system(
             Interaction::None => {
                 text.sections[0].value = String::from("HACK");
                 *color = NORMAL_BUTTON.into();
+            }
+        }
+    }
+}
+
+/// Runs in [`main::HudState::Tablet`], track the cursor and all hackable object
+///
+/// ## Notes
+///
+/// IDEA: polish - bigger trigger, area around the object
+fn click_to_hack(
+    hackable_doors_query: Query<(Entity, &Transform, &Sprite), (With<Door>, With<Hackable>)>,
+    tablet_camera_query: Query<(&Camera, &GlobalTransform), With<MiniMap>>,
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    mouse_input: Res<ButtonInput<MouseButton>>,
+    mut open_door_event: EventWriter<OpenDoorEvent>,
+) {
+    let (camera, camera_transform) = tablet_camera_query.single();
+    let window = q_windows.single();
+
+    if let Some(cursor_position) = window
+        .cursor_position()
+        .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor))
+    {
+        if mouse_input.just_pressed(MouseButton::Left) {
+            info!("click at {cursor_position:#?}");
+            for (door, transform, sprite) in hackable_doors_query.iter() {
+                let sprite_size = sprite.custom_size.unwrap_or(Vec2::new(4., 14.));
+                let entity_position = transform.translation.truncate();
+
+                let half_size = sprite_size / 2.0;
+                let min_bounds = entity_position - half_size;
+                let max_bounds = entity_position + half_size;
+
+                if cursor_position.x > min_bounds.x
+                    && cursor_position.x < max_bounds.x
+                    && cursor_position.y > min_bounds.y
+                    && cursor_position.y < max_bounds.y
+                {
+                    info!("THE GATE IS OPENING");
+                    open_door_event.send(OpenDoorEvent(door));
+                    // sprite.color = Color::srgb(0., 1., 0.);
+                }
             }
         }
     }

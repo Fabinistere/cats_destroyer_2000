@@ -30,6 +30,9 @@ pub struct ExitDoor;
 ///     which will open all secured door.
 /// - [`tablet::hack::button_event`]
 ///   - Hack button clicked, open the closet.
+/// - [`tablet::hack::click_to_hack`]
+///   - Hackable door clicked in the tablet interface,
+///     open the clicked door.
 ///
 /// Read in:
 /// - [`location::level_one::opens::open_door_event`]
