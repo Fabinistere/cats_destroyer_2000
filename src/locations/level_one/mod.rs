@@ -229,8 +229,7 @@ fn setup_level_one(
                         ActiveEvents::COLLISION_EVENTS,
                         Sensor,
                         ButtonSensor,
-                        // DOC: Better Naming
-                        Name::new("OneWay Button Sensor"),
+                        Name::new("Escape Button Sensor"),
                     ));
                 });
 

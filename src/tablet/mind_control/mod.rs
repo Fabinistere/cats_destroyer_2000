@@ -5,11 +5,11 @@ use std::time::Duration;
 use bevy::prelude::*;
 
 use crate::{
-    characters::movement::Dazed,
-    characters::{effects::style::DazeAnimation, npcs::NPC, player::Player},
+    characters::{effects::style::DazeAnimation, movement::Dazed, npcs::NPC, player::Player},
     constants::character::effects::DAZE_TIMER,
     locations::Location,
     tablet::{tablet_is_free, tablet_is_mind_ctrl},
+    HudState, PlayerCamera,
 };
 
 mod movement;
@@ -30,7 +30,8 @@ impl Plugin for MindControlPlugin {
                 movement::freeze_dazed_character,
             )
                 .chain()
-                .run_if(in_state(Location::Level1000)),
+                .run_if(in_state(Location::Level1000))
+                .run_if(in_state(HudState::Closed)),
         );
     }
 }
@@ -56,7 +57,10 @@ pub enum CurrentlyMindControlled {
 /// IDEA: gamefeel - smooth transition between mind control switch
 fn camera_follow(
     mind_controled_query: Query<&Transform, With<MindControlled>>,
-    mut camera_query: Query<&mut Transform, (Without<MindControlled>, With<Camera>)>,
+    mut camera_query: Query<
+        &mut Transform,
+        (With<PlayerCamera>, With<Camera>, Without<MindControlled>),
+    >,
 ) {
     let player_transform = mind_controled_query.single();
     let mut camera_transform = camera_query.single_mut();

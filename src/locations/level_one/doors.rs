@@ -24,7 +24,19 @@ pub enum DoorState {
 #[derive(Component)]
 pub struct ExitDoor;
 
-/// DOC: describe `OpenDoorEvent`
+/// Happens when:
+/// - [`location::sensors::button_event`]
+///   - A character pushed the closet button
+///     which will open all secured door.
+/// - [`tablet::hack::button_event`]
+///   - Hack button clicked, open the closet.
+/// - [`tablet::hack::click_to_hack`]
+///   - Hackable door clicked in the tablet interface,
+///     open the clicked door.
+///
+/// Read in:
+/// - [`location::level_one::opens::open_door_event`]
+///   - Change the state of the given door
 #[derive(Event)]
 pub struct OpenDoorEvent(pub Entity);
 
