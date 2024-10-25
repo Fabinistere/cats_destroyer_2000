@@ -7,8 +7,7 @@ use std::time::Duration;
 
 use crate::{
     constants::ui::tablet::{
-        HOVERED_BUTTON, MINIMAP_ANIMATION_OFFSET, MINI_MAP_Z, NORMAL_BUTTON, PRESSED_BUTTON,
-        TABLET_ANIMATION_OFFSET, TABLET_ANIMATION_TIME_MS,
+        MINIMAP_ANIMATION_OFFSET, MINI_MAP_Z, TABLET_ANIMATION_OFFSET, TABLET_ANIMATION_TIME_MS,
     },
     locations::{
         level_one::doors::{Door, OpenDoorEvent},
@@ -22,23 +21,23 @@ pub struct HackPlugin;
 impl Plugin for HackPlugin {
     // #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app.insert_resource(WinitSettings::game())
-            .add_systems(
-                Update,
-                (create_tablet_on_key_press, despawn_tablet).run_if(in_state(Location::Level1000)),
-            )
-            .add_systems(OnEnter(HudState::Tablet), create_tablet)
-            .add_systems(
-                Update,
-                (button_system, click_to_hack)
-                    // .run_if(tablet_is_free)
-                    .run_if(in_state(Location::Level1000))
-                    .run_if(in_state(HudState::Tablet)),
-            )
-            .add_systems(OnExit(HudState::Tablet), close_tablet)
-            .add_systems(OnExit(Location::Level1000), close_tablet);
+            app.insert_resource(WinitSettings::game())
+                .add_systems(
+                    Update,
+                    (create_tablet_on_key_press, despawn_tablet).run_if(in_state(Location::Level1000)),
+                )
+                .add_systems(OnEnter(HudState::Tablet), create_tablet)
+                .add_systems(
+                    Update,
+                    click_to_hack
+                        // .run_if(tablet_is_free)
+                        .run_if(in_state(Location::Level1000))
+                        .run_if(in_state(HudState::Tablet)),
+                )
+                .add_systems(OnExit(HudState::Tablet), close_tablet)
+                .add_systems(OnExit(Location::Level1000), close_tablet);
+        }
     }
-}
 
 /* ------------------------------- Components ------------------------------- */
 
@@ -165,68 +164,35 @@ pub fn create_tablet(
     let player_camera = player_camera_query.single();
     let tablet = asset_server.load("textures/UI/Tablet.png");
 
-    commands
-        .spawn((
-            ImageBundle {
-                image: tablet.into(),
-                style: Style {
-                    display: Display::Flex,
-                    flex_direction: FlexDirection::Row,
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    position_type: PositionType::Relative,
-                    // top: Val::Px(0.),
-                    // left: Val::Px(TABLET_ANIMATION_OFFSET),
-                    // bottom: Val::Px(0.),
-                    margin: UiRect {
-                        right: Val::Auto,
-                        left: Val::Px(0.),
-                        top: Val::Auto,
-                        bottom: Val::Px(0.),
-                    },
-                    height: Val::Percent(100.),
-                    aspect_ratio: Some(16. / 9.),
-                    ..default()
+    commands.spawn((
+        ImageBundle {
+            image: tablet.into(),
+            style: Style {
+                display: Display::Flex,
+                flex_direction: FlexDirection::Row,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                position_type: PositionType::Relative,
+                // top: Val::Px(0.),
+                // left: Val::Px(TABLET_ANIMATION_OFFSET),
+                // bottom: Val::Px(0.),
+                margin: UiRect {
+                    right: Val::Auto,
+                    left: Val::Px(0.),
+                    top: Val::Auto,
+                    bottom: Val::Px(0.),
                 },
+                height: Val::Percent(100.),
+                aspect_ratio: Some(16. / 9.),
                 ..default()
             },
-            TargetCamera(player_camera),
-            Tablet,
-            Animator::new(tablet_tween),
-            Name::new("Tablet"),
-        ))
-        .with_children(|parent| {
-            // -- Hack/Open the ALT_DOOR --
-            parent
-                .spawn((
-                    ButtonBundle {
-                        style: Style {
-                            width: Val::Px(180.),
-                            height: Val::Px(65.),
-                            margin: UiRect::all(Val::Auto),
-                            justify_content: JustifyContent::Center,
-                            align_items: AlignItems::Center,
-                            top: Val::Percent(30.),
-                            right: Val::Percent(-39.),
-                            ..default()
-                        },
-                        background_color: NORMAL_BUTTON.into(),
-                        ..default()
-                    },
-                    Name::new("Hack Button"),
-                    HackButton,
-                ))
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "HACK",
-                        TextStyle {
-                            font: asset_server.load("fonts/dpcomic.ttf"),
-                            font_size: 40.,
-                            color: Color::srgb(0.9, 0.9, 0.9),
-                        },
-                    ));
-                });
-        });
+            ..default()
+        },
+        TargetCamera(player_camera),
+        Tablet,
+        Animator::new(tablet_tween),
+        Name::new("Tablet"),
+    ));
 
     // Minimap
     let minimap_tween = Tween::new(
@@ -262,46 +228,6 @@ pub fn create_tablet(
     ));
 }
 
-/// # Note
-///
-/// Spam proof (cause of the timer being only 0.1s)
-///
-/// REFACTOR: separate color/text management from action
-fn button_system(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &Children),
-        (Changed<Interaction>, With<HackButton>),
-    >,
-
-    mut text_query: Query<&mut Text>,
-
-    hackable_door: Query<Entity, (With<Door>, With<Hackable>)>,
-    mut open_door_event: EventWriter<OpenDoorEvent>,
-) {
-    for (interaction, mut color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                // hack every hackable door
-                for door in hackable_door.iter() {
-                    open_door_event.send(OpenDoorEvent(door));
-                }
-
-                text.sections[0].value = String::from("HOCK");
-                *color = PRESSED_BUTTON.into();
-            }
-            Interaction::Hovered => {
-                text.sections[0].value = String::from("HACK");
-                *color = HOVERED_BUTTON.into();
-            }
-            Interaction::None => {
-                text.sections[0].value = String::from("HACK");
-                *color = NORMAL_BUTTON.into();
-            }
-        }
-    }
-}
-
 /// Runs in [`main::HudState::Tablet`], track the cursor and all hackable object
 ///
 /// ## Notes
@@ -322,7 +248,7 @@ fn click_to_hack(
         .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor))
     {
         if mouse_input.just_pressed(MouseButton::Left) {
-            info!("click at {cursor_position:#?}");
+            // info!("click at {cursor_position:#?}");
             for (door, transform, sprite) in hackable_doors_query.iter() {
                 let sprite_size = sprite.custom_size.unwrap_or(Vec2::new(4., 14.));
                 let entity_position = transform.translation.truncate();
@@ -336,7 +262,6 @@ fn click_to_hack(
                     && cursor_position.y > min_bounds.y
                     && cursor_position.y < max_bounds.y
                 {
-                    info!("THE GATE IS OPENING");
                     open_door_event.send(OpenDoorEvent(door));
                     // sprite.color = Color::srgb(0., 1., 0.);
                 }
