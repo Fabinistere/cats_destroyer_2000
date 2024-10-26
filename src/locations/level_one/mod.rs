@@ -5,7 +5,13 @@ use crate::{
     characters::Character,
     constants::{
         character::npcs::movement::BLACK_CAT_STARTING_POSITION,
-        locations::{level_one::*, FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE},
+        locations::{
+            level_one::{
+                ALT_DOOR_POSITION, BUTTON_SENSOR_POSITION, IN_DOOR_POSITION, OUT_DOOR_POSITION,
+                WAYPOINT_BOT, WAYPOINT_TOP,
+            },
+            FLOOR_POSITION, LEVEL_POSITION, LEVEL_SCALE,
+        },
     },
     locations::{
         level_one::{
@@ -28,7 +34,7 @@ impl Plugin for LevelOnePlugin {
         app.add_event::<OpenDoorEvent>()
             .add_systems(
                 OnEnter(Location::Level1000),
-                (setup_level_one, button::set_up_button),
+                (setup_level_one, button::set_up),
             )
             .add_systems(
                 Update,
@@ -63,14 +69,15 @@ fn despawn_level_one(
     for (entity, name) in level_1000_query.iter() {
         info!("{name} despawn");
         commands.entity(entity).despawn_recursive();
-        // NOTE: will despawn 40v3 and 40v2 twice
+        // NOTE: the warning that we'll get is due to the already despawned `DazeAnimation`; But the link with the parent remain.
     }
 }
 
+#[allow(clippy::too_many_lines)]
 fn setup_level_one(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
 ) {
     // -- WayPoints --
     commands
@@ -110,8 +117,6 @@ fn setup_level_one(
         });
 
     // -- Map --
-    // FIXME: as issued [here](https://github.com/bevyengine/bevy/issues/12344), the asset will wrongly unload while strong handle is alive after a State Change. It has been fixed in `13.1`
-    // Will not load a second time after being caught
     let walls = asset_server.load("textures/level_one/lab_wall.png");
     let floor = asset_server.load("textures/level_one/lab_floor.png");
 
@@ -224,30 +229,31 @@ fn setup_level_one(
                         ActiveEvents::COLLISION_EVENTS,
                         Sensor,
                         ButtonSensor,
-                        // DOC: Better Naming
-                        Name::new("OneWay Button Sensor"),
+                        Name::new("Escape Button Sensor"),
                     ));
                 });
 
             // -- Doors --
-
             let horizontal_door = asset_server.load("textures/level_one/horizontal_door_anim.png");
             let horizontal_door_atlas =
-                TextureAtlas::from_grid(horizontal_door, Vec2::new(12., 3.), 1, 7, None, None);
+                TextureAtlasLayout::from_grid(UVec2::new(12, 3), 1, 7, None, None);
 
             let horizontal_door_atlas_handle = texture_atlases.add(horizontal_door_atlas);
-            let horizontal_door_texture_atlas_sprite = TextureAtlasSprite::new(0);
             parent
                 .spawn((
-                    SpriteSheetBundle {
-                        texture_atlas: horizontal_door_atlas_handle.clone(),
-                        sprite: horizontal_door_texture_atlas_sprite.clone(),
+                    SpriteBundle {
+                        texture: horizontal_door.clone(),
+
                         transform: Transform {
                             translation: IN_DOOR_POSITION.into(),
                             scale: LEVEL_SCALE.into(),
                             ..default()
                         },
                         ..default()
+                    },
+                    TextureAtlas {
+                        layout: horizontal_door_atlas_handle.clone(),
+                        index: 0,
                     },
                     Name::new("Front Door"),
                     RigidBody::Fixed,
@@ -288,15 +294,19 @@ fn setup_level_one(
 
             parent
                 .spawn((
-                    SpriteSheetBundle {
-                        texture_atlas: horizontal_door_atlas_handle.clone(),
-                        sprite: horizontal_door_texture_atlas_sprite.clone(),
+                    SpriteBundle {
+                        texture: horizontal_door,
+
                         transform: Transform {
                             translation: OUT_DOOR_POSITION.into(),
                             scale: LEVEL_SCALE.into(),
                             ..default()
                         },
                         ..default()
+                    },
+                    TextureAtlas {
+                        layout: horizontal_door_atlas_handle.clone(),
+                        index: 0,
                     },
                     Name::new("Exit Door"),
                     RigidBody::Fixed,
@@ -336,20 +346,24 @@ fn setup_level_one(
 
             let vertical_door = asset_server.load("textures/level_one/vertical_door_anim.png");
             let vertical_door_atlas =
-                TextureAtlas::from_grid(vertical_door, Vec2::new(3., 15.), 9, 1, None, None);
+                TextureAtlasLayout::from_grid(UVec2::new(3, 15), 9, 1, None, None);
 
             let vertical_door_atlas_handle = texture_atlases.add(vertical_door_atlas);
 
             parent
                 .spawn((
-                    SpriteSheetBundle {
-                        texture_atlas: vertical_door_atlas_handle,
+                    SpriteBundle {
+                        texture: vertical_door,
                         transform: Transform {
                             translation: ALT_DOOR_POSITION.into(),
                             scale: LEVEL_SCALE.into(),
                             ..default()
                         },
                         ..default()
+                    },
+                    TextureAtlas {
+                        layout: vertical_door_atlas_handle,
+                        index: 0,
                     },
                     Name::new("Closet Door"),
                     RigidBody::Fixed,

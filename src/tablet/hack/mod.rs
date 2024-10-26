@@ -1,12 +1,19 @@
-use bevy::{prelude::*, winit::WinitSettings};
+use bevy::{prelude::*, window::PrimaryWindow, winit::WinitSettings};
+use bevy_tweening::{
+    lens::{TransformPositionLens, UiPositionLens},
+    Animator, EaseFunction, Tween, TweenCompleted,
+};
+use std::time::Duration;
 
 use crate::{
-    constants::ui::tablet::*,
+    constants::ui::tablet::{
+        MINIMAP_ANIMATION_OFFSET, MINI_MAP_Z, TABLET_ANIMATION_OFFSET, TABLET_ANIMATION_TIME_MS,
+    },
     locations::{
         level_one::doors::{Door, OpenDoorEvent},
         Location,
     },
-    tablet::{tablet_is_free, tablet_is_mind_ctrl},
+    HudState, PlayerCamera,
 };
 
 pub struct HackPlugin;
@@ -14,135 +21,250 @@ pub struct HackPlugin;
 impl Plugin for HackPlugin {
     // #[rustfmt::skip]
     fn build(&self, app: &mut App) {
-        app
-            // OPTIMIZE: Only run the app when there is user input. This will significantly reduce CPU/GPU use.
-            .insert_resource(WinitSettings::game())
-            .add_systems(OnEnter(Location::Level1000), setup_tablet_button)
-            .add_systems(
-                Update,
-                (
-                    button_system.run_if(tablet_is_free),
-                    place_holder_while_in_mind_control.run_if(tablet_is_mind_ctrl),
+            app.insert_resource(WinitSettings::game())
+                .add_systems(
+                    Update,
+                    (create_tablet_on_key_press, despawn_tablet).run_if(in_state(Location::Level1000)),
                 )
-                    .run_if(in_state(Location::Level1000)),
-            )
-            .add_systems(OnExit(Location::Level1000), remove_tablet_button);
+                .add_systems(OnEnter(HudState::Tablet), create_tablet)
+                .add_systems(
+                    Update,
+                    click_to_hack
+                        // .run_if(tablet_is_free)
+                        .run_if(in_state(Location::Level1000))
+                        .run_if(in_state(HudState::Tablet)),
+                )
+                .add_systems(OnExit(HudState::Tablet), close_tablet)
+                .add_systems(OnExit(Location::Level1000), close_tablet);
+        }
     }
-}
+
+/* ------------------------------- Components ------------------------------- */
 
 #[derive(Component)]
 pub struct Hackable;
 
 #[derive(Component)]
+#[allow(clippy::module_name_repetitions)]
 pub struct HackButton;
 
-fn remove_tablet_button(mut commands: Commands, tablet_query: Query<Entity, With<HackButton>>) {
-    for button in tablet_query.iter() {
-        commands.entity(button).despawn_recursive();
-    }
-}
+#[derive(Component)]
+pub struct Tablet;
 
-pub fn setup_tablet_button(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // 'Hack'/Open the ALT_DOOR
-    commands
-        .spawn((
-            ButtonBundle {
-                style: Style {
-                    width: Val::Px(180.),
-                    height: Val::Px(65.),
-                    // center button
-                    margin: UiRect::all(Val::Auto),
-                    // horizontally center child text
-                    justify_content: JustifyContent::Center,
-                    // vertically center child text
-                    align_items: AlignItems::Center,
-                    top: Val::Percent(30.),
-                    right: Val::Percent(-39.),
-                    ..default()
-                },
-                background_color: NORMAL_BUTTON.into(),
-                ..default()
-            },
-            Name::new("Hack Button"),
-            HackButton,
-        ))
-        .with_children(|parent| {
-            parent.spawn(TextBundle::from_section(
-                "HACK",
-                TextStyle {
-                    font: asset_server.load("fonts/dpcomic.ttf"),
-                    font_size: 40.,
-                    color: Color::rgb(0.9, 0.9, 0.9),
-                },
-            ));
-        });
-}
+#[derive(Component)]
+pub struct MiniMap;
 
-// pub fn hack_door(
-//     mut open_doors_alt_event: EventWriter<OpenAltDoorsEvent>,
-// ) {
-// }
+/* --------------------------------- Systems -------------------------------- */
 
-/// # Note
-///
-/// Spamming should not work (cause of the timer being only 0.1s)
-///
-/// REFACTOR: seperate color/text management from action
-fn button_system(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &Children),
-        (Changed<Interaction>, With<HackButton>),
-    >,
+pub fn create_tablet_on_key_press(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    tablet_query: Query<(Entity, &Animator<Style>, &Style), With<Tablet>>,
 
-    mut text_query: Query<&mut Text>,
-
-    hackable_door: Query<Entity, (With<Door>, With<Hackable>)>,
-    mut open_door_event: EventWriter<OpenDoorEvent>,
+    mut next_game_state: ResMut<NextState<HudState>>,
 ) {
-    for (interaction, mut color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                // hack every hackable door
-                for door in hackable_door.iter() {
-                    open_door_event.send(OpenDoorEvent(door));
-                }
-
-                text.sections[0].value = String::from("HOCK");
-                *color = PRESSED_BUTTON.into();
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        if let Ok((_entity, animator, _style)) = tablet_query.get_single() {
+            if animator.tweenable().progress() >= 1. {
+                next_game_state.set(HudState::Closed);
             }
-            Interaction::Hovered => {
-                text.sections[0].value = String::from("HACK");
-                *color = HOVERED_BUTTON.into();
-            }
-            Interaction::None => {
-                text.sections[0].value = String::from("HACK");
-                *color = NORMAL_BUTTON.into();
-            }
+        } else {
+            next_game_state.set(HudState::Tablet);
         }
     }
 }
 
-pub fn place_holder_while_in_mind_control(
-    mut interaction_query: Query<
-        (&Interaction, &mut BackgroundColor, &Children),
-        (Changed<Interaction>, With<HackButton>),
-    >,
-    mut text_query: Query<&mut Text>,
+pub fn close_tablet(
+    mut commands: Commands,
+    mut tablet_query: Query<(Entity, &mut Animator<Style>, &Style), With<Tablet>>,
+    minimap_camera_query: Query<Entity, With<MiniMap>>,
 ) {
-    for (interaction, mut color, children) in &mut interaction_query {
-        let mut text = text_query.get_mut(children[0]).unwrap();
-        match *interaction {
-            Interaction::Pressed => {
-                // *color = PRESSED_BUTTON.into();
-            }
-            Interaction::Hovered => {
-                *color = HOVERED_INACTIVE_BUTTON.into();
-                text.sections[0].value = String::from("In MindCtrl");
-            }
-            Interaction::None => {
-                *color = INACTIVE_BUTTON.into();
-                text.sections[0].value = String::from("In MindCtrl");
+    if let Ok((entity, mut _animator, style)) = tablet_query.get_single_mut() {
+        let tablet_tween = Tween::new(
+            EaseFunction::ExponentialIn, // EaseFunction::CircularIn,
+            Duration::from_millis(TABLET_ANIMATION_TIME_MS),
+            UiPositionLens {
+                start: UiRect {
+                    left: style.left,
+                    right: style.right,
+                    top: style.top,
+                    bottom: style.bottom,
+                },
+                end: UiRect {
+                    top: Val::Auto,
+                    right: Val::Auto,
+                    left: Val::Px(TABLET_ANIMATION_OFFSET),
+                    bottom: Val::Px(TABLET_ANIMATION_OFFSET),
+                },
+            },
+        )
+        .with_completed_event(0);
+
+        commands
+            .entity(entity)
+            .remove::<Animator<Style>>()
+            .insert(Animator::new(tablet_tween));
+
+        // minimap
+        let minimap = minimap_camera_query.single();
+        let minimap_tween = Tween::new(
+            EaseFunction::ExponentialIn, // EaseFunction::CircularIn,
+            Duration::from_millis(TABLET_ANIMATION_TIME_MS),
+            TransformPositionLens {
+                start: Vec3::new(0., 0., MINI_MAP_Z),
+                // left bottom
+                end: MINIMAP_ANIMATION_OFFSET.into(),
+            },
+        )
+        .with_completed_event(0);
+
+        commands
+            .entity(minimap)
+            .remove::<Animator<Transform>>()
+            .insert(Animator::new(minimap_tween));
+    }
+}
+
+/// Despawn the tablet and its camera once the animation is done.
+pub fn despawn_tablet(mut commands: Commands, mut completed_event: EventReader<TweenCompleted>) {
+    for TweenCompleted { entity, user_data } in completed_event.read() {
+        if *user_data == 0 {
+            commands.entity(*entity).despawn_recursive();
+        }
+    }
+}
+
+#[allow(clippy::too_many_lines)]
+pub fn create_tablet(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+
+    player_camera_query: Query<Entity, With<PlayerCamera>>,
+) {
+    // Tablet's motion
+    let tablet_motion = (
+        EaseFunction::ExponentialOut, // EaseFunction::CircularOut,
+        Duration::from_millis(TABLET_ANIMATION_TIME_MS),
+        UiPositionLens {
+            start: UiRect {
+                top: Val::Auto,
+                right: Val::Auto,
+                left: Val::Px(TABLET_ANIMATION_OFFSET),
+                bottom: Val::Px(TABLET_ANIMATION_OFFSET),
+            },
+            end: UiRect {
+                top: Val::Auto,
+                right: Val::Auto,
+                left: Val::Px(0.),
+                bottom: Val::Px(0.),
+            },
+        },
+    );
+    let tablet_tween = Tween::new(tablet_motion.0, tablet_motion.1, tablet_motion.2);
+
+    let player_camera = player_camera_query.single();
+    let tablet = asset_server.load("textures/UI/Tablet.png");
+
+    commands.spawn((
+        ImageBundle {
+            image: tablet.into(),
+            style: Style {
+                display: Display::Flex,
+                flex_direction: FlexDirection::Row,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                position_type: PositionType::Relative,
+                // top: Val::Px(0.),
+                // left: Val::Px(TABLET_ANIMATION_OFFSET),
+                // bottom: Val::Px(0.),
+                margin: UiRect {
+                    right: Val::Auto,
+                    left: Val::Px(0.),
+                    top: Val::Auto,
+                    bottom: Val::Px(0.),
+                },
+                height: Val::Percent(100.),
+                aspect_ratio: Some(16. / 9.),
+                ..default()
+            },
+            ..default()
+        },
+        TargetCamera(player_camera),
+        Tablet,
+        Animator::new(tablet_tween),
+        Name::new("Tablet"),
+    ));
+
+    // Minimap
+    let minimap_tween = Tween::new(
+        tablet_motion.0,
+        tablet_motion.1,
+        TransformPositionLens {
+            // left bottom
+            start: MINIMAP_ANIMATION_OFFSET.into(),
+            end: Vec3::new(0., 0., MINI_MAP_Z),
+        },
+    );
+
+    // BUG: Visual - Sometimes an asset (BlackCat) is not being drawn outside the PlayerCamera
+    commands.spawn((
+        Camera2dBundle {
+            camera: Camera {
+                // renders after / on top of the main camera
+                order: 1,
+                clear_color: ClearColorConfig::None,
+                ..default()
+            },
+            transform: Transform::from_translation(Vec3::new(0., 0., MINI_MAP_Z)),
+            projection: OrthographicProjection {
+                scale: -0.2,
+                // near: -1000.,
+                ..default()
+            },
+            ..default()
+        },
+        Animator::new(minimap_tween),
+        MiniMap,
+        Name::new("Tablet Camera"),
+    ));
+}
+
+/// Runs in [`main::HudState::Tablet`], track the cursor and all hackable object
+///
+/// ## Notes
+///
+/// IDEA: polish - bigger trigger, area around the object
+fn click_to_hack(
+    hackable_doors_query: Query<(Entity, &Transform, &Sprite), (With<Door>, With<Hackable>)>,
+    tablet_camera_query: Query<(&Camera, &GlobalTransform), With<MiniMap>>,
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    mouse_input: Res<ButtonInput<MouseButton>>,
+    mut open_door_event: EventWriter<OpenDoorEvent>,
+) {
+    let (camera, camera_transform) = tablet_camera_query.single();
+    let window = q_windows.single();
+
+    if let Some(cursor_position) = window
+        .cursor_position()
+        .and_then(|cursor| camera.viewport_to_world_2d(camera_transform, cursor))
+    {
+        if mouse_input.just_pressed(MouseButton::Left) {
+            // info!("click at {cursor_position:#?}");
+            for (door, transform, sprite) in hackable_doors_query.iter() {
+                let sprite_size = sprite.custom_size.unwrap_or(Vec2::new(4., 14.));
+                let entity_position = transform.translation.truncate();
+
+                let half_size = sprite_size / 2.0;
+                let min_bounds = entity_position - half_size;
+                let max_bounds = entity_position + half_size;
+
+                if cursor_position.x > min_bounds.x
+                    && cursor_position.x < max_bounds.x
+                    && cursor_position.y > min_bounds.y
+                    && cursor_position.y < max_bounds.y
+                {
+                    open_door_event.send(OpenDoorEvent(door));
+                    // sprite.color = Color::srgb(0., 1., 0.);
+                }
             }
         }
     }

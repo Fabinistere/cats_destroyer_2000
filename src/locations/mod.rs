@@ -29,7 +29,7 @@ pub struct LocationsPlugin;
 impl Plugin for LocationsPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<WinTriggerEvent>()
-            .add_state::<Location>()
+            .init_state::<Location>()
             .add_plugins(level_one::LevelOnePlugin)
             .add_systems(OnEnter(Location::Void), void_transition)
             .add_systems(

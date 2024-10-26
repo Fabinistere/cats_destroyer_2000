@@ -3,7 +3,7 @@
 //! 1 == one pixel
 //! magical number = ratio
 
-pub const CLEAR: bevy::render::color::Color = bevy::render::color::Color::rgb(0.1, 0.1, 0.1);
+pub const CLEAR: bevy::color::Color = bevy::color::Color::srgb(0.1, 0.1, 0.1);
 
 pub const RESOLUTION: f32 = 16. / 9.;
 
@@ -82,12 +82,26 @@ pub mod ui {
     pub mod tablet {
         use bevy::prelude::Color;
 
-        pub const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-        pub const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-        pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
+        use crate::constants::character::CHAR_Z;
 
-        pub const HOVERED_INACTIVE_BUTTON: Color = Color::rgb(0.75, 0.75, 0.75);
-        pub const INACTIVE_BUTTON: Color = Color::rgb(0.5, 0.5, 0.5);
+        pub const NORMAL_BUTTON: Color = Color::srgb(0.15, 0.15, 0.15);
+        pub const HOVERED_BUTTON: Color = Color::srgb(0.25, 0.25, 0.25);
+        pub const PRESSED_BUTTON: Color = Color::srgb(0.35, 0.75, 0.35);
+
+        pub const HOVERED_INACTIVE_BUTTON: Color = Color::srgb(0.75, 0.75, 0.75);
+        pub const INACTIVE_BUTTON: Color = Color::srgb(0.5, 0.5, 0.5);
+
+        pub const TABLET_ANIMATION_OFFSET: f32 = -1000.;
+        pub const TABLET_ANIMATION_TIME_MS: u64 = 500;
+
+        pub const MINI_MAP_Z: f32 = CHAR_Z + 1.;
+        /// (200., 200., 200.)
+        pub const MINIMAP_ANIMATION_OFFSET: (f32, f32, f32) = (
+            -TABLET_ANIMATION_OFFSET / 5.,
+            -TABLET_ANIMATION_OFFSET / 5.,
+            MINI_MAP_Z,
+        );
+        // pub const MINIMAP_ANIMATION_OFFSET: (f32, f32, f32) = (-1000., -1000., MINI_MAP_Z);
     }
 
     pub const DRAGGED_ENTITY_Z: f32 = 100.;

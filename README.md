@@ -1,11 +1,16 @@
 # Cats Destroyer 2000
 
-[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-0.11-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
+[![Bevy tracking](https://img.shields.io/badge/Bevy%20tracking-0.14-lightblue)](https://github.com/bevyengine/bevy/blob/main/docs/plugins_guidelines.md#main-branch-tracking)
 [![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)](https://github.com/fabinistere/bevy_turn-based_combat#license)
 
 CreaJeu Edition 2023 - Theme: ***One Object Many Use***
 
 ![fast_blue_cat](https://user-images.githubusercontent.com/73140258/216720606-6e8f7768-3170-4956-a5d1-5124741783aa.gif)
+
+<https://github.com/user-attachments/assets/3b8384c0-938f-400f-a038-8838310e54cb>
+
+![tablet-preview](https://github.com/user-attachments/assets/dec29ae4-a369-43e5-a7d3-84c1f283a48e)
+![mind-control-preview](https://github.com/user-attachments/assets/04081e3f-f08c-4168-8965-91c118b96311)
 
 ## Assets are excluded from git storage
 
@@ -18,53 +23,61 @@ or in the correct release note (if from other version):
 
 ## Rules
 
-***But du jeu**- : Arriver à s’enfuir du Labo
+***Goal***: Flee from the lab!
 
 ### Binding
 
 - `M` or `:` to mindcontrol a cat
-- `ESC` to return to the player body
-- `Left Click` on the button *Hack* to hack doors
+  - `ESC` to return to the player body
+- `ESC` to open the tablet
+  - *click* on the side door to hack doors
 - `Z Q S D` or `W A S D` or `Up Left Down Right` to move
 
-### Future... (lmao)
+### Future
 
-- [ ] TODO: LevelScene, CinematicScene
+- [x] LevelScene, CinematicScene
   - [x] Reset the scene when touched (by an enemy)
-- [ ] TODO: Background + MovingBubbles
 - [x] Final Cinematic
   - [x] Animations
   - [x] Black Cat, EasterEgg
+- [x] Hacking tablet
+- [ ] Limited Vision
+  - [ ] Hack camera
+    - [ ] Mind control through camera's needle shots
+- [ ] TODO: polish - Background and MovingBubbles
 
 ### Level Design
 
 #### Tutorial
 
-Un long couloir, avec des compartiments à gauche et à droite.
-Un chat normal marche dans le couloir.
-La sortie est au bout du couloir, bloquée par le chaton.
+A long corridor, with compartments to the left and right.
+A normal cat is walking down the corridor.
+The exit is at the end of the corridor, blocked by the kitten.
+The player must
 
-Lae player devra:
+- access a terminal in order to open one of the doors on the sides (maybe just one door for clarity)
+- mind control the kitten to move it into the cupboard
+- Press the global red button with the mind controlled cat
+- rehack before the kitten's daze wears off
+  - having a delay after mind control can allow you to chain actions like this
+- slide to exit
 
-- accéder à un terminal afin d’ouvrir une des portes sur les côtés (p’etre qu’une porte pour la clarté)
-- mind control le chaton afin de le déplacer dans le placard
-- refermer la porte
-- avoir un délai après le mind control peut permettre d'enchaîner des actions comme ça
-- rehack avant que le daze du chaton se dissipe
-- slide jusqu’à l’exit
+### Mechanics
 
-### Mécaniques
+#### Tablet
 
-#### Tablette
+Through the tablet overlay
 
-- Appuyer une touche pour entrer dans l’overlay tablette qui permet de sélectionner les entités repérées/vues et de les mind control.
-- Permet de prendre le contrôle d’une entité qui a été vu par lae player
-- Appuyer esc pour sortir de la tablette de re-contrôler son personnage
-- Permet de prendre le contrôle de caméra dispo pour voir qq entités.
+- Hack doors;
+- Take control of the cameras available;
+  - Uncover some rooms with the camera's vision;
+  - The cameras will allow you to shot needles of mind control to the scientists;
+- Sabotage electronics to distract attention;
+- Press `esc` to exit the tablet and re-control your character.
 
-Petit à petit, on dévoile le niveau + les entités dedans.
+Little by little, the level and the entities inside it are revealed.
 
-### Idées
+<!-- ### Idées
 
 vv———————————————————————————————————————vv
 
@@ -84,4 +97,4 @@ Types de chats :
 Nombre de croquettes max qui peut être reset que si on reset le level
 (ou le même style que la gestion des barrettes de RAM dans cyberpunk)
 
-Des collectibles style des clés pour déverrouiller des portes
+Des collectibles style des clés pour déverrouiller des portes -->
